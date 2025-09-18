@@ -1,0 +1,52 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# Node / Next.js
+node_modules/
+*.log
+.next/
+.next-static/
+.next-turbo/
+.vercel/
+.swp
+
+# Env
+.env
+.env.*
+frontend/.env.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Python
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.dist/
+.build/
+
+# Django
+/static/
+media/
+*.sqlite3
+/db.sqlite3
+
+# IDEs/Editors
+.vscode/
+.idea/
+*.iml
+
+# Coverage/Testing
+coverage/
+htmlcov/
+.pytest_cache/
+
+# OS/Other
+Thumbs.db
+*.swp
+*.swo

@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7e6cd; /* warm cream */
+  --foreground: #1a1a1a;
+  --pop-red: #cb4e3f;
+  --pop-ink: #0b0b0b;
+  --pop-gold: #ffd36a;
+  --pop-teal: #247b6e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --color-pop-red: var(--pop-red);
+  --color-pop-ink: var(--pop-ink);
+  --color-pop-gold: var(--pop-gold);
+  --color-pop-teal: var(--pop-teal);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.btn-pop {
+  @apply inline-flex items-center justify-center px-5 py-2 rounded-full font-semibold border-2;
+  background-color: var(--pop-red);
+  color: #fff;
+  border-color: #000;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.section-heading {
+  @apply text-4xl md:text-5xl font-extrabold;
+  text-shadow: 2px 2px 0 #000;
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+.hero-card {
+  background-color: var(--pop-red);
+  border: 3px solid #000;
+  border-radius: 24px;
+  box-shadow: 6px 6px 0 #000;
+}
