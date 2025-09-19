@@ -32,16 +32,23 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${display.variable} antialiased`}>
         <header className="border-b bg-[var(--background)]">
-          <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-            <a href="/" className="font-extrabold text-xl">POP</a>
-            <nav className="flex items-center gap-4 text-sm">
-              <a href="/" className="hover:underline">Shop</a>
-              <a href="#gift-boxes" className="hover:underline">Gift Boxes</a>
-              <a href="#best-sellers" className="hover:underline">Best Sellers</a>
-              <a href="#unique-gifts" className="hover:underline">Unique Gifts</a>
-              <a href="#snacky" className="hover:underline">Feeling Snacky?</a>
-              <a href="/cart" className="btn-pop text-xs px-3 py-1">Cart</a>
-            </nav>
+          <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <nav className="hidden md:flex items-center gap-10 text-base font-extrabold tracking-wide">
+                <a href="/" className="hover:underline">SHOP</a>
+                <a href="/about" className="hover:underline">ABOUT</a>
+                <a href="/visit" className="hover:underline">VISIT</a>
+              </nav>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="/seller" className="btn-pop text-xs px-4 py-2">BECOME A SELLER</a>
+              <a href="/cart" className="icon-btn" aria-label="Cart">
+                <img src="/icons/cart.svg" alt="Cart" width={20} height={20} />
+              </a>
+              <a href="#" className="icon-btn" aria-label="Account">
+                <img src="/icons/user.svg" alt="Account" width={20} height={20} />
+              </a>
+            </div>
           </div>
         </header>
         <div>{children}</div>
