@@ -51,6 +51,14 @@ OnlineShoppingSystem/
 └─ README.md
 ```
 
+## Development Notes
+
+### 2026-01-13
+- 
+
+### [Future Date]
+- 
+
 ## Notes
 - Development only; not production-hardened.
 - Inspired by sections found on `https://www.poplocal.com.au/`.
