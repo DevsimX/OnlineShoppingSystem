@@ -10,20 +10,12 @@ Full-stack demo e-commerce app (Next.js + Tailwind frontend, Django + DRF backen
 
 ### Backend (Django)
 ```bash
-cd /Users/jason/OnlineShoppingSystem/backend
-python3 -m venv ../venv
-source ../venv/bin/activate
-pip install --upgrade pip setuptools wheel
-pip install djangorestframework django-cors-headers psycopg[binary]
-python manage.py migrate
-python manage.py seed_shop
-python manage.py runserver
 ```
-API: http://localhost:8000/api/
+API: 
 
 ### Frontend (Next.js)
 ```bash
-cd /Users/jason/OnlineShoppingSystem/frontend
+cd ./frontend
 npm install
 # optional: echo "NEXT_PUBLIC_API_BASE=http://localhost:8000" > .env.local
 npm run dev
@@ -42,31 +34,20 @@ npm run lint       # run ESLint
 
 Backend (from `backend/`):
 ```bash
-source ../venv/bin/activate
-python manage.py test          # run tests
-python manage.py createsuperuser
 ```
 
 ## Features
-- Categories, products with images
-- Cart via session key stored in localStorage
-- Checkout creates an order
+
 
 ## API Routes
-- GET /api/categories/, GET /api/categories/{slug}/
-- GET /api/products/, GET /api/products/{slug}/
-- GET /api/carts/{session_key}/, POST /api/carts/{session_key}/add, POST /api/carts/{session_key}/remove
-- POST /api/orders/
+
 
 ## Project Structure
 ```
 OnlineShoppingSystem/
 ├─ backend/                # Django project (DRF, CORS)
-│  ├─ backend/             # settings, urls
-│  └─ shop/                # models, serializers, views, admin, seeds
 ├─ frontend/               # Next.js (App Router, Tailwind)
 │  └─ src/app/             # pages and UI
-├─ venv/                   # Python virtual environment (gitignored)
 └─ README.md
 ```
 
