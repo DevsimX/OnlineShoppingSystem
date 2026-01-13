@@ -3,12 +3,12 @@
 :root {
   --background: #fde9cc; /* warm cream */
   --foreground: #0b0b0b;
-  --pop-red: #c9503f;   /* hero brick red */
+  --pop-red: #cd4c3a;   /* hero brick red */
   --pop-ink: #0b0b0b;   /* heavy ink black */
   --pop-gold: #ffd36a;  /* accent gold */
   --pop-teal: #1e7c6f;  /* pattern teal */
   --pop-yellow-light: #ffeb99; /* light yellow */
-  --pop-yellow-mid: #ffd36a;   /* medium yellow (same as gold) */
+  --pop-yellow-mid: #fbd576;   /* medium yellow (same as gold) */
 }
 
 @theme inline {
@@ -145,6 +145,66 @@ body {
   border-radius: 12px;
   box-shadow: 3px 3px 0 #000;
 }
+
+.IconMenu{
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #000;
+  background-color: #fff;
+  padding: 0.375rem;
+  box-shadow: 2px 2px 0px 0px #000;
+}
+
+.IconMenu:hover {
+  background-color: #30897c;
+  color: #fff;
+}
+
+/* Navigation menu styles */
+.nav-menu-button {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom-width: 4px;
+  padding-bottom: 0.375rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  color: var(--pop-yellow-mid);
+  border-color: transparent;
+}
+
+.nav-menu-button:hover {
+  border-color: var(--pop-yellow-mid);
+}
+
+.nav-menu-link-wrapper {
+  border-bottom-width: 4px;
+  border-color: transparent;
+  padding-bottom: 0.375rem;
+}
+
+.nav-menu-link-wrapper:hover {
+  border-color: var(--pop-yellow-mid);
+}
+
+.nav-menu-link {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  color: var(--pop-yellow-mid);
+}
+
+/* font family */
 
 /* Logo hover effect */
 .logo-container .logo-face-skew {

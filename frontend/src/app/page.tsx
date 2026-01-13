@@ -1,41 +1,16 @@
-async function fetchJSON<T>(path: string): Promise<T> {
-  const base = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
-  const res = await fetch(`${base}/api/${path}`, { next: { revalidate: 60 } });
-  if (!res.ok) throw new Error("Failed to fetch " + path);
-  return res.json();
-}
-
-type Category = { name: string; slug: string; description: string; image_url: string };
-type Product = {
-  name: string;
-  slug: string;
-  short_description: string;
-  price_cents: number;
-  images: { image_url: string }[];
-  category: Category;
-};
-
-export default async function Home() {
-  const [categoriesResp, productsResp] = await Promise.all([
-    fetchJSON<{ count: number; results: Category[] }>("categories/"),
-    fetchJSON<{ count: number; results: Product[] }>("products/?page_size=12"),
-  ]);
-  const categories = categoriesResp.results;
-  const products = productsResp.results;
-  let snackProducts: Product[] = [];
-  let giftBoxProducts: Product[] = [];
-  try {
-    const snacks = await fetchJSON<{ count: number; results: Product[] }>(
-      "products/?category=snacks-sauces&page_size=8"
-    );
-    snackProducts = snacks.results;
-  } catch {}
-  try {
-    const gifts = await fetchJSON<{ count: number; results: Product[] }>(
-      "products/?category=gift-boxes&page_size=4"
-    );
-    giftBoxProducts = gifts.results;
-  } catch {}
+export default function Home() {
+  // Placeholder data - backend not ready yet
+  const categories: { name: string; slug: string; description: string; image_url: string }[] = [];
+  const products: {
+    name: string;
+    slug: string;
+    short_description: string;
+    price_cents: number;
+    images: { image_url: string }[];
+    category: { name: string; slug: string; description: string; image_url: string };
+  }[] = [];
+  const snackProducts: typeof products = [];
+  const giftBoxProducts: typeof products = [];
 
   return (
     <main className="min-h-screen">
@@ -51,7 +26,9 @@ export default async function Home() {
             </div>
             <div className="hidden md:block">
               <div className="w-full h-80 md:h-[420px] card-pop overflow-hidden bg-white">
-                <img src={categories[0]?.image_url} alt="Store" className="w-full h-full object-cover" />
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  Store Image
+                </div>
               </div>
             </div>
           </div>
@@ -107,12 +84,16 @@ export default async function Home() {
       <section id="shop" className="mx-auto max-w-7xl px-6">
         <h2 className="text-2xl md:text-3xl font-extrabold mb-4">Shop</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {categories.map((c) => (
-            <a key={c.slug} href={`/category/${c.slug}`} className="group relative overflow-hidden rounded-lg border p-4 hover:shadow">
-              <img src={c.image_url} alt={c.name} className="h-36 w-full object-cover rounded" />
-              <div className="mt-2 font-medium">{c.name}</div>
-            </a>
-          ))}
+          {categories.length > 0 ? (
+            categories.map((c) => (
+              <a key={c.slug} href={`/category/${c.slug}`} className="group relative overflow-hidden rounded-lg border p-4 hover:shadow">
+                <img src={c.image_url} alt={c.name} className="h-36 w-full object-cover rounded" />
+                <div className="mt-2 font-medium">{c.name}</div>
+              </a>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-500 py-8">Categories coming soon...</p>
+          )}
         </div>
       </section>
 
@@ -122,20 +103,24 @@ export default async function Home() {
           <a href="#" className="btn-pop text-sm px-4 py-1">EXPLORE ALL →</a>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {products.map((p, i) => (
-            <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
-              <div className="aspect-square overflow-hidden card-pop bg-gray-50">
-                <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-              </div>
-              {(i === 0 || i === 1) && (
-                <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
-              )}
-              <div className="mt-2">
-                <div className="font-medium">{p.name}</div>
-                <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-              </div>
-            </a>
-          ))}
+          {products.length > 0 ? (
+            products.map((p, i) => (
+              <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
+                <div className="aspect-square overflow-hidden card-pop bg-gray-50">
+                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
+                </div>
+                {(i === 0 || i === 1) && (
+                  <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
+                )}
+                <div className="mt-2">
+                  <div className="font-medium">{p.name}</div>
+                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
+                </div>
+              </a>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-500 py-8">Products coming soon...</p>
+          )}
         </div>
       </section>
 
@@ -146,20 +131,24 @@ export default async function Home() {
         </div>
         <p className="text-gray-600 mb-4">Explore curated gifts from local makers.</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((p, i) => (
-            <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
-              <div className="aspect-square overflow-hidden card-pop bg-gray-50">
-                <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-              </div>
-              {(i === 0 || i === 1) && (
-                <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
-              )}
-              <div className="mt-2">
-                <div className="font-medium">{p.name}</div>
-                <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-              </div>
-            </a>
-          ))}
+          {products.length > 0 ? (
+            products.slice(0, 4).map((p, i) => (
+              <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
+                <div className="aspect-square overflow-hidden card-pop bg-gray-50">
+                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
+                </div>
+                {(i === 0 || i === 1) && (
+                  <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
+                )}
+                <div className="mt-2">
+                  <div className="font-medium">{p.name}</div>
+                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
+                </div>
+              </a>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-500 py-8">Gift ideas coming soon...</p>
+          )}
         </div>
       </section>
 
