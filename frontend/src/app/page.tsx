@@ -38,9 +38,9 @@ export default async function Home() {
   } catch {}
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen">
       {/* Hero */}
-      <section className="relative py-6 md:py-8">
+      <section className="relative">
         <div className="pattern-band h-6 md:h-8 w-full" />
         <div className="mx-auto max-w-7xl px-6">
           <div className="hero-card grid grid-cols-1 md:grid-cols-2 items-center gap-6 md:gap-10 p-8 md:p-14">

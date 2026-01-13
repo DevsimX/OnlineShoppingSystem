@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4e2c7; /* warm cream */
+  --background: #fde9cc; /* warm cream */
   --foreground: #0b0b0b;
   --pop-red: #c9503f;   /* hero brick red */
   --pop-ink: #0b0b0b;   /* heavy ink black */
   --pop-gold: #ffd36a;  /* accent gold */
   --pop-teal: #1e7c6f;  /* pattern teal */
+  --pop-yellow-light: #ffeb99; /* light yellow */
+  --pop-yellow-mid: #ffd36a;   /* medium yellow (same as gold) */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --font-display: var(--font-display);
   --color-pop-red: var(--pop-red);
   --color-pop-ink: var(--pop-ink);
   --color-pop-gold: var(--pop-gold);
   --color-pop-teal: var(--pop-teal);
+  --color-pop-yellow-light: var(--pop-yellow-light);
+  --color-pop-yellow-mid: var(--pop-yellow-mid);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -142,4 +144,23 @@ body {
   border: 3px solid #000;
   border-radius: 12px;
   box-shadow: 3px 3px 0 #000;
+}
+
+/* Logo hover effect */
+.logo-container .logo-face-skew {
+  opacity: 1;
+  transition: opacity 0.05s ease;
+}
+
+.logo-container .logo-face-straight {
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+.logo-container:hover .logo-face-skew {
+  opacity: 0;
+}
+
+.logo-container:hover .logo-face-straight {
+  opacity: 1;
 }
