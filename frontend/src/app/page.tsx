@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   // Placeholder data - backend not ready yet
   const categories: { name: string; slug: string; description: string; image_url: string }[] = [];
@@ -20,7 +22,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="hero-card grid grid-cols-1 md:grid-cols-2 items-center gap-6 md:gap-10 p-8 md:p-14">
             <div className="text-white md:pr-8">
-              <div className="text-pop-gold text-3xl md:text-4xl font-extrabold mb-2">G'day Canberra!</div>
+              <div className="text-pop-gold text-3xl md:text-4xl font-extrabold mb-2">G&apos;day Canberra!</div>
               <h1 className="section-heading md:text-6xl leading-[0.95]">YOUR FAVE LOCAL HAS A FRESH NEW LOOK</h1>
               <a href="#shop" className="btn-pop-outline mt-8">VISIT OUR STORE →</a>
             </div>
@@ -157,7 +159,7 @@ export default function Home() {
         <section id="snacky" className="mx-auto max-w-7xl px-6 pb-16">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold">Feeling Snacky?</h2>
-            <a href="/category/snacks-sauces" className="text-sm underline">Explore All</a>
+            <Link href="/category/snacks-sauces" className="text-sm underline">Explore All</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {snackProducts.map((p) => (
@@ -190,7 +192,7 @@ export default function Home() {
         <section id="gift-boxes" className="mx-auto max-w-7xl px-6 pb-20">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold">Gift Boxes</h2>
-            <a href="/category/gift-boxes" className="text-sm underline">Explore All</a>
+            <Link href="/category/gift-boxes" className="text-sm underline">Explore All</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {giftBoxProducts.map((p, i) => (

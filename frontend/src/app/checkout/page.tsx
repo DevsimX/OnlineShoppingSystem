@@ -44,8 +44,8 @@ export default function CheckoutPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.detail || "Order failed");
       setMessage(`Order placed! #${json.id}`);
-    } catch (err: any) {
-      setMessage(err.message);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Order failed");
     } finally {
       setSubmitting(false);
     }

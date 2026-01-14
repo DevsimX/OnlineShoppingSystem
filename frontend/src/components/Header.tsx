@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import Logo from "@/assets/logo.svg";
 import Menu from "@/assets/menu.svg";
 import Search from "@/assets/search.svg"
@@ -185,14 +186,14 @@ export default function Header() {
 
         {/* Logo */}
         <div className="relative z-10 transition-all delay-100 max-md:flex-shrink-0">
-          <a href="/">
+          <Link href="/">
             <span className="sr-only">Go Home</span>
             <div className="h-auto w-full transition-all max-lg:max-w-[100px] lg:w-[135px] xl:w-[200px]">
               <div className="logo-container">
                 <Logo/>
               </div>
             </div>
-          </a>
+          </Link>
         </div>
 
         {/* Search Bar */}

@@ -40,7 +40,7 @@ export default function CartPage() {
 		fetch(`${API_BASE}/api/carts/${sessionKey}/`)
 			.then((r) => (r.ok ? r.json() : Promise.reject()))
 			.then((data) => setCart(data))
-			.catch(() => setCart({ session_key: sessionKey, items: [] } as any));
+			.catch(() => setCart({ session_key: sessionKey, items: [] } as Cart));
 	}, [sessionKey]);
 
 	function remove(productSlug: string) {
