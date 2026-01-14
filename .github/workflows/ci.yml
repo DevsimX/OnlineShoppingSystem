@@ -37,9 +37,9 @@ jobs:
       
       - name: Build Next.js app
         run: npm run build
-        env:
-          # Add any required build-time environment variables here
-          # NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        # Add any required build-time environment variables here:
+        # env:
+        #   NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
   backend:
     name: Backend Checks
@@ -73,10 +73,10 @@ jobs:
         run: |
           python manage.py check
           python manage.py check --deploy
-        env:
-          # Add any required Django environment variables here
-          # SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          # DEBUG: 'False'
+        # Add any required Django environment variables here:
+        # env:
+        #   SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        #   DEBUG: 'False'
       
       - name: Run Django tests (if available)
         run: |
