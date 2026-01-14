@@ -223,16 +223,20 @@ body {
 /* Dropdown menu height animation */
 .dropdown-menu-container {
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 300ms ease-in-out;
   background-color: var(--pop-yellow-mid);
 }
 
-.dropdown-menu-container.dropdown-menu-open {
+.dropdown-menu-content-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-in-out;
+}
+
+.dropdown-menu-container.dropdown-menu-open .dropdown-menu-content-wrapper {
   max-height: 1000px;
 }
 
-.dropdown-menu-container.dropdown-menu-closed {
+.dropdown-menu-container.dropdown-menu-closed .dropdown-menu-content-wrapper {
   max-height: 0;
   pointer-events: none;
 }

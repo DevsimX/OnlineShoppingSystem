@@ -27,6 +27,7 @@ type NavLinkItem = {
 
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -51,6 +52,20 @@ export default function Header() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, [activeDropdown]);
+
+  // Handle displayed dropdown for animation
+  useEffect(() => {
+    if (activeDropdown) {
+      // Opening: show immediately
+      setDisplayedDropdown(activeDropdown);
+    } else {
+      // Closing: delay hiding to allow animation
+      const timer = setTimeout(() => {
+        setDisplayedDropdown(null);
+      }, 300); // Match CSS transition duration
+      return () => clearTimeout(timer);
+    }
   }, [activeDropdown]);
 
   // Dropdown menu items (Shop, Brands, Gifts)
@@ -343,17 +358,20 @@ export default function Header() {
           {/* Dropdown Menu */}
           <div
             ref={dropdownRef}
-            className={`dropdown-menu-container w-full bg-[var(--pop-yellow-mid)] ${activeDropdown ? "dropdown-menu-open" : "dropdown-menu-closed"
-              }`}
+            className={`dropdown-menu-container w-full bg-[var(--pop-yellow-mid)] ${
+              activeDropdown ? "dropdown-menu-open" : "dropdown-menu-closed"
+            }`}
           >
-            {activeDropdown && (() => {
-              const activeItem = dropdownMenuItems.find(
-                (item) => item.label.toLowerCase() === activeDropdown
-              );
-              if (!activeItem || activeItem.items.length === 0) return null;
+            <div className="dropdown-menu-content-wrapper">
+              {(() => {
+                if (!displayedDropdown) return null;
+                const activeItem = dropdownMenuItems.find(
+                  (item) => item.label.toLowerCase() === displayedDropdown
+                );
+                if (!activeItem || activeItem.items.length === 0) return null;
 
-              return (
-                <div className="w-full border-b-2 border-black lg:min-h-52">
+                return (
+                  <div key={displayedDropdown} className="w-full border-b-2 border-black lg:min-h-52">
                   <div className="mx-auto max-w-5xl columns-3 p-4 text-lg">
                     {activeItem.items.map((section, index) => {
                       if (section.type === "standalone") {
@@ -402,8 +420,9 @@ export default function Header() {
                     })}
                   </div>
                 </div>
-              );
-            })()}
+                );
+              })()}
+            </div>
           </div>
 
         </div>
