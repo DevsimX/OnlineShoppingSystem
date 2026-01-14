@@ -204,6 +204,29 @@ body {
   color: var(--pop-yellow-mid);
 }
 
+/* Font family utility */
+.font-family-trade-gothic {
+  font-family: "trade-gothic-next", sans-serif;
+}
+
+/* Dropdown menu visibility (no height/opacity animation) */
+.dropdown-menu-container {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+}
+
+.dropdown-menu-container.dropdown-menu-open {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.dropdown-menu-container.dropdown-menu-closed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* font family */
 
 /* Logo hover effect */
