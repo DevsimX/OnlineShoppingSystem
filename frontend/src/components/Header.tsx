@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import Link from "next/link";
 import Logo from "@/assets/logo.svg";
 import Menu from "@/assets/menu.svg";
@@ -9,11 +9,15 @@ import MyAccount from "@/assets/account.svg"
 import Cart from "@/assets/cart.svg"
 import { ChevronDown } from "lucide-react"
 
+type DropdownSection = {
+  type: "category" | "standalone";
+  header?: { label: string; href?: string };
+  links: Array<{ label: string; href: string; className?: string }>;
+};
+
 type DropdownMenuItem = {
   label: string;
-  href?: string;
-  // Placeholder for dropdown menu items/submenu
-  items?: Array<{ label: string; href: string }>;
+  items: DropdownSection[];
 };
 
 type NavLinkItem = {
@@ -21,30 +25,26 @@ type NavLinkItem = {
   href: string;
 };
 
-type ShopDropdownSection = {
-  type: "category" | "standalone";
-  header?: { label: string; href: string };
-  links: Array<{ label: string; href: string }>;
-};
-
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
       const isClickInsideDropdown = dropdownRef.current?.contains(target);
-      const isClickOnButton = buttonRef.current?.contains(target);
-      
-      if (!isClickInsideDropdown && !isClickOnButton) {
+      const isClickOnAnyButton = Object.values(buttonRefs.current).some(
+        (ref) => ref?.contains(target)
+      );
+
+      if (!isClickInsideDropdown && !isClickOnAnyButton) {
         setActiveDropdown(null);
       }
     }
 
-    if (activeDropdown === "shop") {
+    if (activeDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
@@ -53,106 +53,170 @@ export default function Header() {
     };
   }, [activeDropdown]);
 
-  // Shop dropdown menu content
-  const shopDropdownContent: ShopDropdownSection[] = [
-    {
-      type: "category",
-      header: { label: "Gifts", href: "/collections/gifts" },
-      links: [
-        { label: "Gift Boxes", href: "/collections/gift-boxes" },
-        { label: "Gift Cards", href: "/products/pop-gift-card" },
-        { label: "Gifts Under $10", href: "/collections/gifts-under-10" },
-        { label: "Gifts Under $25", href: "/collections/gifts-under-25" },
-        { label: "Gifts Under $50", href: "/collections/gifts-under-50" },
-        { label: "Gifts Under $100", href: "/collections/gifts-under-100" },
-        { label: "Gifts For Men", href: "/collections/gifts-for-men" },
-        { label: "Gifts For Women", href: "/collections/gifts-for-women" },
-        { label: "Gifts For Kids", href: "/collections/gifts-for-kids" },
-        { label: "Unique Gifts", href: "/collections/unique-gifts" },
-        { label: "Corporate Gifts", href: "/collections/corporate-gifting" },
-      ],
-    },
-    {
-      type: "standalone",
-      links: [{ label: "What's Hot", href: "/collections/whats-hot" }],
-    },
-    {
-      type: "standalone",
-      links: [{ label: "New Stuff", href: "/collections/new-stuff" }],
-    },
-    {
-      type: "category",
-      header: { label: "Food & Drinks", href: "/collections/food-drinks" },
-      links: [
-        { label: "Beer, Wine & Spirits", href: "/collections/beer-wine-spirits" },
-        { label: "Non-Alc Drinks", href: "/collections/non-alcoholic-drinks" },
-        { label: "Confectionary", href: "/collections/sweet-treats" },
-        { label: "Snacks", href: "/collections/snacks" },
-        { label: "Coffee & Tea", href: "/collections/coffee-tea" },
-        { label: "Cooking & Condiments", href: "/collections/cooking-condiments" },
-      ],
-    },
-    {
-      type: "category",
-      header: { label: "Fashion", href: "/collections/fashion" },
-      links: [
-        { label: "Accessories", href: "/collections/accessories" },
-        { label: "Jewellery", href: "/collections/jewellery" },
-      ],
-    },
-    {
-      type: "category",
-      header: { label: "Body", href: "/collections/body" },
-      links: [
-        { label: "Skincare", href: "/collections/skincare" },
-        { label: "Bath", href: "/collections/bath" },
-        { label: "Beauty & Fragrance", href: "/collections/beauty-fragrances" },
-      ],
-    },
-    {
-      type: "category",
-      header: { label: "Stationery", href: "/collections/stationery" },
-      links: [
-        { label: "Greeting Cards", href: "/collections/greeting-cards" },
-        { label: "Stickers & Stationery", href: "/collections/stationery" },
-        { label: "Games", href: "/collections/games" },
-        { label: "Kids Toys", href: "/collections/kids-toys" },
-      ],
-    },
-    {
-      type: "category",
-      header: { label: "Memorabilia", href: "/collections/memorabilia" },
-      links: [
-        { label: "Canberra Merch", href: "/collections/canberra-merch" },
-        { label: "POP Merch", href: "/collections/pop-merch" },
-      ],
-    },
-    {
-      type: "category",
-      header: { label: "Home", href: "/collections/home" },
-      links: [
-        { label: "Candles & Diffusers", href: "/collections/candles-diffusers" },
-        { label: "Ceramics & Tableware", href: "/collections/ceramics-tableware" },
-        { label: "Prints", href: "/collections/prints" },
-        { label: "Books", href: "/collections/books" },
-        { label: "Pet Goods", href: "/collections/pet-goods" },
-      ],
-    },
-  ];
-
   // Dropdown menu items (Shop, Brands, Gifts)
   const dropdownMenuItems: DropdownMenuItem[] = [
     {
       label: "Shop",
-      // items: [] // Placeholder for dropdown submenu items
+      items: [
+        {
+          type: "category",
+          header: { label: "Gifts", href: "/collections/gifts" },
+          links: [
+            { label: "Gift Boxes", href: "/collections/gift-boxes" },
+            { label: "Gift Cards", href: "/products/pop-gift-card" },
+            { label: "Gifts Under $10", href: "/collections/gifts-under-10" },
+            { label: "Gifts Under $25", href: "/collections/gifts-under-25" },
+            { label: "Gifts Under $50", href: "/collections/gifts-under-50" },
+            { label: "Gifts Under $100", href: "/collections/gifts-under-100" },
+            { label: "Gifts For Men", href: "/collections/gifts-for-men" },
+            { label: "Gifts For Women", href: "/collections/gifts-for-women" },
+            { label: "Gifts For Kids", href: "/collections/gifts-for-kids" },
+            { label: "Unique Gifts", href: "/collections/unique-gifts" },
+            { label: "Corporate Gifts", href: "/collections/corporate-gifting" },
+          ],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "What's Hot", href: "/collections/whats-hot" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "New Stuff", href: "/collections/new-stuff" }],
+        },
+        {
+          type: "category",
+          header: { label: "Food & Drinks", href: "/collections/food-drinks" },
+          links: [
+            { label: "Beer, Wine & Spirits", href: "/collections/beer-wine-spirits" },
+            { label: "Non-Alc Drinks", href: "/collections/non-alcoholic-drinks" },
+            { label: "Confectionary", href: "/collections/sweet-treats" },
+            { label: "Snacks", href: "/collections/snacks" },
+            { label: "Coffee & Tea", href: "/collections/coffee-tea" },
+            { label: "Cooking & Condiments", href: "/collections/cooking-condiments" },
+          ],
+        },
+        {
+          type: "category",
+          header: { label: "Fashion", href: "/collections/fashion" },
+          links: [
+            { label: "Accessories", href: "/collections/accessories" },
+            { label: "Jewellery", href: "/collections/jewellery" },
+          ],
+        },
+        {
+          type: "category",
+          header: { label: "Body", href: "/collections/body" },
+          links: [
+            { label: "Skincare", href: "/collections/skincare" },
+            { label: "Bath", href: "/collections/bath" },
+            { label: "Beauty & Fragrance", href: "/collections/beauty-fragrances" },
+          ],
+        },
+        {
+          type: "category",
+          header: { label: "Stationery", href: "/collections/stationery" },
+          links: [
+            { label: "Greeting Cards", href: "/collections/greeting-cards" },
+            { label: "Stickers & Stationery", href: "/collections/stationery" },
+            { label: "Games", href: "/collections/games" },
+            { label: "Kids Toys", href: "/collections/kids-toys" },
+          ],
+        },
+        {
+          type: "category",
+          header: { label: "Memorabilia", href: "/collections/memorabilia" },
+          links: [
+            { label: "Canberra Merch", href: "/collections/canberra-merch" },
+            { label: "POP Merch", href: "/collections/pop-merch" },
+          ],
+        },
+        {
+          type: "category",
+          header: { label: "Home", href: "/collections/home" },
+          links: [
+            { label: "Candles & Diffusers", href: "/collections/candles-diffusers" },
+            { label: "Ceramics & Tableware", href: "/collections/ceramics-tableware" },
+            { label: "Prints", href: "/collections/prints" },
+            { label: "Books", href: "/collections/books" },
+            { label: "Pet Goods", href: "/collections/pet-goods" },
+          ],
+        },
+      ],
     },
     {
       label: "Brands",
-      // items: [] // Placeholder for dropdown submenu items
+      items: [
+        {
+          type: "category",
+          header: { label: "Featured Brands" },
+          links: [
+            { label: "Allara Creative", href: "/collections/allara-creative" },
+            { label: "Bakers Wanna Bake", href: "/collections/bakers-wanna-bake" },
+            { label: "Bearlymade", href: "/collections/bearlymade" },
+            { label: "Burley & Brave", href: "/collections/burley-brave" },
+            { label: "Contentious Character Winery", href: "/collections/contentious-character-winery" },
+            { label: "Cygnet & Pen", href: "/collections/cygnet-and-pen" },
+            { label: "Jasper & Myrtle", href: "/collections/jasper-myrtle-chocolates" },
+            { label: "Kate's Bombs", href: "/collections/kates-bombs" },
+            { label: "KOKOArtisan", href: "/collections/kokoartisan" },
+            { label: "La Source Australia", href: "/collections/la-source" },
+            { label: "Leafy Sea Dragon", href: "/collections/leafy-sea-dragon" },
+            { label: "North/South Print Shop", href: "/collections/north-south-print-shop" },
+            { label: "Poncho Fox", href: "/collections/poncho-fox" },
+            { label: "Trevor Dickinson Art", href: "/collections/trevor-dickinson-art" },
+            { label: "Zealous & Co.", href: "/collections/zealous-co" },
+          ],
+        },
+      ],
     },
     {
       label: "Gifts",
-      // items: [] // Placeholder for dropdown submenu items
+      items: [
+        {
+          type: "standalone",
+          links: [{ label: "Gifts Under $10", href: "/collections/gifts-under-10", className: "font-ultra-bold font-black uppercase" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts Under $25", href: "/collections/gifts-under-25", className: "font-ultra-bold font-black uppercase" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts Under $50", href: "/collections/gifts-under-50", className: "font-ultra-bold font-black uppercase" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts Under $100", href: "/collections/gifts-under-100", className: "font-ultra-bold font-black uppercase" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gift Boxes", href: "/collections/gift-boxes" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts For Men", href: "/collections/gifts-for-men" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts For Women", href: "/collections/gifts-for-women" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gifts For Kids", href: "/collections/gifts-for-kids" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Gift Cards", href: "/products/pop-gift-card" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Unique Gifts", href: "/collections/unique-gifts" }],
+        },
+        {
+          type: "standalone",
+          links: [{ label: "Corporate Gifts", href: "/collections/corporate-gifting" }],
+        },
+      ],
     },
   ];
 
@@ -190,7 +254,7 @@ export default function Header() {
             <span className="sr-only">Go Home</span>
             <div className="h-auto w-full transition-all max-lg:max-w-[100px] lg:w-[135px] xl:w-[200px]">
               <div className="logo-container">
-                <Logo/>
+                <Logo />
               </div>
             </div>
           </Link>
@@ -209,7 +273,7 @@ export default function Header() {
         </div>
 
         {/* Navigation Links & Icons */}
-        <div className="flex items-center gap-6 text-lg tracking-wide uppercase max-md:flex-1 max-md:justify-end lg:pt-2 font-family-trade-gothic">
+        <div className="flex items-center gap-6 text-lg tracking-wide uppercase max-md:flex-1 max-md:justify-end lg:pt-2 ">
           {/* Desktop Navigation Links */}
           <a href="/about" className="font-extrabold hover:text-[var(--pop-red)] max-md:hidden">
             About
@@ -246,21 +310,19 @@ export default function Header() {
                 className="relative"
               >
                 <button
-                  ref={item.label === "Shop" ? buttonRef : null}
+                  ref={(el) => {
+                    buttonRefs.current[item.label] = el;
+                  }}
                   className="nav-menu-button"
                   onClick={() => {
-                    if (item.label === "Shop") {
-                      setActiveDropdown(activeDropdown === "shop" ? null : "shop");
-                    }
+                    const isActive = activeDropdown === item.label.toLowerCase();
+                    setActiveDropdown(isActive ? null : item.label.toLowerCase());
                   }}
                 >
                   {item.label}
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 ${
-                      activeDropdown === "shop" && item.label === "Shop"
-                        ? "rotate-180"
-                        : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === item.label.toLowerCase() ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
               </div>
@@ -278,48 +340,72 @@ export default function Header() {
             ))}
           </div>
 
-          {/* Shop Dropdown Menu (mount/unmount like Poplocal) */}
-          {activeDropdown === "shop" && (
-            <div ref={dropdownRef} className="w-full bg-[var(--pop-yellow-mid)]">
-              <div className="mx-auto max-w-5xl columns-3 p-4 text-lg">
-                {shopDropdownContent.map((section, index) => {
-                  if (section.type === "standalone") {
-                    return (
-                      <div key={index} className="break-inside-avoid py-1">
-                        <a
-                          href={section.links[0].href}
-                          className="block space-y-1 hover:text-[var(--pop-red)] font-family-trade-gothic font-black uppercase"
-                        >
-                          {section.links[0].label}
-                        </a>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={index} className="flex break-inside-avoid flex-col gap-2 pb-6">
-                      {section.header && (
-                        <a
-                          href={section.header.href}
-                          className="font-family-trade-gothic font-extrabold uppercase hover:text-[var(--pop-red)]"
-                        >
-                          {section.header.label}
-                        </a>
-                      )}
-                      {section.links.map((link) => (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          className="hover:text-[var(--pop-red)]"
-                        >
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Dropdown Menu */}
+          <div
+            ref={dropdownRef}
+            className={`dropdown-menu-container w-full bg-[var(--pop-yellow-mid)] ${activeDropdown ? "dropdown-menu-open" : "dropdown-menu-closed"
+              }`}
+          >
+            {activeDropdown && (() => {
+              const activeItem = dropdownMenuItems.find(
+                (item) => item.label.toLowerCase() === activeDropdown
+              );
+              if (!activeItem || activeItem.items.length === 0) return null;
+
+              return (
+                <div className="w-full border-b-2 border-black lg:min-h-52">
+                  <div className="mx-auto max-w-5xl columns-3 p-4 text-lg">
+                    {activeItem.items.map((section, index) => {
+                      if (section.type === "standalone") {
+                        return (
+                          <div key={index} className="break-inside-avoid py-1">
+                            <a
+                              href={section.links[0].href}
+                              className={`block space-y-1 hover:text-[var(--pop-red)] ${section.links[0].className || ""}`}
+                            >
+                              {section.links[0].label}
+                            </a>
+                          </div>
+                        );
+                      }
+                      // Category type
+                      return (
+                        <Fragment key={index}>
+                          {section.header && (
+                            <div className="break-inside-avoid py-1">
+                              {section.header.href ? (
+                                <a
+                                  href={section.header.href}
+                                  className="font-ultra-bold uppercase hover:text-[var(--pop-red)]"
+                                >
+                                  {section.header.label}
+                                </a>
+                              ) : (
+                                <span className="block space-y-1 font-semibold">
+                                  {section.header.label}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {section.links.map((link) => (
+                            <div key={link.href} className="break-inside-avoid py-1">
+                              <a
+                                href={link.href}
+                                className={`block space-y-1 hover:text-[var(--pop-red)] ${link.className || ""}`}
+                              >
+                                {link.label}
+                              </a>
+                            </div>
+                          ))}
+                        </Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
         </div>
       </div>
     </nav>

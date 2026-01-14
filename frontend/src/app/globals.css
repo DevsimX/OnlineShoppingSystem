@@ -209,21 +209,31 @@ body {
   font-family: "trade-gothic-next", sans-serif;
 }
 
-/* Dropdown menu visibility (no height/opacity animation) */
+/* Ultra bold utility - makes text appear bolder than font-weight 900 */
+.font-ultra-bold {
+  font-weight: 900;
+  -webkit-text-stroke: 0.5px currentColor;
+  text-shadow: 
+    0.2px 0.2px 0 currentColor,
+    0.4px 0.4px 0 currentColor,
+    0.6px 0.6px 0 currentColor;
+  letter-spacing: 0.01em;
+}
+
+/* Dropdown menu height animation */
 .dropdown-menu-container {
   overflow: hidden;
   max-height: 0;
-  opacity: 0;
+  transition: max-height 300ms ease-in-out;
+  background-color: var(--pop-yellow-mid);
 }
 
 .dropdown-menu-container.dropdown-menu-open {
   max-height: 1000px;
-  opacity: 1;
 }
 
 .dropdown-menu-container.dropdown-menu-closed {
   max-height: 0;
-  opacity: 0;
   pointer-events: none;
 }
 
