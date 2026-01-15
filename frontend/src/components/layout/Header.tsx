@@ -358,9 +358,19 @@ export default function Header() {
           {/* Dropdown Menu */}
           <div
             ref={dropdownRef}
-            className={`dropdown-menu-container w-full bg-[var(--pop-yellow-mid)] ${
-              activeDropdown ? "dropdown-menu-open" : "dropdown-menu-closed"
-            }`}
+            className={`dropdown-menu-container w-full bg-[var(--pop-yellow-mid)] ${activeDropdown ? "dropdown-menu-open" : "dropdown-menu-closed"
+              }`}
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              // Close dropdown if clicking on empty space (not on links or interactive elements)
+              // Check if the click is on an anchor tag or inside an anchor tag
+              const isClickOnLink = target.closest('a') !== null;
+              
+              // Only close if NOT clicking on a link
+              if (!isClickOnLink) {
+                setActiveDropdown(null);
+              }
+            }}
           >
             <div className="dropdown-menu-content-wrapper">
               {(() => {
@@ -372,54 +382,54 @@ export default function Header() {
 
                 return (
                   <div key={displayedDropdown} className="w-full border-b-2 border-black lg:min-h-52">
-                  <div className="mx-auto max-w-5xl columns-3 p-4 text-lg">
-                    {activeItem.items.map((section, index) => {
-                      if (section.type === "standalone") {
-                        return (
-                          <div key={index} className="break-inside-avoid py-1">
-                            <a
-                              href={section.links[0].href}
-                              className={`block space-y-1 hover:text-[var(--pop-red)] ${section.links[0].className || ""}`}
-                            >
-                              {section.links[0].label}
-                            </a>
-                          </div>
-                        );
-                      }
-                      // Category type
-                      return (
-                        <Fragment key={index}>
-                          {section.header && (
-                            <div className="break-inside-avoid py-1">
-                              {section.header.href ? (
-                                <a
-                                  href={section.header.href}
-                                  className="font-ultra-bold uppercase hover:text-[var(--pop-red)]"
-                                >
-                                  {section.header.label}
-                                </a>
-                              ) : (
-                                <span className="block space-y-1 font-semibold">
-                                  {section.header.label}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {section.links.map((link) => (
-                            <div key={link.href} className="break-inside-avoid py-1">
+                    <div className="mx-auto max-w-5xl columns-3 p-4 text-lg">
+                      {activeItem.items.map((section, index) => {
+                        if (section.type === "standalone") {
+                          return (
+                            <div key={index} className="break-inside-avoid py-1">
                               <a
-                                href={link.href}
-                                className={`block space-y-1 hover:text-[var(--pop-red)] ${link.className || ""}`}
+                                href={section.links[0].href}
+                                className={`block space-y-1 hover:text-[var(--pop-red)] ${section.links[0].className || ""}`}
                               >
-                                {link.label}
+                                {section.links[0].label}
                               </a>
                             </div>
-                          ))}
-                        </Fragment>
-                      );
-                    })}
+                          );
+                        }
+                        // Category type
+                        return (
+                          <Fragment key={index}>
+                            {section.header && (
+                              <div className="break-inside-avoid py-1">
+                                {section.header.href ? (
+                                  <a
+                                    href={section.header.href}
+                                    className="font-ultra-bold uppercase hover:text-[var(--pop-red)]"
+                                  >
+                                    {section.header.label}
+                                  </a>
+                                ) : (
+                                  <span className="block space-y-1 font-semibold">
+                                    {section.header.label}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {section.links.map((link) => (
+                              <div key={link.href} className="break-inside-avoid py-1">
+                                <a
+                                  href={link.href}
+                                  className={`block space-y-1 hover:text-[var(--pop-red)] ${link.className || ""}`}
+                                >
+                                  {link.label}
+                                </a>
+                              </div>
+                            ))}
+                          </Fragment>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
                 );
               })()}
             </div>

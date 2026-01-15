@@ -1,217 +1,321 @@
-import Link from "next/link";
+import CategoryCarousel from "@/components/home/CategoryCarousel";
+import HeroSection from "@/components/home/HeroSection";
+import ProductCarousel from "@/components/home/ProductCarousel";
+import CategoryGrid from "@/components/home/CategoryGrid";
+import CTASection from "@/components/home/CTASection";
+import InstagramFeed from "@/components/home/InstagramFeed";
+import Marquee from "@/components/home/Marquee";
+
+// Product data extracted from the HTML
+const whatsHotProducts = [
+  {
+    name: "Contentious Condiments Trio Cheeseboard",
+    href: "/products/contentious-condiments-trio-cheeseboard",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/triopack_350x350_crop_center.jpg.webp?v=1760865499",
+    imageAlt: "Contentious Condiments Trio Cheeseboard",
+    vendor: "Contentious Character Winery",
+    price: "24.55",
+  },
+  {
+    name: "Soju Gift Box",
+    href: "/products/soju-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0318630_350x350_crop_center.jpg.webp?v=1765260108",
+    imageAlt: "Soju Gift Box",
+    vendor: "Poncho Fox Distillery",
+    price: "83.40",
+    badge: "new" as const,
+  },
+  {
+    name: "Ambrosia Vodka Gift Box",
+    href: "/products/ambrosia-vodka-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519157_350x350_crop_center.jpg.webp?v=1766308060",
+    imageAlt: "Ambrosia Vodka Gift Box",
+    vendor: "Ambrosia Distillery",
+    price: "85.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Novelty Vibes Earrings",
+    href: "/products/novelty-vibes-earrings",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/POP_pewpewstudio_250509_38_LR_350x350_crop_center.jpg.webp?v=1762138657",
+    imageAlt: "Novelty Vibes Earrings",
+    vendor: "Fruity Stones",
+    price: "66.00",
+  },
+  {
+    name: "Keep on the Sunny Side Earrings",
+    href: "/products/keep-on-the-sunny-side-earrings",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0418878_350x350_crop_center.jpg.webp?v=1766059173",
+    imageAlt: "Keep on the Sunny Side Earrings",
+    vendor: "Dangly Bits",
+    price: "50.00",
+  },
+  {
+    name: "Mango No.5 Candle - Glass",
+    href: "/products/mango-no5-candle-glass",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0118098_350x350_crop_center.jpg.webp?v=1765346633",
+    imageAlt: "Mango No.5 Candle - Glass",
+    vendor: "Lucian Candles",
+    price: "35.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Sugar Cookie Candle",
+    href: "/products/sugar-cookie-candle",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0118069_350x350_crop_center.jpg.webp?v=1765278427",
+    imageAlt: "Sugar Cookie Candle",
+    vendor: "Zealous & Co",
+    price: "34.00",
+    badge: "new" as const,
+  },
+  {
+    name: "AVEC FlowState Mango Spritzer - 750ml",
+    href: "/products/avec-flowstate-mango-spritzer-750ml",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0318644_350x350_crop_center.jpg.webp?v=1765260777",
+    imageAlt: "AVEC FlowState Mango Spritzer - 750ml",
+    vendor: "Altina",
+    price: "25.00",
+    badge: "new" as const,
+  },
+];
+
+const newStuffProducts = [
+  {
+    name: "The Fountain Tilda A4 Print",
+    href: "/products/the-fountain-tilda-a4-print",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519181_350x350_crop_center.jpg.webp?v=1766308529",
+    imageAlt: "The Fountain Tilda A4 Print",
+    vendor: "Tilda Joy",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Wood Ducks Tilda A4 Print",
+    href: "/products/wood-ducks-tilda-a4-print",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519184_350x350_crop_center.jpg.webp?v=1766308683",
+    imageAlt: "Wood Ducks Tilda A4 Print",
+    vendor: "Tilda Joy",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Canberra Bus Stop Tilda A4 Print",
+    href: "/products/canberra-bus-stop-tilda-a4-print",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519183_350x350_crop_center.jpg.webp?v=1766308634",
+    imageAlt: "Canberra Bus Stop Tilda A4 Print",
+    vendor: "Tilda Joy",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "National Arboretum Tilda A4 Print",
+    href: "/products/national-arboretum-tilda-a4-print",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519174_350x350_crop_center.jpg.webp?v=1766308281",
+    imageAlt: "National Arboretum Tilda A4 Print",
+    vendor: "Tilda Joy",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Crochet Mini Dragon - Maroon",
+    href: "/products/crochet-mini-dragon-maroon",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0619829_350x350_crop_center.jpg.webp?v=1766399248",
+    imageAlt: "Crochet Mini Dragon - Maroon",
+    vendor: "Josies Crochet",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Crochet Mini Dragon - Blue Purple",
+    href: "/products/crochet-mini-dragon-blue-purple",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0619832_24a8ed44-9693-42dc-9ef9-8ed8d34d4139_350x350_crop_center.jpg.webp?v=1766398649",
+    imageAlt: "Crochet Mini Dragon - Blue Purple",
+    vendor: "Josies Crochet",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Crochet Mini Dragon - Pink",
+    href: "/products/crochet-mini-dragon-pink",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0619835_350x350_crop_center.jpg.webp?v=1766399384",
+    imageAlt: "Crochet Mini Dragon - Pink",
+    vendor: "Josies Crochet",
+    price: "50.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Crochet Squid",
+    href: "/products/crochet-squid",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0619822_350x350_crop_center.jpg.webp?v=1766397645",
+    imageAlt: "Crochet Squid",
+    vendor: "Josies Crochet",
+    price: "40.00",
+    badge: "new" as const,
+  },
+];
+
+const giftBoxProducts = [
+  {
+    name: "Flora Trio Pack",
+    href: "/products/flora-trio-pack",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/original_c3e76064-5acc-43e8-aac4-c18a69701059_350x350_crop_center.jpg.webp?v=1759734323",
+    imageAlt: "Flora Trio Pack 1",
+    vendor: "Local Spirit Group",
+    price: "76.00",
+  },
+  {
+    name: "Soju Gift Box",
+    href: "/products/soju-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0318630_350x350_crop_center.jpg.webp?v=1765260108",
+    imageAlt: "Soju Gift Box",
+    vendor: "Poncho Fox Distillery",
+    price: "83.40",
+    badge: "new" as const,
+  },
+  {
+    name: "Riverbourne Gift Box",
+    href: "/products/riverbourne-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/original_6e915979-75b3-4120-9dd8-faa4509d91d5_350x350_crop_center.jpg.webp?v=1759734344",
+    imageAlt: "Riverbourne Gift Box Regular 1",
+    vendor: "Riverbourne Distillery Pty Ltd",
+    price: "123.10",
+    badge: "hot" as const,
+  },
+  {
+    name: "Poncho Fox Gift Box Rum Mix",
+    href: "/products/poncho-fox-gift-box-rum-mix",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0619840_350x350_crop_center.jpg.webp?v=1766499411",
+    imageAlt: "Poncho Fox Gift Box Rum Mix",
+    vendor: "Poncho Fox Distillery",
+    price: "83.40",
+    badge: "new" as const,
+  },
+  {
+    name: "Poncho Fox Gift Box Mix",
+    href: "/products/poncho-fox-gift-box-mix",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519152_350x350_crop_center.jpg.webp?v=1766308014",
+    imageAlt: "Poncho Fox Gift Box Mix",
+    vendor: "Poncho Fox Distillery",
+    price: "83.40",
+    badge: "hot" as const,
+  },
+  {
+    name: "Speciality Selection Hot Choc Bomb Gift Box",
+    href: "/products/speciality-selection-hot-choc-bomb-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/POPCANBERRA_pewpewstudio_240830_1289_LR_350x350_crop_center.jpg.webp?v=1760828329",
+    imageAlt: "Speciality Selection Hot Choc Bomb Gift Box",
+    vendor: "Kate's Bombs",
+    price: "60.00",
+  },
+  {
+    name: "Thank You Pack",
+    href: "/products/thank-you-pack",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/POP-CBR-Product-GiftBoxes-251024-LR-052_350x350_crop_center.jpg.webp?v=1762921032",
+    imageAlt: "Thank You Pack",
+    vendor: "POP Local",
+    price: "45.00",
+    badge: "new" as const,
+  },
+  {
+    name: "The Big Thank You Gift Box",
+    href: "/products/the-big-thank-you-gift-box",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/POP-CBR-Product-GiftBoxes-251024-LR-034_350x350_crop_center.jpg.webp?v=1762827055",
+    imageAlt: "The Big Thank You Gift Box",
+    vendor: "POP Local",
+    price: "100.00",
+    badge: "new" as const,
+  },
+];
+
+const moreToExploreProducts = [
+  {
+    name: "Unwinding Artwork Print - A4",
+    href: "/products/unwinding-artwork-print-a4",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519185_350x350_crop_center.jpg.webp?v=1766308809",
+    imageAlt: "Unwinding Artwork Print - A4",
+    vendor: "Julia Ockert Art",
+    price: "42.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Morning Coffee Artwork Print - A4",
+    href: "/products/morning-coffee-artwork-print-a4",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519197_350x350_crop_center.jpg.webp?v=1766310039",
+    imageAlt: "Morning Coffee Artwork Print - A4",
+    vendor: "Julia Ockert Art",
+    price: "42.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Gang Gang Artwork Print - A4",
+    href: "/products/gang-gang-artwork-print-a4",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519196_350x350_crop_center.jpg.webp?v=1766309958",
+    imageAlt: "Gang Gang Artwork Print - A4",
+    vendor: "Julia Ockert Art",
+    price: "42.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Ginpeachment Gin 200ml",
+    href: "/products/ginpeachment-gin-200ml",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519324_350x350_crop_center.jpg.webp?v=1766318191",
+    imageAlt: "Ginpeachment Gin 200ml",
+    vendor: "The Prime Ginister",
+    price: "39.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Ginister For Defence Navy Strength Gin 200ml",
+    href: "/products/ginister-for-defence-navy-strength-gin-200ml",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519328_350x350_crop_center.jpg.webp?v=1766318239",
+    imageAlt: "Ginister For Defence Navy Strength Gin 200ml",
+    vendor: "The Prime Ginister",
+    price: "41.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Signature Gin 200ml",
+    href: "/products/signature-gin-200ml",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519322_350x350_crop_center.jpg.webp?v=1766318120",
+    imageAlt: "Signature Gin 200ml",
+    vendor: "The Prime Ginister",
+    price: "36.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Lychee Soju - 200ml",
+    href: "/products/lychee-soju-200ml",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519319_350x350_crop_center.jpg.webp?v=1766315994",
+    imageAlt: "Lychee Soju - 200ml",
+    vendor: "Poncho Fox Distillery",
+    price: "35.00",
+    badge: "new" as const,
+  },
+  {
+    name: "Poncho Fox Gift Box Mix",
+    href: "/products/poncho-fox-gift-box-mix",
+    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519152_350x350_crop_center.jpg.webp?v=1766308014",
+    imageAlt: "Poncho Fox Gift Box Mix",
+    vendor: "Poncho Fox Distillery",
+    price: "83.40",
+    badge: "hot" as const,
+  },
+];
 
 export default function Home() {
-  // Placeholder data - backend not ready yet
-  const categories: { name: string; slug: string; description: string; image_url: string }[] = [];
-  const products: {
-    name: string;
-    slug: string;
-    short_description: string;
-    price_cents: number;
-    images: { image_url: string }[];
-    category: { name: string; slug: string; description: string; image_url: string };
-  }[] = [];
-  const snackProducts: typeof products = [];
-  const giftBoxProducts: typeof products = [];
-
   return (
-    <main className="min-h-screen">
-      {/* Hero */}
-      <section className="relative">
-        <div className="pattern-band h-6 md:h-8 w-full" />
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="hero-card grid grid-cols-1 md:grid-cols-2 items-center gap-6 md:gap-10 p-8 md:p-14">
-            <div className="text-white md:pr-8">
-              <div className="text-pop-gold text-3xl md:text-4xl font-extrabold mb-2">G&apos;day Canberra!</div>
-              <h1 className="section-heading md:text-6xl leading-[0.95]">YOUR FAVE LOCAL HAS A FRESH NEW LOOK</h1>
-              <a href="#shop" className="btn-pop-outline mt-8">VISIT OUR STORE →</a>
-            </div>
-            <div className="hidden md:block">
-              <div className="w-full h-80 md:h-[420px] card-pop overflow-hidden bg-white">
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  Store Image
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="pattern-band h-6 md:h-8 w-full" />
-      </section>
-
-      {/* Badges row */}
-      <div className="badges-bar marquee">
-        <div className="marquee-track">
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>FREE SHIPPING OVER $100</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>EARN REWARDS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>ALL LOCAL GOODS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>PICK UP AND DELIVERY</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>FREE SHIPPING OVER $100</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>EARN REWARDS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>ALL LOCAL GOODS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>PICK UP AND DELIVERY</span>
-        </div>
-        <div className="marquee-track" aria-hidden>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>FREE SHIPPING OVER $100</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>EARN REWARDS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>ALL LOCAL GOODS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>PICK UP AND DELIVERY</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>FREE SHIPPING OVER $100</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>EARN REWARDS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>ALL LOCAL GOODS</span>
-          <img src="/icons/smile.svg" alt="" aria-hidden className="marquee-icon" />
-          <span>PICK UP AND DELIVERY</span>
-        </div>
-      </div>
-
-      {/* Promo bar */}
-      <div className="mx-auto max-w-xl px-6">
-        <div className="promo-bar mt-6 text-center py-3 font-extrabold">CLAIM 10% OFF!</div>
-      </div>
-
-      <section id="shop" className="mx-auto max-w-7xl px-6">
-        <h2 className="text-2xl md:text-3xl font-extrabold mb-4">Shop</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {categories.length > 0 ? (
-            categories.map((c) => (
-              <a key={c.slug} href={`/category/${c.slug}`} className="group relative overflow-hidden rounded-lg border p-4 hover:shadow">
-                <img src={c.image_url} alt={c.name} className="h-36 w-full object-cover rounded" />
-                <div className="mt-2 font-medium">{c.name}</div>
-              </a>
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-500 py-8">Categories coming soon...</p>
-          )}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="flex items-center justify-between mb-2">
-          <h2 id="best-sellers" className="text-2xl md:text-3xl font-extrabold">Best Sellers</h2>
-          <a href="#" className="btn-pop text-sm px-4 py-1">EXPLORE ALL →</a>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {products.length > 0 ? (
-            products.map((p, i) => (
-              <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
-                <div className="aspect-square overflow-hidden card-pop bg-gray-50">
-                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-                </div>
-                {(i === 0 || i === 1) && (
-                  <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
-                )}
-                <div className="mt-2">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-                </div>
-              </a>
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-500 py-8">Products coming soon...</p>
-          )}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 pb-16">
-        <div className="flex items-center justify-between mb-2">
-          <h2 id="unique-gifts" className="text-2xl md:text-3xl font-extrabold">Unique Gift Ideas</h2>
-          <a href="#" className="btn-pop text-sm px-4 py-1">EXPLORE ALL →</a>
-        </div>
-        <p className="text-gray-600 mb-4">Explore curated gifts from local makers.</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {products.length > 0 ? (
-            products.slice(0, 4).map((p, i) => (
-              <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
-                <div className="aspect-square overflow-hidden card-pop bg-gray-50">
-                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-                </div>
-                {(i === 0 || i === 1) && (
-                  <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
-                )}
-                <div className="mt-2">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-                </div>
-              </a>
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-500 py-8">Gift ideas coming soon...</p>
-          )}
-        </div>
-      </section>
-
-      {/* Feeling Snacky */}
-      {snackProducts.length > 0 && (
-        <section id="snacky" className="mx-auto max-w-7xl px-6 pb-16">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Feeling Snacky?</h2>
-            <Link href="/category/snacks-sauces" className="text-sm underline">Explore All</Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {snackProducts.map((p) => (
-              <a key={p.slug} href={`/product/${p.slug}`} className="group">
-                <div className="aspect-square overflow-hidden rounded-lg border bg-gray-50">
-                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-                </div>
-                <div className="mt-2">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Become a seller CTA */}
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="rounded-xl border bg-gray-50 p-8 md:p-10 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-semibold">Become a seller</h3>
-            <p className="text-gray-600 mt-1">Showcase your goods and join our community of makers.</p>
-          </div>
-          <a href="#" className="mt-4 md:mt-0 inline-block bg-black text-white px-5 py-2 rounded">Learn More</a>
-        </div>
-      </section>
-
-      {giftBoxProducts.length > 0 && (
-        <section id="gift-boxes" className="mx-auto max-w-7xl px-6 pb-20">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Gift Boxes</h2>
-            <Link href="/category/gift-boxes" className="text-sm underline">Explore All</Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {giftBoxProducts.map((p, i) => (
-              <a key={p.slug} href={`/product/${p.slug}`} className="group relative">
-                <div className="aspect-square overflow-hidden card-pop bg-gray-50">
-                  <img src={p.images?.[0]?.image_url} alt={p.name} className="h-full w-full object-cover" />
-                </div>
-                {(i === 0 || i === 1) && (
-                  <span className="star-badge">{i === 0 ? "Hot" : "New"}</span>
-                )}
-                <div className="mt-2">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-gray-600">${(p.price_cents / 100).toFixed(2)}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
+    <main style={{ viewTransitionName: "main-content" }}>
+      <CategoryCarousel />
+      <HeroSection />
+      <Marquee />
+      <ProductCarousel title="What's Hot" titleHref="/collections/whats-hot" products={whatsHotProducts} />
+      <CategoryGrid />
+      <ProductCarousel title="New Stuff" titleHref="/collections/new-stuff" products={newStuffProducts} />
+      <ProductCarousel title="Gift Boxes" titleHref="/collections/gift-boxes" products={giftBoxProducts} />
+      <ProductCarousel title="More to Explore" titleHref="/collections/all-products" products={moreToExploreProducts} />
+      <CTASection />
+      <InstagramFeed />
+      <Marquee />
     </main>
   );
 }

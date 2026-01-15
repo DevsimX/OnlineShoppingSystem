@@ -4,10 +4,14 @@
   --background: #fde9cc; /* warm cream */
   --foreground: #0b0b0b;
   --pop-red: #cd4c3a;   /* hero brick red */
+  --pop-red-accent: #cd4c3a; /* same as pop-red */
   --pop-ink: #0b0b0b;   /* heavy ink black */
+  --pop-neutral-black: #000; /* pure black */
   --pop-gold: #ffd36a;  /* accent gold */
   --pop-teal: #1e7c6f;  /* pattern teal */
-  --pop-yellow-light: #ffeb99; /* light yellow */
+  --pop-teal-mid: #30897c; /* medium teal */
+  --pop-green-mid: #60bb8f; /* medium green */
+  --pop-yellow-light: #fde9cc; /* light yellow */
   --pop-yellow-mid: #fbd576;   /* medium yellow (same as gold) */
 }
 
@@ -16,9 +20,13 @@
   --color-foreground: var(--foreground);
   --font-display: var(--font-display);
   --color-pop-red: var(--pop-red);
+  --color-pop-red-accent: var(--pop-red-accent);
   --color-pop-ink: var(--pop-ink);
+  --color-pop-neutral-black: var(--pop-neutral-black);
   --color-pop-gold: var(--pop-gold);
   --color-pop-teal: var(--pop-teal);
+  --color-pop-teal-mid: var(--pop-teal-mid);
+  --color-pop-green-mid: var(--pop-green-mid);
   --color-pop-yellow-light: var(--pop-yellow-light);
   --color-pop-yellow-mid: var(--pop-yellow-mid);
 }
@@ -30,10 +38,29 @@
   }
 }
 
+@font-face {
+  font-family: "Reika Script";
+  src: url("/fonts/Reika-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Price Check";
+  src: url("/fonts/PriceCheck Extended.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
 }
 
 .btn-pop {
@@ -82,8 +109,8 @@ body {
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translate(0); }
+  100% { transform: translate(-50%); }
 }
 
 .marquee {
@@ -93,12 +120,35 @@ body {
 }
 
 .marquee-track {
-  display: inline-flex;
-  gap: 48px;
-  padding-block: 12px;
+  display: flex;
+  align-items: center;
+  width: max-content;
   /* Two copies side-by-side → translate -50% for a perfect loop */
-  animation: marquee 18s linear infinite;
+  animation: marquee 30s linear infinite;
   will-change: transform;
+}
+
+/* Font stretch utility */
+.font-stretch-expanded {
+  font-stretch: expanded;
+}
+
+/* Additional utility classes */
+.rounded-4xl {
+  border-radius: 2rem;
+}
+
+.shadow-3d {
+  box-shadow: 2px 2px 0px 0px #000;
+}
+
+/* Font family utilities */
+.font-reika-script {
+  font-family: "Reika Script", serif;
+}
+
+.font-price-check {
+  font-family: "Price Check", monospace;
 }
 
 .marquee-icon {
@@ -204,10 +254,6 @@ body {
   color: var(--pop-yellow-mid);
 }
 
-/* Font family utility */
-.font-family-trade-gothic {
-  font-family: "trade-gothic-next", sans-serif;
-}
 
 /* Ultra bold utility - makes text appear bolder than font-weight 900 */
 .font-ultra-bold {
@@ -260,4 +306,21 @@ body {
 
 .logo-container:hover .logo-face-straight {
   opacity: 1;
+}
+
+/* Hide scrollbar for carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Category carousel slide sizing */
+@media screen and (min-width: 1280px) {
+  .category-carousel-slide {
+    flex: 0 0 calc(100% / 12 - 18px);
+  }
 }
