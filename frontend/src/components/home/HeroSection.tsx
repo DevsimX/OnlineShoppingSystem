@@ -19,7 +19,7 @@ const heroSlides: HeroSlide[] = [
     title: "Summer Love",
     subtitle: "Classic Summer Favourites Available Now!",
     description: "",
-    imageUrl: "https://cdn.sanity.io/images/q52u2xck/production/b479a415667b589973591cdb49ac8efc202b91c7-1464x1462.jpg?rect=1,0,1462,1462&w=740&h=740&auto=format",
+    imageUrl: "/images/image01.png",
     imageAlt: "Classic Summer Favourites Available Now!",
     ctaText: "Shop Food & Drinks",
     ctaHref: "/collections/food-drinks",
@@ -28,7 +28,7 @@ const heroSlides: HeroSlide[] = [
     title: "Sweet Treats",
     subtitle: "Tasty Local-Made Chocolates & Candy!",
     description: "",
-    imageUrl: "https://cdn.sanity.io/images/q52u2xck/production/03bf89296ff1c4294b773708aab9d46abe08ad4d-1464x1462.png?rect=3,0,1461,1461&w=740&h=740&auto=format",
+    imageUrl: "/images/image02.png",
     imageAlt: "Tasty Local-Made Chocolates & Candy!",
     ctaText: "Shop Confectionary",
     ctaHref: "/collections/sweet-treats",
@@ -49,8 +49,8 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden md:px-6 md:py-10">
-      <div className="relative overflow-hidden rounded-4xl border-2 border-black bg-[var(--pop-red-accent)] shadow-3d">
-        <div className="grid h-full min-h-[500px] grid-cols-2 items-center md:min-h-[600px]">
+      <div className="relative overflow-hidden md:rounded-4xl md:border-2 md:border-black bg-[var(--pop-red-accent)] hero-shadow-3d">
+        <div className="grid h-full min-h-[500px] items-center md:grid-cols-2 md:min-h-[600px]">
           <div className="relative flex h-full flex-col items-center justify-center space-y-2 px-6 pt-6 pb-12 text-center md:p-12 lg:space-y-8">
             <p className="text-4xl text-[var(--pop-yellow-mid)] font-reika-script">{slide.title}</p>
             <h1 className="text-4xl leading-[0.9] text-[var(--pop-yellow-light)] font-stretch-expanded lg:text-6xl font-price-check">
@@ -78,14 +78,14 @@ export default function HeroSection() {
               ))}
             </div>
           </div>
-          <div className="relative h-full">
+          <div className="relative order-first h-full md:order-none">
             <div className="h-full">
               <img
                 src={slide.imageUrl}
                 alt={slide.imageAlt}
-                className="h-full w-full object-cover object-center"
-                height="740"
-                width="740"
+                className="h-72 w-full object-cover object-center md:h-full"
+                height="300"
+                width="400"
                 loading="eager"
                 decoding="async"
               />

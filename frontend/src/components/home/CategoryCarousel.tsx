@@ -116,7 +116,7 @@ export default function CategoryCarousel() {
           {categories.map((category, index) => (
             <div
               key={category.href}
-              className={`category-carousel-slide flex-shrink-0 ${index === 0 ? "ml-4 md:ml-6" : ""} ${index === categories.length - 1 ? "mr-4 md:mr-6" : ""}`}
+              className={`embla__slide flex-shrink-0 first:ml-4 last:mr-4 md:first:ml-6 md:last:mr-6 svelte-13teip0`}
             >
               <Link href={category.href} className="group block text-center text-sm font-semibold">
                 <img
@@ -137,7 +137,7 @@ export default function CategoryCarousel() {
       {canScrollLeft && (
         <button
           onClick={() => scroll("left")}
-          className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center left-1.5"
+          className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center left-1.5 max-md:hidden"
           aria-label="Previous items"
         >
           <ChevronLeft className="w-6 h-6" />
@@ -147,7 +147,7 @@ export default function CategoryCarousel() {
       {canScrollRight && (
         <button
           onClick={() => scroll("right")}
-          className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center right-1.5"
+          className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center right-1.5 max-md:hidden"
           aria-label="Next items"
         >
           <ChevronRight className="w-6 h-6" />

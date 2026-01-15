@@ -317,7 +317,7 @@ export default function Header() {
       {/* Secondary Navigation */}
       <div className="bg-black xl:-mt-8">
         <div className="relative">
-          <div className="flex h-12 items-end justify-center gap-6 max-sm:hidden">
+          <div className="flex h-12 items-end justify-center gap-6 max-md:hidden">
             {/* Dropdown Menu Items */}
             {dropdownMenuItems.map((item) => (
               <div
