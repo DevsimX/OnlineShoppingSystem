@@ -110,13 +110,17 @@ export default function CategoryCarousel() {
       <div className="w-full overflow-hidden 2xl:max-w-[1535px] 2xl:mx-auto mr-[-60px]">
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pl-20 pr-20 md:pl-0 md:pr-0"
+          className="flex gap-4 lg:gap-6 max-lg:pr-20px"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {categories.map((category, index) => (
             <div
               key={category.href}
-              className={`embla__slide flex-shrink-0 first:ml-4 last:mr-4 md:first:ml-6 md:last:mr-6 svelte-13teip0`}
+              className={`embla__slide flex-shrink-0 svelte-13teip0 ${
+                index === 0 ? "ml-4 md:ml-6" : ""
+              } ${
+                index === categories.length - 1 ? "mr-4 md:mr-6" : ""
+              }`}
             >
               <Link href={category.href} className="group block text-center text-sm font-semibold">
                 <img

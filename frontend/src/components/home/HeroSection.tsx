@@ -83,7 +83,7 @@ export default function HeroSection() {
               <img
                 src={slide.imageUrl}
                 alt={slide.imageAlt}
-                className="h-72 w-full object-cover object-center md:h-full"
+                className="!h-full !w-full object-cover object-center max-md:!h-72"
                 height="300"
                 width="400"
                 loading="eager"
@@ -98,7 +98,7 @@ export default function HeroSection() {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center left-1.5"
+            className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center left-1.5 max-md:hidden"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -106,7 +106,7 @@ export default function HeroSection() {
           </button>
           <button
             onClick={goToNext}
-            className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center right-1.5"
+            className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center right-1.5 max-md:hidden"
             aria-label="Next slide"
           >
             <ChevronRight className="w-6 h-6" />

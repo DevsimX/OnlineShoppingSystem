@@ -24,6 +24,10 @@
   /* light yellow */
   --pop-yellow-mid: #fbd576;
   /* medium yellow (same as gold) */
+
+  /* 10 seconds for mobile, 15 seconds for desktop */
+  --desktop-speed: 15s;
+  --mobile-speed: 10s;
 }
 
 @theme inline {
@@ -130,19 +134,19 @@ video {
   }
 }
 
-.marquee {
-  overflow: hidden;
-  position: relative;
-  white-space: nowrap;
-}
-
 .marquee-track {
   display: flex;
   align-items: center;
   width: max-content;
   /* Two copies side-by-side → translate -50% for a perfect loop */
-  animation: marquee 30s linear infinite;
+  animation: marquee var(--desktop-speed) linear infinite;
   will-change: transform;
+}
+
+@media screen and (max-width: 768px) {
+  .marquee-track {
+    animation: marquee var(--mobile-speed) linear infinite;
+  }
 }
 
 /* Font stretch utility */
