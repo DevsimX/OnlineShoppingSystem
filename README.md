@@ -1,67 +1,140 @@
 # OnlineShoppingSystem
 
-Full-stack demo e-commerce app (Next.js + Tailwind frontend, Django + DRF backend).
+Full-stack e-commerce app with Next.js + Tailwind frontend and Django + DRF backend.
 
 ## Prerequisites
 - Node.js 18+
-- Python 3.11+
+- Docker and Docker Compose
+- Python 3.11+ (for local development)
 
 ## Getting Started
 
-### Backend (Django)
+### Backend (Django + DRF)
+
+Navigate to the backend directory:
 ```bash
+cd backend
 ```
-API: 
+
+**Step 1: Create .env file from .env.example**
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and update the `SECRET_KEY` with a secure random string.
+
+**Step 2: Build and start Docker services**
+```bash
+docker-compose up --build
+```
+
+This will start PostgreSQL, Django web server, and Nginx.
+
+**Step 3: Create database migrations**
+```bash
+docker-compose exec web python manage.py makemigrations
+```
+
+**Step 4: Run database migrations**
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+**Step 5: (Optional) Create superuser for admin access**
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+**API Base URL**: http://localhost (via Nginx)
+
+For more backend details, see [backend/README.md](./backend/README.md)
 
 ### Frontend (Next.js)
+
+Navigate to the frontend directory:
 ```bash
-cd ./frontend
+cd frontend
+```
+
+**Install dependencies:**
+```bash
 npm install
-# optional: echo "NEXT_PUBLIC_API_BASE=http://localhost:8000" > .env.local
+```
+
+**Start development server:**
+```bash
 npm run dev
 ```
-App: http://localhost:3000
 
-## Scripts
+**App URL**: http://localhost:3000
 
-Frontend (from `frontend/`):
-```bash
-npm run dev        # start Next.js dev server
-npm run build      # production build
-npm run start      # start production server
-npm run lint       # run ESLint
-```
+For more frontend details, see [frontend/README.md](./frontend/README.md)
 
-Backend (from `backend/`):
-```bash
-```
+## API Endpoints
 
-## Features
-
-
-## API Routes
-
+### Authentication
+- `POST /api/auth/register/` - User registration
+- `POST /api/auth/login/` - User login
+- `POST /api/auth/logout/` - User logout
+- `GET /api/auth/me/` - Get current user info
 
 ## Project Structure
 ```
 OnlineShoppingSystem/
-├─ backend/                # Django project (DRF, CORS)
-├─ frontend/               # Next.js (App Router, Tailwind)
-│  └─ src/app/             # pages and UI
+├─ backend/                # Django + DRF backend
+│  ├─ apps/               # Django apps
+│  │  └─ authentication/  # Auth app (login/register)
+│  ├─ config/             # Django project settings
+│  ├─ nginx/              # Nginx configuration
+│  ├─ docker-compose.yml  # Docker services
+│  └─ Dockerfile          # Web container image
+├─ frontend/              # Next.js frontend
+│  └─ src/app/            # Pages and UI components
 └─ README.md
 ```
+
+## Development Commands
+
+### Backend (from `backend/`)
+```bash
+docker-compose up --build          # Build and start all services
+docker-compose exec web python manage.py makemigrations  # Create migrations
+docker-compose exec web python manage.py migrate        # Run migrations
+docker-compose exec web python manage.py shell          # Django shell
+docker-compose logs -f web         # View web logs
+docker-compose down                # Stop services
+```
+
+### Frontend (from `frontend/`)
+```bash
+npm run dev        # Start Next.js dev server
+npm run build      # Production build
+npm run start      # Start production server
+npm run lint       # Run ESLint
+```
+
+## Features
+
+- ✅ User authentication (login/register)
+- ✅ Responsive home page
+- ✅ Product carousels
+- ✅ Category navigation
+- ✅ Visit/Store location page
+- ✅ About page with timeline
+- ✅ Instagram feed integration
 
 ## Development Notes
 
 ### 2026-01-16
 - Home page frontend finished
-- Visited page frontend finished
+- Visit page frontend finished
 - About page frontend finished
-- Login or Register page frontend finished
-
-### Todo
-- Start work on backend from login and register
+- Login/Register page frontend finished
+- Backend restructured with Docker, Nginx, PostgreSQL
+- Authentication API endpoints implemented
 
 ## Notes
 - Development only; not production-hardened.
+- Backend uses Docker Compose for local development.
+- Frontend connects to backend API at http://localhost (via Nginx).
 - Inspired by sections found on `https://www.poplocal.com.au/`.
