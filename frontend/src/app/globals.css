@@ -25,9 +25,9 @@
   --pop-yellow-mid: #fbd576;
   /* medium yellow (same as gold) */
 
-  /* 10 seconds for mobile, 15 seconds for desktop */
-  --desktop-speed: 15s;
-  --mobile-speed: 10s;
+  /* 20 seconds for mobile, 25 seconds for desktop */
+  --desktop-speed: 25s;
+  --mobile-speed: 20s;
 }
 
 @theme inline {
