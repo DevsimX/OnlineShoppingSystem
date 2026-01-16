@@ -16,12 +16,12 @@ Navigate to the backend directory:
 cd backend
 ```
 
-**Step 1: Create .env file from .env.example**
+**Step 1: Create .env.example file from .env**
 ```bash
-cp .env.example .env
+cp .env .env.example
 ```
 
-Edit `.env` and update the `SECRET_KEY` with a secure random string.
+Edit `.env` and update the `SECRET_KEY` with a secure random string if needed.
 
 **Step 2: Build and start Docker services**
 ```bash
