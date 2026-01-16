@@ -55,11 +55,11 @@ OnlineShoppingSystem/
 
 ### 2026-01-16
 - Home page frontend finished
-- Visited frontend page finished
-- About frontend page finished
+- Visited page frontend finished
+- About page frontend finished
+- Login or Register page frontend finished
 
 ### Todo
-- Work on Login and Register page 
 - Start work on backend from login and register
 
 ## Notes
