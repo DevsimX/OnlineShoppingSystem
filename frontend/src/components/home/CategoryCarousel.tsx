@@ -41,13 +41,61 @@ export default function CategoryCarousel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-
-  // Transform values for each step (from leftmost to rightmost)
-  const transformSteps = [0, -398, -772, -1147, -1468];
+  const [transformSteps, setTransformSteps] = useState<number[]>([0]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
+
+    const calculateTransformSteps = () => {
+      const slides = container.querySelectorAll('.embla__slide');
+      if (slides.length === 0) return;
+
+      const containerWidth = container.clientWidth;
+      const maxScroll = container.scrollWidth - containerWidth;
+      
+      if (maxScroll <= 0) {
+        setTransformSteps([0]);
+        return;
+      }
+
+      // Calculate target number of steps based on screen width
+      // Large screens (>= 1280px): 4 steps
+      // Medium screens (1024px-1279px): 5 steps
+      // Smaller screens (768px-1023px): 6 steps
+      // Below 768px: buttons are hidden, but we'll still calculate
+      const screenWidth = window.innerWidth;
+      let targetSteps = 4; // Default for large screens
+      
+      if (screenWidth >= 1280) {
+        targetSteps = 4;
+      } else if (screenWidth >= 1024) {
+        targetSteps = 5;
+      } else if (screenWidth >= 768) {
+        targetSteps = 6;
+      } else {
+        // Below md, buttons are hidden, but calculate anyway
+        targetSteps = 6;
+      }
+
+      // Calculate step size to evenly distribute across scrollable area
+      const stepSize = maxScroll / targetSteps;
+      
+      const steps: number[] = [0];
+      for (let i = 1; i <= targetSteps; i++) {
+        const stepPosition = Math.round(stepSize * i);
+        if (stepPosition < maxScroll) {
+          steps.push(stepPosition);
+        }
+      }
+      
+      // Ensure max scroll is included as final step
+      if (steps[steps.length - 1] < maxScroll) {
+        steps.push(maxScroll);
+      }
+
+      setTransformSteps(steps);
+    };
 
     const checkScroll = () => {
       const { scrollLeft, scrollWidth, clientWidth } = container;
@@ -55,18 +103,47 @@ export default function CategoryCarousel() {
       setCanScrollLeft(scrollLeft > 10);
     };
 
-    checkScroll();
+    const handleResize = () => {
+      // Wait for layout to settle
+      setTimeout(() => {
+        calculateTransformSteps();
+        checkScroll();
+      }, 100);
+    };
+
+    // Wait for images to load and layout to settle
+    const init = () => {
+      setTimeout(() => {
+        calculateTransformSteps();
+        checkScroll();
+      }, 100);
+    };
+
+    init();
+
     container.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", handleResize);
+    
+    // Recalculate when images load
+    const images = container.querySelectorAll('img');
+    images.forEach(img => {
+      if (!img.complete) {
+        img.addEventListener('load', init);
+      }
+    });
+
     return () => {
       container.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+      window.removeEventListener("resize", handleResize);
+      images.forEach(img => {
+        img.removeEventListener('load', init);
+      });
     };
   }, []);
 
   const scroll = (direction: "left" | "right") => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container || transformSteps.length === 0) return;
 
     const currentScroll = container.scrollLeft;
     let targetScroll = currentScroll;
@@ -74,7 +151,7 @@ export default function CategoryCarousel() {
     if (direction === "right") {
       // Find the next step position
       for (let i = 0; i < transformSteps.length; i++) {
-        const stepPos = Math.abs(transformSteps[i]);
+        const stepPos = transformSteps[i];
         if (stepPos > currentScroll + 10) {
           targetScroll = stepPos;
           break;
@@ -87,7 +164,7 @@ export default function CategoryCarousel() {
     } else {
       // Find the previous step position
       for (let i = transformSteps.length - 1; i >= 0; i--) {
-        const stepPos = Math.abs(transformSteps[i]);
+        const stepPos = transformSteps[i];
         if (stepPos < currentScroll - 10) {
           targetScroll = stepPos;
           break;
@@ -110,8 +187,7 @@ export default function CategoryCarousel() {
       <div className="w-full overflow-hidden 2xl:max-w-[1535px] 2xl:mx-auto mr-[-60px]">
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 lg:gap-6 max-lg:pr-20px"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide max-lg:pr-20px"
         >
           {categories.map((category, index) => (
             <div
@@ -126,9 +202,7 @@ export default function CategoryCarousel() {
                 <img
                   src={category.imageUrl}
                   alt={category.alt}
-                  className="mx-auto pb-2 transition-all group-hover:rotate-12 md:pb-3"
-                  height="110"
-                  width="110"
+                  className="mx-auto pb-2 transition-all group-hover:rotate-12 md:pb-3 !w-[56px] md:!w-[110px]"
                   loading="eager"
                   decoding="async"
                 />

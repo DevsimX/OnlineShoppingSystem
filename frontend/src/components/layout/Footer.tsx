@@ -16,14 +16,14 @@ export default function Footer() {
 
           {/* Stay updated section */}
           <div className="max-w-80 space-y-4">
-            <p className="text-lg font-stretch-expanded md:text-2xl">Stay updated</p>
+            <p className="text-lg font-stretch-expanded md:text-2xl font-price-check">Stay updated</p>
             <p className="text-lg md:text-xl">Subscribe and receive 10% off your first order over $50!</p>
             <form>
               <div className="relative">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full rounded-full border-2 border-[var(--pop-neutral-black)] pr-12 pl-4 shadow-3d focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full py-2 bg-white rounded-full border-2 border-[var(--pop-neutral-black)] pr-12 pl-4 shadow-3d focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <button
                   type="submit"
@@ -38,7 +38,7 @@ export default function Footer() {
 
           {/* Follow us section */}
           <div>
-            <p className="text-lg font-stretch-expanded md:text-2xl">Follow us</p>
+            <p className="text-lg font-stretch-expanded md:text-2xl font-price-check">Follow us</p>
             <div className="grid grid-cols-3 gap-2 pt-4">
               <a
                 href="https://www.instagram.com/popcanberra"

@@ -1,5 +1,8 @@
 "use client";
 
+import GreenDivider from "@/assets/green-divider.svg";
+import GreenBackground from "@/assets/green-background.svg";
+
 type InstagramPost = {
   href: string;
   imageUrl: string;
@@ -11,31 +14,31 @@ const instagramPosts: InstagramPost[] = [
     href: "https://www.instagram.com/p/DS7S4JiEr0z/",
     imageUrl:
       "https://imgs.growave.io/tSdv8Tmf3lKuFXpeip-cWkCQGYjD3uEuVIYlo2Lnkdo/q:80/rs:auto:320/aHR0cHM6Ly9ncm93YXZlLWluc3RhZ3JhbS5zMy5hbWF6b25hd3MuY29tL2luc3RhZ3JhbS1pbWFnZXMvcHJvZHVjdGlvbi9jbGllbnQxNTE0OTcvaW1hZ2VfMjAyNTEyMzExMjAwMTZfMGZiMGFiNjItZjlhNC00NjcyLWI0NmMtMzIzNGUzZDg2YzdlLmpwZw",
-    alt: "That's a wrap! Thanks for loving local with us!",
+    alt: "\"That's a wrap! Thanks for loving local with us! Let's do it all again in 2026.... and much more 😱\n\nHappy New Year 💛\"",
   },
   {
     href: "https://www.instagram.com/p/DSs1oo0EwP9/",
     imageUrl:
       "https://imgs.growave.io/sYOE0KT-iHbgvc9vkvvuOllz9sM2-ULCmI1VDvfEQEM/q:80/rs:auto:320/aHR0cHM6Ly9ncm93YXZlLWluc3RhZ3JhbS5zMy5hbWF6b25hd3MuY29tL2luc3RhZ3JhbS1pbWFnZXMvcHJvZHVjdGlvbi9jbGllbnQxNTE0OTcvaW1hZ2VfMjAyNTEyMjUyMDU5NDhfOGE5ZWExZjUtMjVmYS00ZWM5LWE5NWQtZWJiYWQzZjYyOTE5LmpwZw",
-    alt: "Can't make it to Woden for our big 30% off popping down sale",
+    alt: "\"Can't make it to Woden for our big 30% off popping down sale, but want to enjoy some Northside or Australia wide festive cheer?!?⁠\n⁠\nWe've got 25% off all Christmas goodies online and in Braddon today!! ⁠\n⁠\nSuper limited numbers of Christmas treats to keep the festive vibes alive 🎉\"",
   },
   {
     href: "https://www.instagram.com/p/DSsv6UIk_AS/",
     imageUrl:
       "https://imgs.growave.io/xIv3RtEIDVdiyvGNJuf2rwMAUOBrdUXhCbkDgRt_6AM/q:80/rs:auto:320/aHR0cHM6Ly9ncm93YXZlLWluc3RhZ3JhbS5zMy5hbWF6b25hd3MuY29tL2luc3RhZ3JhbS1pbWFnZXMvcHJvZHVjdGlvbi9jbGllbnQxNTE0OTcvaW1hZ2VfMjAyNTEyMjUyMDE1MjBfZGMyOGMyYjEtM2RlZi00OTgxLWE5NjAtZjBhOWZmZTAxZmM5LmpwZw",
-    alt: "Seeya round Woden!",
+    alt: "\"Seeya round Woden!⁠\n⁠\nWe're packing up and heading back over the bridge. ⁠\n⁠\nTo say thanks for all the fun times \u0026 good vibes, we're giving you 30% off EVERYTHING at our Woden POP up until we close on Sunday night.⁠\n⁠\nSo many goodies to grab!\"",
   },
   {
     href: "https://www.instagram.com/reel/DSo866zDyzA/",
     imageUrl:
       "https://imgs.growave.io/5hSjNJNCvZAl8oOK9f0Kd1f5rgiVL8HqkWK8PZb4otc/q:80/rs:auto:320/aHR0cHM6Ly9ncm93YXZlLWluc3RhZ3JhbS5zMy5hbWF6b25hd3MuY29tL2luc3RhZ3JhbS1pbWFnZXMvcHJvZHVjdGlvbi9jbGllbnQxNTE0OTcvaW1hZ2VfMjAyNTEyMjQwOTAwNTVfN2JkYTY0NzMtZWFlNS00ZWYwLWE5NDEtMDQyMTJmZTM1ZjBkLmpwZw",
-    alt: "THANK YOU",
+    alt: "\"THANK YOU 🩵\n\nYour support has been incredible this year and we are so grateful for each and every one of you. This is a real community, and together we are doing something great.\n\nMerry Christmas to you and yours from all of us at POP.\n\nOh, and you’ll want to watch this video to the end. Let’s just say, Will lost a bet and he did NOT disappoint.\"",
   },
   {
     href: "https://www.instagram.com/p/DSj0EsBjtXj/",
     imageUrl:
       "https://imgs.growave.io/Ptw_tD_wr8Pn0TPefJdt_ukqv1fmzFrgOYYCUJq1e8w/q:80/rs:auto:320/aHR0cHM6Ly9ncm93YXZlLWluc3RhZ3JhbS5zMy5hbWF6b25hd3MuY29tL2luc3RhZ3JhbS1pbWFnZXMvcHJvZHVjdGlvbi9jbGllbnQxNTE0OTcvaW1hZ2VfMjAyNTEyMjIwOTAwMjdfYzRkMjJhMTctYzExNS00YzkwLWI1MmUtZjBiMzE0Nzk4YTcyLmpwZw",
-    alt: "For our final 12 days of Xmas fun",
+    alt: "\"For our final 12 days of Xmas fun, we're refunding one of your orders!⁠\n⁠\nEvery purchase between the 12th and 23rd of December is in the running to be fully refunded. Shop in-store or online until 5pm on Tuesday the 23rd of December, and you’re automatically in the draw.⁠\n⁠\nThanks for supporting local like never before 🩵⁠\"",
   },
 ];
 
@@ -44,29 +47,12 @@ export default function InstagramFeed() {
     <div>
       <div className="relative h-6 overflow-hidden border-t-2 border-b-2 border-black">
         <div className="absolute top-0 left-0">
-          <svg
-            className="w-full"
-            width="1534"
-            height="24"
-            preserveAspectRatio="none"
-            viewBox="0 0 1512 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clipPath="url(#clip0_3164_4073)">
-              <path d="M0 0H1512V24H0V0Z" fill="#30897C" />
-            </g>
-            <defs>
-              <clipPath id="clip0_3164_4073">
-                <path d="M0 0H1512V24H0V0Z" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
+          <GreenDivider />
         </div>
       </div>
       <section className="relative overflow-hidden bg-[var(--pop-green-mid)] px-6 py-12 md:py-16">
         <div className="relative z-10 flex items-center justify-between gap-3 max-sm:flex-col">
-          <h2 className="text-4xl text-[var(--pop-yellow-light)] sm:text-[56px]">Follow Us</h2>
+          <h2 className="mt-2 text-4xl text-[var(--pop-yellow-light)] sm:text-[56px] font-reika-script">Follow Us</h2>
           <a
             href="https://www.instagram.com/popcanberra/?hl=en"
             target="_blank"
@@ -93,16 +79,16 @@ export default function InstagramFeed() {
           </a>
         </div>
         <div className="relative z-10 mt-10 grid grid-cols-3 gap-2 md:grid-cols-5">
-          {instagramPosts.map((post) => (
+          {instagramPosts.map((post, index) => (
             <a
               key={post.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative overflow-hidden rounded-xl md:rounded-3xl"
+              className={`group relative overflow-hidden rounded-xl md:rounded-3xl ${index >= 3 ? "hidden md:block" : ""}`}
               href={post.href}
             >
               <img
-                className="h-36 w-full object-cover md:h-[400px]"
+                className="!h-36 !w-full object-cover md:!h-[400px]"
                 loading="lazy"
                 src={post.imageUrl}
                 alt={post.alt}
@@ -113,33 +99,8 @@ export default function InstagramFeed() {
             </a>
           ))}
         </div>
-        <div className="absolute top-0 left-0 h-full w-full opacity-10">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1024 467" fill="none">
-            <g opacity="0.1">
-              {Array.from({ length: 40 }).map((_, i) => (
-                <line
-                  key={`v-${i}`}
-                  x1={9.75 + i * 24}
-                  y1="-549.056"
-                  x2={9.75 + i * 24}
-                  y2="1014.66"
-                  stroke="#60BB8F"
-                  strokeWidth="1.5"
-                />
-              ))}
-              {Array.from({ length: 20 }).map((_, i) => (
-                <line
-                  key={`h-${i}`}
-                  x1="1294"
-                  y1={18.752 + i * 24}
-                  x2="-269.715"
-                  y2={18.752 + i * 24}
-                  stroke="#60BB8F"
-                  strokeWidth="1.5"
-                />
-              ))}
-            </g>
-          </svg>
+        <div className="absolute top-0 left-0 h-full w-full">
+          <GreenBackground />
         </div>
       </section>
     </div>

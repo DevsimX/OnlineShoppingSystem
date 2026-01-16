@@ -18,7 +18,7 @@
   /* pattern teal */
   --pop-teal-mid: #30897c;
   /* medium teal */
-  --pop-green-mid: #60bb8f;
+  --pop-green-mid: #2d6d4e;
   /* medium green */
   --pop-yellow-light: #fde9cc;
   /* light yellow */
@@ -70,7 +70,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Poppins,sans-serif;
 }
 
 img,
@@ -397,4 +397,68 @@ video {
 .flex-shrink-0,
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.embla__slide.svelte-1h7r9oe {
+  flex: 0 0 calc(100% - 20px);
+  min-width: 0;
+}
+
+@media screen and (min-width: 250px) {
+  .skeletonSlide.svelte-1h7r9oe, .embla__slide.svelte-1h7r9oe {
+      flex: 0 0 calc(45% - 10px);
+  }
+}
+
+@media screen and (min-width: 700px) {
+  .skeletonSlide.svelte-1h7r9oe:not(.constrained), .embla__slide.svelte-1h7r9oe:not(.constrained) {
+      flex: 0 0 calc(34.48% - 20px);
+  }
+}
+
+
+@media screen and (min-width: 1024px) {
+  .skeletonSlide.svelte-1h7r9oe:not(.constrained), .embla__slide.svelte-1h7r9oe:not(.constrained) {
+      flex: 0 0 calc(22.22% - 24px);
+  }
+}
+
+/* Badge wiggle animation */
+@keyframes svelte-kwyjb9-badge-wiggle {
+  0% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(-2deg);
+  }
+}
+
+.group:hover .badge-animation.svelte-kwyjb9 {
+  animation: svelte-kwyjb9-badge-wiggle .8s steps(1,end) infinite;
+}
+
+.badge-animation.svelte-kwyjb9 {
+  transform: rotate(-2deg);
+}
+
+
+@keyframes svelte-1cm5u1n-flipVertical {
+  0%{
+    transform: scaleY(1);
+  }
+
+  50%{
+    transform: scaleY(-1);
+  }
+
+  100%{
+    transform: scaleY(1);
+  }
+}
+
+.sparkle-animation.svelte-1cm5u1n {
+  animation: svelte-1cm5u1n-flipVertical 1s steps(2, jump-none) infinite;
 }
