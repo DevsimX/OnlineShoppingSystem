@@ -55,9 +55,10 @@ OnlineShoppingSystem/
 
 ### 2026-01-16
 - Home page frontend finished
+- Visited frontend page finished
 
 ### Todo
-- Finish About and Visit page
+- Finish About page
 
 ## Notes
 - Development only; not production-hardened.
