@@ -93,7 +93,7 @@ export default function Footer() {
         </div>
 
         {/* Links and copyright */}
-        <div className="flex gap-x-6 gap-y-3 pt-12 text-sm font-extrabold uppercase max-sm:flex-col sm:flex-wrap sm:items-center md:justify-between md:text-lg lg:gap-2">
+        <div className="flex gap-x-6 gap-y-3 pt-12 text-sm font-ultra-bold uppercase max-sm:flex-col sm:flex-wrap sm:items-center md:justify-between md:text-[17px] lg:gap-2">
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/refund">Refund Policy</Link>
@@ -101,7 +101,7 @@ export default function Footer() {
           <Link href="/contact">Contact</Link>
           <Link href="/sitemap">Sitemap</Link>
           <Link href="/loyalty">Earn Rewards</Link>
-          <span>© Pop local&nbsp;{new Date().getFullYear()}</span>
+          <span>© Devsim&nbsp;{new Date().getFullYear()}</span>
         </div>
       </div>
 
