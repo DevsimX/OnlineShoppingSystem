@@ -53,11 +53,11 @@ OnlineShoppingSystem/
 
 ## Development Notes
 
-### 2026-01-13
-- 
+### 2026-01-16
+- Home page frontend finished
 
-### [Future Date]
-- 
+### Todo
+- Finish About and Visit page
 
 ## Notes
 - Development only; not production-hardened.
