@@ -25,24 +25,24 @@ Edit `.env` and update the `SECRET_KEY` with a secure random string if needed.
 
 **Step 2: Build and start Docker services**
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
-This will start PostgreSQL, Django web server, and Nginx.
+This will start PostgreSQL, Django web server, and Nginx in the background.
 
 **Step 3: Create database migrations**
 ```bash
-docker-compose exec web python manage.py makemigrations
+docker compose exec backend python manage.py makemigrations
 ```
 
 **Step 4: Run database migrations**
 ```bash
-docker-compose exec web python manage.py migrate
+docker compose exec backend python manage.py migrate
 ```
 
 **Step 5: (Optional) Create superuser for admin access**
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 **API Base URL**: http://localhost (via Nginx)
@@ -86,7 +86,7 @@ OnlineShoppingSystem/
 │  │  └─ authentication/  # Auth app (login/register)
 │  ├─ config/             # Django project settings
 │  ├─ nginx/              # Nginx configuration
-│  ├─ docker-compose.yml  # Docker services
+│  ├─ docker compose.yml  # Docker services
 │  └─ Dockerfile          # Web container image
 ├─ frontend/              # Next.js frontend
 │  └─ src/app/            # Pages and UI components
@@ -97,12 +97,12 @@ OnlineShoppingSystem/
 
 ### Backend (from `backend/`)
 ```bash
-docker-compose up --build          # Build and start all services
-docker-compose exec web python manage.py makemigrations  # Create migrations
-docker-compose exec web python manage.py migrate        # Run migrations
-docker-compose exec web python manage.py shell          # Django shell
-docker-compose logs -f web         # View web logs
-docker-compose down                # Stop services
+docker compose up --build          # Build and start all services
+docker compose exec backend python manage.py makemigrations  # Create migrations
+docker compose exec backend python manage.py migrate        # Run migrations
+docker compose exec backend python manage.py shell          # Django shell
+docker compose logs -f web         # View web logs
+docker compose down                # Stop services
 ```
 
 ### Frontend (from `frontend/`)
@@ -125,7 +125,7 @@ npm run lint       # Run ESLint
 
 ## Development Notes
 
-### 2026-01-16
+### 2026-01-17
 - Home page frontend finished
 - Visit page frontend finished
 - About page frontend finished

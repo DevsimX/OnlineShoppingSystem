@@ -15,7 +15,7 @@ Edit `.env` and update the `SECRET_KEY` with a secure random string if needed.
 
 ### Step 2: Build and start Docker services
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
 This will:
@@ -23,26 +23,25 @@ This will:
 - Start PostgreSQL database
 - Start Django web server
 - Start Nginx reverse proxy
-
-Wait for all services to be ready (you'll see "Starting server..." in the logs).
+- Run in detached mode (background)
 
 ### Step 3: Create database migrations
 ```bash
-docker-compose exec web python manage.py makemigrations
+docker compose exec backend python manage.py makemigrations
 ```
 
 This creates migration files for the authentication app and custom User model.
 
 ### Step 4: Run database migrations
 ```bash
-docker-compose exec web python manage.py migrate
+docker compose exec backend python manage.py migrate
 ```
 
 This applies all migrations to create the database tables.
 
 ### Step 5: (Optional) Create superuser for admin access
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 Follow the prompts to create an admin user.
@@ -61,33 +60,61 @@ Follow the prompts to create an admin user.
 
 ### Run migrations
 ```bash
-docker-compose exec web python manage.py migrate
+docker compose exec backend python manage.py migrate
 ```
 
 ### Create new Django app
 ```bash
-docker-compose exec web python manage.py startapp app_name apps/
+docker compose exec backend python manage.py startapp app_name apps/
 ```
 
 ### Access Django shell
 ```bash
-docker-compose exec web python manage.py shell
+docker compose exec backend python manage.py shell
 ```
 
 ### View logs
 ```bash
-docker-compose logs -f web
+docker compose logs -f web
 ```
 
 ### Stop services
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Stop services and remove volumes (clean slate)
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
+
+### Troubleshooting PostgreSQL Connection
+
+If you can't connect to the database in pgAdmin:
+
+1. **Check if local PostgreSQL is running:**
+   ```bash
+   brew services list | grep postgresql
+   # or
+   ps aux | grep postgres
+   ```
+
+2. **Stop local PostgreSQL (if needed):**
+   ```bash
+   brew services stop postgresql
+   # or use your system's service manager
+   ```
+
+3. **Restart Docker containers:**
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+
+4. **Verify Docker PostgreSQL is running:**
+   ```bash
+   docker compose exec db psql -U postgres -c "\l"
+   ```
 
 ## Project Structure
 
@@ -103,7 +130,7 @@ backend/
 │       └── production.py   # Production environment
 ├── nginx/                  # Nginx configuration
 │   └── nginx.conf          # Nginx reverse proxy config
-├── docker-compose.yml      # Docker services
+├── docker compose.yml      # Docker services
 ├── Dockerfile              # Web container image
 ├── entrypoint.sh          # Container startup script
 ├── requirements.txt        # Python dependencies
@@ -115,3 +142,4 @@ backend/
 - **API**: http://localhost (via Nginx)
 - **Django Admin**: http://localhost/admin/
 - **PostgreSQL**: localhost:5432
+  - **Note**: If you have a local PostgreSQL running, you may need to stop it first: `brew services stop postgresql` (macOS) or check your system's PostgreSQL service

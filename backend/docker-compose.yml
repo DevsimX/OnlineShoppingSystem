@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
@@ -17,7 +15,7 @@ services:
       timeout: 5s
       retries: 5
 
-  web:
+  backend:
     build: .
     command: sh entrypoint.sh gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
@@ -46,7 +44,7 @@ services:
       - static_volume:/static:ro
       - media_volume:/media:ro
     depends_on:
-      - web
+      - backend
     restart: unless-stopped
 
 volumes:
