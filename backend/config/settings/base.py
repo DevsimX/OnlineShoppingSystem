@@ -26,6 +26,11 @@ INSTALLED_APPS = [
     
     # Local apps
     'apps.authentication',
+    'apps.category',
+    'apps.product',
+    'apps.order',
+    'apps.payment',
+    'apps.cart',
 ]
 
 # Custom User Model

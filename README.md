@@ -82,12 +82,50 @@ For more frontend details, see [frontend/README.md](./frontend/README.md)
 - `POST /api/auth/logout/` - User logout (requires authentication)
 - `GET /api/auth/me/` - Get current user info (requires authentication)
 
+### Categories
+- `GET /api/categories/` - Get all categories
+  - Returns: `[{ "id": number, "name": "string", "great_gift": boolean }, ...]`
+- `GET /api/categories/great-gifts/` - Get categories where great_gift is True
+  - Returns: `[{ "id": number, "name": "string", "great_gift": true }, ...]`
+
+### Products
+- `GET /api/products/` - Get all products (paginated, 20/page)
+  - Returns: Paginated list with `{ "id": number, "name": "string", "company": "string", "price": "string", "profile_pic_link": "string", "new": boolean, "hot": boolean }`
+  - Ranked by `rank_if` (high to low)
+- `GET /api/products/category/<category_id>/` - Get products by category (paginated, 20/page)
+  - Returns: Same format as above, filtered by category
+  - Ranked by `rank_if` (high to low)
+- `GET /api/products/<product_id>/` - Get single product with all details
+  - Returns: Full product details including description, images, stock, etc.
+- `GET /api/products/hot/` - Get 8 most hot products
+  - Returns: List of 8 products ranked by `hot_if` (high to low)
+- `GET /api/products/new/` - Get 8 most new products
+  - Returns: List of 8 products ranked by `new_if` (high to low)
+- `GET /api/products/explore/` - Get 8 most deserve to explore products
+  - Returns: List of 8 products ranked by `rank_if` (high to low)
+- `GET /api/products/gift-box/` - Get 8 gift box products
+  - Returns: List of 8 products ranked by `rank_if` (high to low)
+
+### Orders
+- `GET /api/orders/` - Placeholder (not implemented yet)
+
+### Payments
+- `GET /api/payments/` - Placeholder (not implemented yet)
+
+### Cart
+- `GET /api/cart/` - Placeholder (not implemented yet)
+
 ## Project Structure
 ```
 OnlineShoppingSystem/
 ├─ backend/                # Django + DRF backend
 │  ├─ apps/               # Django apps
-│  │  └─ authentication/  # Auth app (login/register)
+│  │  ├─ authentication/  # Auth app (login/register)
+│  │  ├─ category/        # Category model and endpoints
+│  │  ├─ product/         # Product and ProductTag models and endpoints
+│  │  ├─ order/          # Order model (endpoints pending)
+│  │  ├─ payment/        # Payment model (endpoints pending)
+│  │  └─ cart/           # ShoppingCart model (endpoints pending)
 │  ├─ config/             # Django project settings
 │  ├─ nginx/              # Nginx configuration
 │  ├─ docker compose.yml  # Docker services
@@ -103,6 +141,10 @@ OnlineShoppingSystem/
 │     │  ├─ dashboard/     # Protected dashboard
 │     │  └─ ...           # Other pages
 │     ├─ components/       # Shared components
+│     │  ├─ cart/         # Cart drawer component
+│     │  └─ ...           # Other components
+│     ├─ contexts/        # React contexts
+│     │  └─ CartContext.tsx
 │     └─ lib/              # Utilities and API clients
 │        └─ api/           # API service functions
 └─ README.md
@@ -154,6 +196,8 @@ npm run lint       # Run ESLint
   - Form validation (email, password match, required fields)
   - Toast notifications (top-right, 3-second duration)
   - Header navigation updates (redirects to dashboard if authenticated)
+  - Cart drawer component with scroll lock
+  - All images converted to Next.js Image component
   
 - **Backend:**
   - Backend restructured with Docker, Nginx, PostgreSQL
@@ -161,12 +205,21 @@ npm run lint       # Run ESLint
   - Username-based authentication (unique username and email)
   - Token expiration (24 hours access, 7 days refresh)
   - User registration and login endpoints
-  - Protected endpoints with JWT authentication with JWT tokens
-- User registration with password strength validation
-- Form validation with real-time feedback
-- Protected dashboard page
-- Token-based authentication system
-- Header navigation updates (redirects to dashboard if authenticated)
+  - Protected endpoints with JWT authentication
+  - **Product & Category System:**
+    - Category model with great_gift field
+    - Product model (name, company, description, price, images, stock, status)
+    - ProductTag model (new, hot, gift_box flags with impact factors)
+    - Category API endpoints (list all, great gifts)
+    - Product API endpoints (list, by category, detail, hot, new, explore, gift-box)
+    - Pagination support (20 items per page)
+  - **Order & Payment System:**
+    - Order model (owner, products, amount, status)
+    - Payment model (order, stripe_payment_id, status)
+    - Endpoints placeholder (to be implemented)
+  - **Shopping Cart:**
+    - ShoppingCart model (owner, products, amount)
+    - Endpoints placeholder (to be implemented)
 
 ## Notes
 - Development only; not production-hardened.

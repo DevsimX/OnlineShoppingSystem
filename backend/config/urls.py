@@ -9,6 +9,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.authentication.urls')),
+    path('api/categories/', include('apps.category.urls')),
+    path('api/products/', include('apps.product.urls')),
+    path('api/orders/', include('apps.order.urls')),
+    path('api/payments/', include('apps.payment.urls')),
+    path('api/cart/', include('apps.cart.urls')),
 ]
 
 # Serve media files in development
