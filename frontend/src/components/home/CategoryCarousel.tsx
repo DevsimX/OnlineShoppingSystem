@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -199,12 +200,13 @@ export default function CategoryCarousel() {
               }`}
             >
               <Link href={category.href} className="group block text-center text-sm font-semibold">
-                <img
+                <Image
                   src={category.imageUrl}
                   alt={category.alt}
+                  width={110}
+                  height={110}
                   className="mx-auto pb-2 transition-all group-hover:rotate-12 md:pb-3 !w-[56px] md:!w-[110px]"
-                  loading="eager"
-                  decoding="async"
+                  unoptimized
                 />
                 {category.name}
               </Link>

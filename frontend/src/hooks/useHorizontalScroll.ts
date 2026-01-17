@@ -158,6 +158,7 @@ export function useHorizontalScroll(options: UseHorizontalScrollOptions = {}) {
         img.removeEventListener("load", init);
       });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [translateX, rightPadding, enableOverscroll, overscrollAmount, ...dependencies]);
 
   const scroll = (direction: "left" | "right") => {

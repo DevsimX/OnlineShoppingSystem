@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import GreenDivider from "@/assets/green-divider.svg";
 import GreenBackground from "@/assets/green-background.svg";
 
@@ -87,11 +88,13 @@ export default function InstagramFeed() {
               className={`group relative overflow-hidden rounded-xl md:rounded-3xl ${index >= 3 ? "hidden md:block" : ""}`}
               href={post.href}
             >
-              <img
+              <Image
                 className="!h-36 !w-full object-cover md:!h-[400px]"
-                loading="lazy"
                 src={post.imageUrl}
                 alt={post.alt}
+                width={400}
+                height={400}
+                unoptimized
               />
               <div className="absolute inset-0 flex items-end bg-black/50 p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 <p className="line-clamp-3 text-sm text-white">{post.alt}</p>

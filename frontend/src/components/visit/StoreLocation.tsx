@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import RightArrow from "@/assets/right-arrow.svg";
 
 type StoreLocationProps = {
@@ -52,14 +53,13 @@ export default function StoreLocation({
           </div>
           <div className="relative max-sm:order-first md:order-first">
             <div>
-              <img
+              <Image
                 src={imageUrl}
                 alt={imageAlt}
-                width="680"
-                height="680"
+                width={680}
+                height={680}
                 className="h-auto w-full object-center"
-                loading="lazy"
-                decoding="async"
+                unoptimized
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 75vw, 50vw"
               />
             </div>

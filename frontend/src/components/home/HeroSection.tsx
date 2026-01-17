@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -80,14 +81,13 @@ export default function HeroSection() {
           </div>
           <div className="relative order-first h-full md:order-none">
             <div className="h-full">
-              <img
+              <Image
                 src={slide.imageUrl}
                 alt={slide.imageAlt}
+                width={400}
+                height={300}
                 className="!h-full !w-full object-cover object-center max-md:!h-72"
-                height="300"
-                width="400"
-                loading="eager"
-                decoding="async"
+                unoptimized
               />
             </div>
           </div>

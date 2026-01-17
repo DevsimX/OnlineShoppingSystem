@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type AboutIntroProps = {
   title: string;
   description: string;
@@ -20,15 +22,14 @@ export default function AboutIntro({ title, description, imageUrl, imageAlt }: A
           </div>
           <div className="relative max-sm:order-first md:order-first">
             <div>
-              <img
+              <Image
                 src={imageUrl}
                 alt={imageAlt}
-                width="680"
-                height="680"
+                width={680}
+                height={680}
                 className="h-auto w-full object-center"
-                loading="lazy"
-                decoding="async"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 75vw, 50vw"
+                unoptimized
               />
             </div>
           </div>

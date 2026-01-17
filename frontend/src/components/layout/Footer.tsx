@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Send } from "lucide-react";
 import FooterLogo from "@/assets/footer-logo.svg";
 import Divider from "@/assets/divider.svg";
@@ -46,14 +47,13 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Instagram"
               >
-                <img
+                <Image
                   src="https://cdn.sanity.io/images/q52u2xck/production/93c8892662fe9b6df1f9e1ae4957e7b465b5a00f-72x72.svg?w=72&h=72&auto=format"
                   alt="Instagram Icon"
                   className="transition-all hover:rotate-12"
-                  height="72"
-                  width="72"
-                  loading="lazy"
-                  decoding="async"
+                  width={72}
+                  height={72}
+                  unoptimized
                 />
               </a>
               <a
@@ -62,14 +62,13 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Facebook"
               >
-                <img
+                <Image
                   src="https://cdn.sanity.io/images/q52u2xck/production/dd48800e93e2eb1924789833dfeb9952478fa8c1-72x72.svg?w=72&h=72&auto=format"
                   alt="Facebook Icon"
                   className="transition-all hover:rotate-12"
-                  height="72"
-                  width="72"
-                  loading="lazy"
-                  decoding="async"
+                  width={72}
+                  height={72}
+                  unoptimized
                 />
               </a>
               <a
@@ -78,14 +77,13 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="TikTok"
               >
-                <img
+                <Image
                   src="https://cdn.sanity.io/images/q52u2xck/production/a84bdadd231673bffdf56938a398a52c5e6d49d3-72x72.svg?w=72&h=72&auto=format"
                   alt="TikTok Icon"
                   className="transition-all hover:rotate-12"
-                  height="72"
-                  width="72"
-                  loading="lazy"
-                  decoding="async"
+                  width={72}
+                  height={72}
+                  unoptimized
                 />
               </a>
             </div>

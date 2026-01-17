@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 type CTACard = {
@@ -54,21 +55,21 @@ export default function CTASection() {
             </div>
           </div>
           <div className="order-first lg:order-last lg:ml-auto max-lg:mx-auto">
-            <img
+            <Image
               src={card.mobileImageUrl}
               alt={card.imageAlt}
-              height="400"
-              loading="lazy"
-              decoding="async"
+              width={400}
+              height={400}
               className="w-full h-auto block lg:hidden"
+              unoptimized
             />
-            <img
+            <Image
               src={card.imageUrl}
               alt={card.imageAlt}
-              height="400"
-              loading="lazy"
-              decoding="async"
+              width={400}
+              height={400}
               className="w-full h-auto hidden lg:block"
+              unoptimized
             />
           </div>
         </div>

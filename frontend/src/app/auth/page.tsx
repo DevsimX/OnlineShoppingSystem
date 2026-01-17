@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Marquee from "@/components/home/Marquee";
 import LoginForm from "./_components/LoginForm";
 import RegisterForm from "./_components/RegisterForm";
@@ -68,14 +69,13 @@ export default function AuthPage() {
 
             {/* Right side - Why Join POP */}
             <div className="flex flex-col items-center justify-center gap-6 bg-[var(--pop-red-mid)] p-6 text-center max-md:rounded-b-2xl md:rounded-r-2xl md:p-12">
-              <img
-                decoding="async"
+              <Image
                 src="https://cdn.sanity.io/images/q52u2xck/production/791a53180e1c188afd55fad355a1297ecff51163-159x160.svg?w=120&auto=format"
                 alt="Why Join POP?"
+                width={120}
+                height={120}
                 className="h-auto w-32"
-                width="120"
-                loading="lazy"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                unoptimized
               />
               <h2 className="font-price-check text-3xl text-[var(--pop-yellow-light)] font-stretch-expanded md:text-4xl">
                 Why Join POP?

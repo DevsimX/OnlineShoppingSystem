@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, ChevronLeft, ArrowRight } from "lucide-react";
 import Hot from "@/assets/hot.svg";
 import New from "@/assets/new.svg";
@@ -73,13 +74,13 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
               <div key={product.href} className={`flex-shrink-0 skeletonSlide svelte-1h7r9oe ${index === products.length - 1 ? "mr-6" : ""}`}>
                 <Link href={product.href} className="group relative flex w-full cursor-pointer flex-col text-left">
                   <div className="relative rounded-3xl border-2 border-transparent transition-all group-hover:border-black">
-                    <img
-                      width="300"
-                      height="300"
-                      loading="lazy"
+                    <Image
+                      width={300}
+                      height={300}
                       className="aspect-square h-full w-full rounded-2xl object-cover sm:rounded-[22px]"
                       src={product.imageUrl}
                       alt={product.imageAlt}
+                      unoptimized
                     />
                     {product.badge && (
                       <div className="pointer-events-none absolute -top-4 -left-3 z-[2] sm:-top-5">
