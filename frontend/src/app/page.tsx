@@ -356,8 +356,20 @@ const formatPrice = (price: string | number): string => {
   return numPrice.toFixed(2);
 };
 
+type ProductCarouselProduct = {
+  name: string;
+  href: string;
+  imageUrl: string;
+  imageAlt: string;
+  vendor?: string;
+  price: string;
+  badge?: "new" | "hot" | "both";
+  new?: boolean;
+  hot?: boolean;
+};
+
 // Helper function to convert API product to ProductCarousel format
-const convertToProductCarouselFormat = (apiProduct: APIProduct) => ({
+const convertToProductCarouselFormat = (apiProduct: APIProduct): ProductCarouselProduct => ({
   name: apiProduct.name,
   href: `/product/${apiProduct.id}`,
   imageUrl: apiProduct.profile_pic_link,
@@ -370,7 +382,7 @@ const convertToProductCarouselFormat = (apiProduct: APIProduct) => ({
 });
 
 export default function Home() {
-  const [hotProducts, setHotProducts] = useState<typeof whatsHotProducts>([]);
+  const [hotProducts, setHotProducts] = useState<ProductCarouselProduct[]>([]);
   const [isLoadingHot, setIsLoadingHot] = useState(true);
 
   useEffect(() => {
@@ -380,7 +392,7 @@ export default function Home() {
         // Convert API products to ProductCarousel format
         const convertedProducts = products.map(convertToProductCarouselFormat);
         // Ensure we have exactly 8 products (pad if needed)
-        const paddedProducts = [...convertedProducts];
+        const paddedProducts: ProductCarouselProduct[] = [...convertedProducts];
         while (paddedProducts.length < 8) {
           paddedProducts.push({
             name: "",
@@ -395,7 +407,7 @@ export default function Home() {
       } catch (error) {
         console.error("Failed to fetch hot products:", error);
         // On error, use fallback static data but ensure 8 items
-        const fallbackProducts = [...whatsHotProducts];
+        const fallbackProducts: ProductCarouselProduct[] = [...whatsHotProducts];
         while (fallbackProducts.length < 8) {
           fallbackProducts.push({
             name: "",

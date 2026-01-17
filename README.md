@@ -79,3 +79,18 @@ npm run dev
 npm run build
 npm run lint
 ```
+
+## Progress
+
+### Completed
+- ✅ JWT authentication with username-based login
+- ✅ User registration with password strength validation
+- ✅ Protected dashboard page
+- ✅ Product & Category models and API endpoints
+- ✅ Product carousels with loading states
+- ✅ Badge animations (new/hot badges)
+- ✅ Shopping cart UI with drawer
+- ✅ Responsive design across all pages
+
+### In Progress
+- 🔄 Order, Payment, and Cart API endpoints (models created, endpoints pending)
