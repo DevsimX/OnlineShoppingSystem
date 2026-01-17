@@ -167,6 +167,22 @@ video {
   border-radius: 2rem;
 }
 
+/* Loading shine animation */
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-card {
+  background: linear-gradient(90deg, #f0d9b8 25%, #e8d1b0 50%, #f0d9b8 75%);
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite;
+}
+
 .shadow-3d {
   box-shadow: 2px 2px 0px 0px #000;
 }
@@ -458,6 +474,29 @@ video {
 
 .badge-animation.svelte-kwyjb9 {
   transform: rotate(-2deg);
+}
+
+/* Hot badge wiggle animation (opposite direction) */
+@keyframes svelte-kh30fs-badge-wiggle {
+  0% {
+    transform: rotate(2deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
+
+  100% {
+    transform: rotate(2deg);
+  }
+}
+
+.group:hover .badge-animation.svelte-kh30fs {
+  animation: svelte-kh30fs-badge-wiggle .8s steps(1, end) infinite;
+}
+
+.badge-animation.svelte-kh30fs {
+  transform: rotate(2deg);
 }
 
 

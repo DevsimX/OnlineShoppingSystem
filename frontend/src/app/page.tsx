@@ -1,9 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import CategoryCarousel from "@/components/home/CategoryCarousel";
 import HeroSection from "@/components/home/HeroSection";
 import ProductCarousel from "@/components/home/ProductCarousel";
 import CTASection from "@/components/home/CTASection";
 import InstagramFeed from "@/components/home/InstagramFeed";
 import Marquee from "@/components/home/Marquee";
+import { getHotProducts, type Product as APIProduct } from "@/lib/api/products";
 
 // Product data extracted from the HTML
 const whatsHotProducts = [
@@ -346,13 +350,82 @@ const moreToExploreProducts = [
   },
 ];
 
+// Helper function to format price from API (e.g., "24.55" to "24.55")
+const formatPrice = (price: string | number): string => {
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+  return numPrice.toFixed(2);
+};
+
+// Helper function to convert API product to ProductCarousel format
+const convertToProductCarouselFormat = (apiProduct: APIProduct) => ({
+  name: apiProduct.name,
+  href: `/product/${apiProduct.id}`,
+  imageUrl: apiProduct.profile_pic_link,
+  imageAlt: apiProduct.name,
+  vendor: apiProduct.company,
+  price: formatPrice(apiProduct.price),
+  badge: apiProduct.new && apiProduct.hot ? ("both" as const) : apiProduct.hot ? ("hot" as const) : apiProduct.new ? ("new" as const) : undefined,
+  new: apiProduct.new,
+  hot: apiProduct.hot,
+});
+
 export default function Home() {
+  const [hotProducts, setHotProducts] = useState<typeof whatsHotProducts>([]);
+  const [isLoadingHot, setIsLoadingHot] = useState(true);
+
+  useEffect(() => {
+    const fetchHotProducts = async () => {
+      try {
+        const products = await getHotProducts();
+        // Convert API products to ProductCarousel format
+        const convertedProducts = products.map(convertToProductCarouselFormat);
+        // Ensure we have exactly 8 products (pad if needed)
+        const paddedProducts = [...convertedProducts];
+        while (paddedProducts.length < 8) {
+          paddedProducts.push({
+            name: "",
+            href: "#",
+            imageUrl: "",
+            imageAlt: "",
+            vendor: "",
+            price: "0.00",
+          });
+        }
+        setHotProducts(paddedProducts.slice(0, 8));
+      } catch (error) {
+        console.error("Failed to fetch hot products:", error);
+        // On error, use fallback static data but ensure 8 items
+        const fallbackProducts = [...whatsHotProducts];
+        while (fallbackProducts.length < 8) {
+          fallbackProducts.push({
+            name: "",
+            href: "#",
+            imageUrl: "",
+            imageAlt: "",
+            vendor: "",
+            price: "0.00",
+          });
+        }
+        setHotProducts(fallbackProducts.slice(0, 8));
+      } finally {
+        setIsLoadingHot(false);
+      }
+    };
+
+    fetchHotProducts();
+  }, []);
+
   return (
     <main style={{ viewTransitionName: "main-content" }}>
       <CategoryCarousel />
       <HeroSection />
       <Marquee />
-      <ProductCarousel title="What's Hot" titleHref="/collections/whats-hot" products={whatsHotProducts} />
+      <ProductCarousel
+        title="What's Hot"
+        titleHref="/collections/whats-hot"
+        products={isLoadingHot ? whatsHotProducts.slice(0, 8) : hotProducts}
+        isLoading={isLoadingHot}
+      />
       <div className="border-t-2 border-b-2 bg-pop-yellow-mid">
         <ProductCarousel title="Great Gifts" products={greatGiftsCategories} />
       </div>

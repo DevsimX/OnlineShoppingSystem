@@ -4,6 +4,8 @@ from django.db import models
 class Category(models.Model):
     """Product category model"""
     name = models.CharField(max_length=100, unique=True)
+    href = models.CharField(max_length=255, default='')
+    imageUrl = models.URLField(max_length=500, default='')
     great_gift = models.BooleanField(default=False)
 
     class Meta:
