@@ -10,78 +10,6 @@ import Marquee from "@/components/home/Marquee";
 import { getHotProducts, type Product as APIProduct } from "@/lib/api/products";
 
 // Product data extracted from the HTML
-const whatsHotProducts = [
-  {
-    name: "Contentious Condiments Trio Cheeseboard",
-    href: "/products/contentious-condiments-trio-cheeseboard",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/triopack_350x350_crop_center.jpg.webp?v=1760865499",
-    imageAlt: "Contentious Condiments Trio Cheeseboard",
-    vendor: "Contentious Character Winery",
-    price: "24.55",
-  },
-  {
-    name: "Soju Gift Box",
-    href: "/products/soju-gift-box",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0318630_350x350_crop_center.jpg.webp?v=1765260108",
-    imageAlt: "Soju Gift Box",
-    vendor: "Poncho Fox Distillery",
-    price: "83.40",
-    badge: "new" as const,
-  },
-  {
-    name: "Ambrosia Vodka Gift Box",
-    href: "/products/ambrosia-vodka-gift-box",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POP_LOCAL_DAY_0519157_350x350_crop_center.jpg.webp?v=1766308060",
-    imageAlt: "Ambrosia Vodka Gift Box",
-    vendor: "Ambrosia Distillery",
-    price: "85.00",
-    badge: "new" as const,
-  },
-  {
-    name: "Novelty Vibes Earrings",
-    href: "/products/novelty-vibes-earrings",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/POP_pewpewstudio_250509_38_LR_350x350_crop_center.jpg.webp?v=1762138657",
-    imageAlt: "Novelty Vibes Earrings",
-    vendor: "Fruity Stones",
-    price: "66.00",
-  },
-  {
-    name: "Keep on the Sunny Side Earrings",
-    href: "/products/keep-on-the-sunny-side-earrings",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0418878_350x350_crop_center.jpg.webp?v=1766059173",
-    imageAlt: "Keep on the Sunny Side Earrings",
-    vendor: "Dangly Bits",
-    price: "50.00",
-  },
-  {
-    name: "Mango No.5 Candle - Glass",
-    href: "/products/mango-no5-candle-glass",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0118098_350x350_crop_center.jpg.webp?v=1765346633",
-    imageAlt: "Mango No.5 Candle - Glass",
-    vendor: "Lucian Candles",
-    price: "35.00",
-    badge: "new" as const,
-  },
-  {
-    name: "Sugar Cookie Candle",
-    href: "/products/sugar-cookie-candle",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0118069_350x350_crop_center.jpg.webp?v=1765278427",
-    imageAlt: "Sugar Cookie Candle",
-    vendor: "Zealous & Co",
-    price: "34.00",
-    badge: "new" as const,
-  },
-  {
-    name: "AVEC FlowState Mango Spritzer - 750ml",
-    href: "/products/avec-flowstate-mango-spritzer-750ml",
-    imageUrl: "https://cdn.shopify.com/s/files/1/0724/9674/2585/files/final_POPLOCAL_DAY_0318644_350x350_crop_center.jpg.webp?v=1765260777",
-    imageAlt: "AVEC FlowState Mango Spritzer - 750ml",
-    vendor: "Altina",
-    price: "25.00",
-    badge: "new" as const,
-  },
-];
-
 const newStuffProducts = [
   {
     name: "The Fountain Tilda A4 Print",
@@ -381,8 +309,20 @@ const convertToProductCarouselFormat = (apiProduct: APIProduct): ProductCarousel
   hot: apiProduct.hot,
 });
 
+// Create 8 placeholder products for loading state
+const createPlaceholderProducts = (): ProductCarouselProduct[] => {
+  return Array.from({ length: 8 }, () => ({
+    name: "",
+    href: "#",
+    imageUrl: "",
+    imageAlt: "",
+    vendor: "",
+    price: "0.00",
+  }));
+};
+
 export default function Home() {
-  const [hotProducts, setHotProducts] = useState<ProductCarouselProduct[]>([]);
+  const [hotProducts, setHotProducts] = useState<ProductCarouselProduct[]>(createPlaceholderProducts());
   const [isLoadingHot, setIsLoadingHot] = useState(true);
 
   useEffect(() => {
@@ -406,19 +346,8 @@ export default function Home() {
         setHotProducts(paddedProducts.slice(0, 8));
       } catch (error) {
         console.error("Failed to fetch hot products:", error);
-        // On error, use fallback static data but ensure 8 items
-        const fallbackProducts: ProductCarouselProduct[] = [...whatsHotProducts];
-        while (fallbackProducts.length < 8) {
-          fallbackProducts.push({
-            name: "",
-            href: "#",
-            imageUrl: "",
-            imageAlt: "",
-            vendor: "",
-            price: "0.00",
-          });
-        }
-        setHotProducts(fallbackProducts.slice(0, 8));
+        // On error, keep placeholder products (skeleton will show)
+        setHotProducts(createPlaceholderProducts());
       } finally {
         setIsLoadingHot(false);
       }
@@ -435,7 +364,7 @@ export default function Home() {
       <ProductCarousel
         title="What's Hot"
         titleHref="/collections/whats-hot"
-        products={isLoadingHot ? whatsHotProducts.slice(0, 8) : hotProducts}
+        products={hotProducts}
         isLoading={isLoadingHot}
       />
       <div className="border-t-2 border-b-2 bg-pop-yellow-mid">

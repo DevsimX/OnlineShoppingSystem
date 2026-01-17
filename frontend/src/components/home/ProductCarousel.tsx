@@ -74,7 +74,7 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
               }}
             >
             {products.map((product, index) => (
-              <div key={product.href || index} className={`flex-shrink-0 skeletonSlide svelte-1h7r9oe ${index === products.length - 1 ? "mr-6" : ""}`}>
+              <div key={product.href && product.href !== "#" ? product.href : `placeholder-${index}`} className={`flex-shrink-0 skeletonSlide svelte-1h7r9oe ${index === products.length - 1 ? "mr-6" : ""}`}>
                 {isLoading ? (
                   <div className="skeleton-card w-full rounded-3xl border-2 border-transparent min-h-[400px] sm:min-h-[300px]"></div>
                 ) : (
