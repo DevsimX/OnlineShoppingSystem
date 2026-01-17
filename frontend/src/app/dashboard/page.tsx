@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, getCurrentUser, logout, getRefreshToken } from "@/lib/api/auth";
+import { getToken, getCurrentUser, logout, getRefreshToken, type LoginResponse } from "@/lib/api/auth";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<LoginResponse["user"] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function DashboardPage() {
       try {
         const userData = await getCurrentUser();
         setUser(userData);
-      } catch (error) {
+      } catch {
         // Token invalid, redirect to login
         logout(getRefreshToken() || "");
         router.push("/auth");

@@ -41,8 +41,9 @@ export default function LoginForm({ onSuccess, prefilledUsername = "" }: LoginFo
         // Redirect to protected page or home
         window.location.href = "/dashboard";
       }
-    } catch (error: any) {
-      const errorMessage = error.error || error.username?.[0] || error.password?.[0] || "Login failed";
+    } catch (error) {
+      const apiError = error as { error?: string; username?: string[]; password?: string[] };
+      const errorMessage = apiError.error || apiError.username?.[0] || apiError.password?.[0] || "Login failed";
       setLoginError(errorMessage);
       toast.error(errorMessage);
     } finally {

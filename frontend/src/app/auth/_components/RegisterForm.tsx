@@ -81,13 +81,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       if (onSuccess) {
         onSuccess(registerData.username);
       }
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as Record<string, string | string[]>;
       const errors: Record<string, string> = {};
-      Object.keys(error).forEach((key) => {
-        if (Array.isArray(error[key])) {
-          errors[key] = error[key][0];
+      Object.keys(apiError).forEach((key) => {
+        if (Array.isArray(apiError[key])) {
+          errors[key] = (apiError[key] as string[])[0];
         } else {
-          errors[key] = error[key];
+          errors[key] = apiError[key] as string;
         }
       });
       setRegisterErrors(errors);
