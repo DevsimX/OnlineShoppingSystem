@@ -35,7 +35,7 @@ npm run dev
 ## API Endpoints
 
 - **Auth**: `/api/auth/register/`, `/api/auth/login/`, `/api/auth/logout/`, `/api/auth/me/`
-- **Categories**: `/api/categories/`, `/api/categories/great-gifts/`
+- **Categories**: `/api/categories/`
 - **Products**: `/api/products/`, `/api/products/category/<id>/`, `/api/products/<id>/`, `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/`
 - **Orders/Payments/Cart**: Placeholders (not implemented yet)
 
@@ -51,6 +51,7 @@ OnlineShoppingSystem/
       ├─ app/        # Pages and routes
       ├─ components/ # Shared components
       ├─ contexts/   # React contexts
+      ├─ hooks/      # Custom React hooks
       └─ lib/api/    # API service functions
 ```
 
@@ -58,10 +59,12 @@ OnlineShoppingSystem/
 
 - ✅ JWT authentication (login/register)
 - ✅ Protected dashboard
-- ✅ Product carousels with real-time data
+- ✅ Product carousels with real-time backend data
+- ✅ Lazy loading for product sections
 - ✅ Category navigation
 - ✅ Shopping cart UI
 - ✅ Responsive design
+- ✅ Custom hooks for maintainability
 
 ## Development
 
@@ -87,9 +90,15 @@ npm run lint
 - ✅ User registration with password strength validation
 - ✅ Protected dashboard page
 - ✅ Product & Category models and API endpoints
-- ✅ Product carousels with loading states
-- ✅ Badge animations (new/hot badges)
+- ✅ Product carousels with loading states and lazy loading
+- ✅ Backend integration for all product sections (Hot, New, Gift Box, Explore)
+- ✅ Badge animations (new/hot badges with opposite rotation)
 - ✅ Shopping cart UI with drawer
+- ✅ Custom hooks extracted for better maintainability
+  - `useProductSections` - Product fetching and lazy loading
+  - `useAuth` - Authentication checking
+  - `useLogin` / `useRegister` - Form handling
+  - `usePasswordValidation` - Password strength
 - ✅ Responsive design across all pages
 
 ### In Progress

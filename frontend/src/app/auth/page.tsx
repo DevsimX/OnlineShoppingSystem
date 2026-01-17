@@ -1,22 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Marquee from "@/components/home/Marquee";
 import LoginForm from "./_components/LoginForm";
 import RegisterForm from "./_components/RegisterForm";
-
-type TabType = "login" | "register";
+import { useAuthTabs } from "@/hooks/useAuthTabs";
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("login");
-  const [prefilledUsername, setPrefilledUsername] = useState<string>("");
-
-  const handleRegisterSuccess = (username: string) => {
-    setActiveTab("login");
-    setPrefilledUsername(username);
-  };
+  const { activeTab, setActiveTab, prefilledUsername, handleRegisterSuccess } = useAuthTabs();
 
   return (
     <>

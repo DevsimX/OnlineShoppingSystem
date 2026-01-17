@@ -73,21 +73,25 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
                 willChange: "transform",
               }}
             >
-            {products.map((product, index) => (
-              <div key={product.href && product.href !== "#" ? product.href : `placeholder-${index}`} className={`flex-shrink-0 skeletonSlide svelte-1h7r9oe ${index === products.length - 1 ? "mr-6" : ""}`}>
-                {isLoading ? (
-                  <div className="skeleton-card w-full rounded-3xl border-2 border-transparent min-h-[400px] sm:min-h-[300px]"></div>
-                ) : (
-                  <Link href={product.href || "#"} className="group relative flex w-full cursor-pointer flex-col text-left">
-                    <div className="relative rounded-3xl border-2 border-transparent transition-all group-hover:border-black">
-                      <Image
-                        width={300}
-                        height={300}
-                        className="aspect-square h-full w-full rounded-2xl object-cover sm:rounded-[22px]"
-                        src={product.imageUrl || ""}
-                        alt={product.imageAlt || ""}
-                        unoptimized
-                      />
+            {products.map((product, index) => {
+              // Skip rendering placeholder products (empty name/imageUrl)
+              const isPlaceholder = !product.name || !product.imageUrl;
+              
+              return (
+                <div key={product.href && product.href !== "#" ? product.href : `placeholder-${index}`} className={`flex-shrink-0 skeletonSlide svelte-1h7r9oe ${index === products.length - 1 ? "mr-6" : ""}`}>
+                  {isLoading || isPlaceholder ? (
+                    <div className="skeleton-card w-full rounded-3xl border-2 border-transparent min-h-[400px] sm:min-h-[300px]"></div>
+                  ) : product.imageUrl ? (
+                    <Link href={product.href || "#"} className="group relative flex w-full cursor-pointer flex-col text-left">
+                      <div className="relative rounded-3xl border-2 border-transparent transition-all group-hover:border-black">
+                        <Image
+                          width={300}
+                          height={300}
+                          className="aspect-square h-full w-full rounded-2xl object-cover sm:rounded-[22px]"
+                          src={product.imageUrl}
+                          alt={product.imageAlt || product.name}
+                          unoptimized
+                        />
                       {((product.badge === "new" || product.badge === "both" || product.new) || (product.badge === "hot" || product.badge === "both" || product.hot)) && (
                         <div className="pointer-events-none absolute -top-4 -left-3 z-[2] sm:-top-5 flex">
                           {(product.badge === "new" || product.badge === "both" || product.new) && <New />}
@@ -139,9 +143,10 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
                       </div>
                     </div>
                   </Link>
-                )}
-              </div>
-            ))}
+                  ) : null}
+                </div>
+              );
+            })}
             </div>
           </div>
         </div>

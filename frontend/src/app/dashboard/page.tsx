@@ -1,41 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getToken, getCurrentUser, logout, getRefreshToken, type LoginResponse } from "@/lib/api/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<LoginResponse["user"] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = getToken();
-      if (!token) {
-        router.push("/auth");
-        return;
-      }
-
-      try {
-        const userData = await getCurrentUser();
-        setUser(userData);
-      } catch {
-        // Token invalid, redirect to login
-        logout(getRefreshToken() || "");
-        router.push("/auth");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  const handleLogout = async () => {
-    await logout(getRefreshToken() || "");
-    router.push("/auth");
-  };
+  const { user, isLoading, handleLogout } = useAuth();
 
   if (isLoading) {
     return (

@@ -1,102 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "react-hot-toast";
-import { register, type RegisterData } from "@/lib/api/auth";
+import { useRegister } from "@/hooks/useRegister";
 
 type RegisterFormProps = {
   onSuccess?: (username: string) => void;
 };
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [registerData, setRegisterData] = useState<RegisterData>({
-    username: "",
-    email: "",
-    first_name: "",
-    last_name: "",
-    password: "",
-    password_confirm: "",
-  });
-
-  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
-  const [hasInteracted, setHasInteracted] = useState<Record<string, boolean>>({});
-  
-  // Validation helpers
-  const emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  const isValidEmail = registerData.email ? emailPattern.test(registerData.email) : true;
-  const passwordsMatch = registerData.password === registerData.password_confirm || !registerData.password_confirm;
-  
-  // Password strength validation
-  const passwordRequirements = {
-    minLength: registerData.password.length >= 8,
-    hasUppercase: /[A-Z]/.test(registerData.password),
-    hasLowercase: /[a-z]/.test(registerData.password),
-    hasNumber: /[0-9]/.test(registerData.password),
-    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(registerData.password),
-  };
-  
-  const passwordStrength = Object.values(passwordRequirements).filter(Boolean).length;
-  const isStrongPassword = Object.values(passwordRequirements).every(Boolean);
-  
-  const getPasswordStrengthLabel = () => {
-    if (passwordStrength === 0) return "Very Weak";
-    if (passwordStrength === 1 || passwordStrength === 2) return "Weak";
-    if (passwordStrength === 3) return "Fair";
-    if (passwordStrength === 4) return "Good";
-    return "Strong";
-  };
-  
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 2) return "red";
-    if (passwordStrength === 3) return "yellow";
-    if (passwordStrength === 4) return "blue";
-    return "green";
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRegisterErrors({});
-
-    // Client-side validation - Password strength
-    if (!isStrongPassword) {
-      setRegisterErrors({ password: "Password does not meet strength requirements" });
-      toast.error("Please create a stronger password");
-      return;
-    }
-
-    // Client-side validation - Password match
-    if (registerData.password !== registerData.password_confirm) {
-      setRegisterErrors({ password_confirm: "Passwords do not match" });
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await register(registerData);
-      toast.success("Registration successful! Please login.");
-      
-      if (onSuccess) {
-        onSuccess(registerData.username);
-      }
-    } catch (error) {
-      const apiError = error as Record<string, string | string[]>;
-      const errors: Record<string, string> = {};
-      Object.keys(apiError).forEach((key) => {
-        if (Array.isArray(apiError[key])) {
-          errors[key] = (apiError[key] as string[])[0];
-        } else {
-          errors[key] = apiError[key] as string;
-        }
-      });
-      setRegisterErrors(errors);
-      toast.error("Registration failed. Please check the errors.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    registerData,
+    setRegisterData,
+    registerErrors,
+    hasInteracted,
+    setHasInteracted,
+    isLoading,
+    isValidEmail,
+    passwordsMatch,
+    isStrongPassword,
+    passwordRequirements,
+    getPasswordStrengthLabel,
+    getPasswordStrengthColor,
+    handleRegister,
+  } = useRegister(onSuccess);
 
   return (
     <form onSubmit={handleRegister} className="space-y-6">
