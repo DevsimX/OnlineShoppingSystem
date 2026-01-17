@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef, Fragment } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Logo from "@/assets/logo.svg";
 import Menu from "@/assets/menu.svg";
 import Search from "@/assets/search.svg"
 import MyAccount from "@/assets/account.svg"
 import Cart from "@/assets/cart.svg"
 import { ChevronDown } from "lucide-react"
+import { isAuthenticated } from "@/lib/api/auth";
 
 type DropdownSection = {
   type: "category" | "standalone";
@@ -26,10 +28,20 @@ type NavLinkItem = {
 };
 
 export default function Header() {
+  const router = useRouter();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const handleAccountClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+    } else {
+      router.push("/auth");
+    }
+  };
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -300,7 +312,12 @@ export default function Header() {
           {/* Icons */}
           <div className="flex gap-2 md:gap-3">
             {/* User Account Icon */}
-            <a href="/auth/login" className="IconMenu" aria-label="Go to your account">
+            <a 
+              href={isAuthenticated() ? "/dashboard" : "/auth"} 
+              onClick={handleAccountClick}
+              className="IconMenu" 
+              aria-label="Go to your account"
+            >
               <span className="sr-only">Go to your account</span>
               <MyAccount />
             </a>

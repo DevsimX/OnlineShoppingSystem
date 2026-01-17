@@ -74,9 +74,13 @@ For more frontend details, see [frontend/README.md](./frontend/README.md)
 
 ### Authentication
 - `POST /api/auth/register/` - User registration
+  - Body: `{ "username": "string", "email": "string", "password": "string", "password_confirm": "string", "first_name": "string" (optional), "last_name": "string" (optional) }`
+  - Returns: `{ "message": "User registered successfully" }`
 - `POST /api/auth/login/` - User login
-- `POST /api/auth/logout/` - User logout
-- `GET /api/auth/me/` - Get current user info
+  - Body: `{ "username": "string", "password": "string" }`
+  - Returns: `{ "message": "Login successful", "token": "JWT token", "refresh_token": "refresh token", "user": {...} }`
+- `POST /api/auth/logout/` - User logout (requires authentication)
+- `GET /api/auth/me/` - Get current user info (requires authentication)
 
 ## Project Structure
 ```
@@ -89,7 +93,18 @@ OnlineShoppingSystem/
 │  ├─ docker compose.yml  # Docker services
 │  └─ Dockerfile          # Web container image
 ├─ frontend/              # Next.js frontend
-│  └─ src/app/            # Pages and UI components
+│  └─ src/
+│     ├─ app/             # Pages and routes
+│     │  ├─ auth/         # Authentication pages
+│     │  │  ├─ _components/  # Auth-specific components
+│     │  │  │  ├─ LoginForm.tsx
+│     │  │  │  └─ RegisterForm.tsx
+│     │  │  └─ page.tsx   # Auth page with tabs
+│     │  ├─ dashboard/     # Protected dashboard
+│     │  └─ ...           # Other pages
+│     ├─ components/       # Shared components
+│     └─ lib/              # Utilities and API clients
+│        └─ api/           # API service functions
 └─ README.md
 ```
 
@@ -115,7 +130,10 @@ npm run lint       # Run ESLint
 
 ## Features
 
-- ✅ User authentication (login/register)
+- ✅ User authentication (login/register with JWT tokens)
+- ✅ Protected dashboard page
+- ✅ Password strength validation
+- ✅ Form validation with real-time feedback
 - ✅ Responsive home page
 - ✅ Product carousels
 - ✅ Category navigation
@@ -126,12 +144,29 @@ npm run lint       # Run ESLint
 ## Development Notes
 
 ### 2026-01-17
-- Home page frontend finished
-- Visit page frontend finished
-- About page frontend finished
-- Login/Register page frontend finished
-- Backend restructured with Docker, Nginx, PostgreSQL
-- Authentication API endpoints implemented
+- **Frontend:**
+  - Home page frontend finished
+  - Visit page frontend finished
+  - About page frontend finished
+  - Login/Register page with tab switching
+  - Protected dashboard page
+  - Password strength validation with real-time feedback
+  - Form validation (email, password match, required fields)
+  - Toast notifications (top-right, 3-second duration)
+  - Header navigation updates (redirects to dashboard if authenticated)
+  
+- **Backend:**
+  - Backend restructured with Docker, Nginx, PostgreSQL
+  - Authentication API endpoints implemented with JWT tokens
+  - Username-based authentication (unique username and email)
+  - Token expiration (24 hours access, 7 days refresh)
+  - User registration and login endpoints
+  - Protected endpoints with JWT authentication with JWT tokens
+- User registration with password strength validation
+- Form validation with real-time feedback
+- Protected dashboard page
+- Token-based authentication system
+- Header navigation updates (redirects to dashboard if authenticated)
 
 ## Notes
 - Development only; not production-hardened.
