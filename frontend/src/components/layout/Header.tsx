@@ -10,6 +10,7 @@ import MyAccount from "@/assets/account.svg"
 import Cart from "@/assets/cart.svg"
 import { ChevronDown } from "lucide-react"
 import { isAuthenticated } from "@/lib/api/auth";
+import { useCart } from "@/contexts/CartContext";
 
 type DropdownSection = {
   type: "category" | "standalone";
@@ -29,6 +30,7 @@ type NavLinkItem = {
 
 export default function Header() {
   const router = useRouter();
+  const { openCart } = useCart();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -323,7 +325,11 @@ export default function Header() {
             </a>
 
             {/* Cart Icon */}
-            <button className="IconMenu cursor-pointer" aria-label="Open Cart">
+            <button
+              className="IconMenu cursor-pointer"
+              aria-label="Open Cart"
+              onClick={openCart}
+            >
               <span className="sr-only">Open Cart</span>
               <Cart />
             </button>
