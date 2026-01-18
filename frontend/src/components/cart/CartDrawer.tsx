@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import Link from "next/link";
 import BigCart from "@/assets/bigcart.svg";
 
 type CartDrawerProps = {

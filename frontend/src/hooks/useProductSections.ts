@@ -133,13 +133,16 @@ export function useLazyProducts(
       { rootMargin: "100px" } // Start loading 100px before section is visible
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    // Capture the current ref value to use in cleanup
+    const currentSection = sectionRef.current;
+
+    if (currentSection) {
+      observer.observe(currentSection);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentSection) {
+        observer.unobserve(currentSection);
       }
     };
   }, [hasLoaded, fetchFunction, sectionName]);
