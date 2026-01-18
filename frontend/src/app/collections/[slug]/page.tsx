@@ -1,22 +1,17 @@
 "use client";
 
-import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ListFilter, ChevronDown } from "lucide-react";
+import { ListFilter } from "lucide-react";
 import { useCollections } from "@/hooks/useCollections";
+import { useCollectionsPagination } from "@/hooks/useCollectionsPagination";
+import SortDropdown from "@/components/collections/SortDropdown";
 import Hot from "@/assets/hot.svg";
 import New from "@/assets/new.svg";
 
 export default function CollectionsPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const slug = params.slug as string;
-  
-  // Get page and page_size from URL query params
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("page_size") || "20", 10);
+  const { slug, currentPage, pageSize, sort, handleNextPage: handleNext, handlePreviousPage: handlePrevious, handleSortChange } =
+    useCollectionsPagination();
 
   const {
     products,
@@ -25,23 +20,7 @@ export default function CollectionsPage() {
     hasNext,
     hasPrevious,
     pageTitle,
-  } = useCollections(slug, currentPage, pageSize);
-
-  const handleNextPage = () => {
-    if (hasNext) {
-      const newPage = currentPage + 1;
-      router.push(`/collections/${slug}?page=${newPage}&page_size=${pageSize}`);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (hasPrevious) {
-      const newPage = currentPage - 1;
-      router.push(`/collections/${slug}?page=${newPage}&page_size=${pageSize}`);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  } = useCollections(slug, currentPage, pageSize, sort);
 
   return (
     <section className="px-6 py-12 md:py-20">
@@ -70,16 +49,7 @@ export default function CollectionsPage() {
           </div>
 
           {/* Sort Dropdown */}
-          <div className="ml-auto min-w-0">
-            <button
-              className="flex h-12 max-w-full items-center gap-2 overflow-hidden rounded-full border-2 border-black bg-white px-4 font-black tracking-wide uppercase shadow-3d sm:px-6 sm:text-lg"
-              aria-haspopup="listbox"
-              aria-expanded="false"
-            >
-              <span className="min-w-0 truncate">Featured</span>
-              <ChevronDown className="h-6 w-6" />
-            </button>
-          </div>
+          <SortDropdown value={sort} onChange={handleSortChange} />
         </div>
 
         {/* Product Count - Mobile */}
@@ -243,7 +213,7 @@ export default function CollectionsPage() {
             <div className="flex gap-2">
               {hasPrevious && (
                 <button
-                  onClick={handlePreviousPage}
+                  onClick={() => handlePrevious(hasPrevious)}
                   className="flex items-center justify-center uppercase tracking-wide font-black disabled:cursor-not-allowed disabled:bg-gray-400 cursor-pointer leading-none bg-pop-red-accent text-white hover:bg-pop-teal-mid border-2 border-black shadow-[2px_2px_0px_0px_#000] min-h-12 px-6 py-2 text-lg md:text-xl rounded-full"
                 >
                   <svg
@@ -269,7 +239,7 @@ export default function CollectionsPage() {
             <div className="ml-auto">
               {hasNext && (
                 <button
-                  onClick={handleNextPage}
+                  onClick={() => handleNext(hasNext)}
                   className="flex items-center justify-center uppercase tracking-wide font-black disabled:cursor-not-allowed disabled:bg-gray-400 cursor-pointer leading-none bg-pop-red-accent text-white hover:bg-pop-teal-mid border-2 border-black shadow-[2px_2px_0px_0px_#000] min-h-12 px-6 py-2 text-lg md:text-xl rounded-full"
                 >
                   Next

@@ -36,7 +36,15 @@ npm run dev
 
 - **Auth**: `/api/auth/register/`, `/api/auth/login/`, `/api/auth/logout/`, `/api/auth/me/`
 - **Categories**: `/api/categories/`
-- **Products**: `/api/products/`, `/api/products/category/<category_name>/`, `/api/products/<id>/`, `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/`
+- **Products**: 
+  - `/api/products/` - All products (supports `?sort=PRICE`, `?page=1`, `?page_size=20`)
+  - `/api/products/category/<category_name>/` - Products by category (supports `?sort=PRICE`, `?page=1`, `?page_size=20`)
+  - `/api/products/<id>/` - Single product details
+  - `/api/products/hot/` - 8 most hot products
+  - `/api/products/new/` - 8 most new products
+  - `/api/products/explore/` - 8 most explore products
+  - `/api/products/gift-box/` - 8 gift box products
+  - **Sort Options**: `COLLECTION_DEFAULT` (Featured), `BEST_SELLING`, `CREATED` (Oldest), `CREATED_REVERSE` (Newest), `PRICE` (Low to High), `PRICE_REVERSE` (High to Low)
 - **Orders/Payments/Cart**: Placeholders (not implemented yet)
 
 ## Project Structure
@@ -61,6 +69,8 @@ OnlineShoppingSystem/
 - ✅ Protected dashboard
 - ✅ Product carousels with real-time backend data
 - ✅ Lazy loading for product sections
+- ✅ Collections page with pagination and sorting
+- ✅ Sort dropdown with URL-trackable sort parameters
 - ✅ Category navigation
 - ✅ Shopping cart UI
 - ✅ Responsive design
@@ -93,9 +103,15 @@ npm run lint
 - ✅ Product carousels with loading states and lazy loading
 - ✅ Backend integration for all product sections (Hot, New, Gift Box, Explore)
 - ✅ Badge animations (new/hot badges with opposite rotation)
+- ✅ Collections page with pagination and URL-trackable parameters
+- ✅ Product sorting functionality (Featured, Best Selling, Oldest, Newest, Price: Low to High, Price: High to Low)
+- ✅ Sort dropdown component with fade-in/fade-out animations
 - ✅ Shopping cart UI with drawer
 - ✅ Custom hooks extracted for better maintainability
   - `useProductSections` - Product fetching and lazy loading
+  - `useCollections` - Collections page data fetching
+  - `useCollectionsPagination` - Pagination and URL management
+  - `useSortDropdown` - Sort dropdown state management
   - `useAuth` - Authentication checking
   - `useLogin` / `useRegister` - Form handling
   - `usePasswordValidation` - Password strength

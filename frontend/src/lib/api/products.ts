@@ -102,8 +102,21 @@ export async function getGiftBoxProducts(): Promise<Product[]> {
   return result as Product[];
 }
 
-export async function getAllProducts(page = 1, pageSize = 20): Promise<PaginatedResponse<Product>> {
-  const response = await fetch(`${API_BASE_URL}/api/products/?page=${page}&page_size=${pageSize}`, {
+export async function getAllProducts(
+  page = 1,
+  pageSize = 20,
+  sort?: string
+): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  if (sort && sort !== "COLLECTION_DEFAULT") {
+    params.append("sort", sort);
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/api/products/?${params.toString()}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -122,10 +135,20 @@ export async function getAllProducts(page = 1, pageSize = 20): Promise<Paginated
 export async function getProductsByCategory(
   categoryName: string,
   page = 1,
-  pageSize = 20
+  pageSize = 20,
+  sort?: string
 ): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  if (sort && sort !== "COLLECTION_DEFAULT") {
+    params.append("sort", sort);
+  }
+  
   const response = await fetch(
-    `${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}/?page=${page}&page_size=${pageSize}`,
+    `${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}/?${params.toString()}`,
     {
       method: "GET",
       headers: {

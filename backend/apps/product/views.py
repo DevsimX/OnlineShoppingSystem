@@ -19,7 +19,7 @@ class ProductPagination(PageNumberPagination):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
-    """Get all products with pagination, ranked by rank_if high to low"""
+    """Get all products with pagination, with optional sorting"""
     from django.db.models import Case, When, Value, FloatField
     
     products = Product.objects.select_related('tag').annotate(
@@ -28,7 +28,29 @@ def product_list(request):
             default=Value(0.0),
             output_field=FloatField()
         )
-    ).order_by('-rank_if_value', '-created_at')
+    )
+    
+    # Handle sorting based on query parameter
+    sort_param = request.query_params.get('sort', 'COLLECTION_DEFAULT')
+    
+    if sort_param == 'BEST_SELLING':
+        # Best selling: rank by rank_if (could be enhanced with sales data later)
+        products = products.order_by('-rank_if_value', '-created_at')
+    elif sort_param == 'CREATED':
+        # Oldest first
+        products = products.order_by('created_at', 'id')
+    elif sort_param == 'CREATED_REVERSE':
+        # Newest first
+        products = products.order_by('-created_at', '-id')
+    elif sort_param == 'PRICE':
+        # Price: Low to High
+        products = products.order_by('price', 'id')
+    elif sort_param == 'PRICE_REVERSE':
+        # Price: High to Low
+        products = products.order_by('-price', '-id')
+    else:
+        # COLLECTION_DEFAULT or unknown: Featured (rank by rank_if)
+        products = products.order_by('-rank_if_value', '-created_at')
     
     paginator = ProductPagination()
     paginated_products = paginator.paginate_queryset(products, request)
@@ -39,7 +61,7 @@ def product_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list_by_category(request, category_name):
-    """Get products by category name with pagination, ranked by rank_if high to low"""
+    """Get products by category name with pagination, with optional sorting"""
     from django.db.models import Case, When, Value, FloatField
     
     # Get category by name (case-insensitive lookup)
@@ -53,7 +75,29 @@ def product_list_by_category(request, category_name):
             default=Value(0.0),
             output_field=FloatField()
         )
-    ).order_by('-rank_if_value', '-created_at')
+    )
+    
+    # Handle sorting based on query parameter
+    sort_param = request.query_params.get('sort', 'COLLECTION_DEFAULT')
+    
+    if sort_param == 'BEST_SELLING':
+        # Best selling: rank by rank_if (could be enhanced with sales data later)
+        products = products.order_by('-rank_if_value', '-created_at')
+    elif sort_param == 'CREATED':
+        # Oldest first
+        products = products.order_by('created_at', 'id')
+    elif sort_param == 'CREATED_REVERSE':
+        # Newest first
+        products = products.order_by('-created_at', '-id')
+    elif sort_param == 'PRICE':
+        # Price: Low to High
+        products = products.order_by('price', 'id')
+    elif sort_param == 'PRICE_REVERSE':
+        # Price: High to Low
+        products = products.order_by('-price', '-id')
+    else:
+        # COLLECTION_DEFAULT or unknown: Featured (rank by rank_if)
+        products = products.order_by('-rank_if_value', '-created_at')
     
     paginator = ProductPagination()
     paginated_products = paginator.paginate_queryset(products, request)

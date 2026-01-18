@@ -65,7 +65,7 @@ const slugToCategoryName = (slug: string, categories: { name: string }[]): strin
   return null;
 };
 
-export function useCollections(slug: string, page: number, pageSize: number = 20) {
+export function useCollections(slug: string, page: number, pageSize: number = 20, sort?: string) {
   const [products, setProducts] = useState<ProductCarouselProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -84,7 +84,7 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
         
         if (slug === "all-products") {
           // Fetch all products
-          response = await getAllProducts(page, pageSize);
+          response = await getAllProducts(page, pageSize, sort);
           setPageTitle("All Products");
         } else {
           // Map slug to category name
@@ -98,7 +98,7 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
             return;
           }
           setPageTitle(mappedName);
-          response = await getProductsByCategory(mappedName, page, pageSize);
+          response = await getProductsByCategory(mappedName, page, pageSize, sort);
         }
 
         const convertedProducts = response.results.map(convertToProductFormat);
@@ -116,7 +116,7 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
     };
 
     fetchData();
-  }, [slug, page, pageSize]);
+  }, [slug, page, pageSize, sort]);
 
   return {
     products,

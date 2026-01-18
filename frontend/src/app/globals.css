@@ -491,6 +491,36 @@ video {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+}
+
+.dropdown-enter {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.dropdown-exit {
+  animation: fadeOut 0.15s ease-in forwards;
+}
+
 .group:hover .badge-animation.svelte-kh30fs {
   animation: svelte-kh30fs-badge-wiggle .8s steps(1, end) infinite;
 }
