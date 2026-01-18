@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost";
 export type Product = {
   id: number;
   name: string;
-  company: string;
+  brand: string;
   price: string;
   profile_pic_link: string;
   new: boolean;

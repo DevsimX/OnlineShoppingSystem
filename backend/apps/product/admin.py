@@ -4,13 +4,13 @@ from .models import Product, ProductTag
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'company', 'category', 'price', 'current_stock', 'status', 'created_at')
+    list_display = ('name', 'brand', 'category', 'price', 'current_stock', 'status', 'created_at')
     list_filter = ('category', 'status', 'created_at')
-    search_fields = ('name', 'company', 'description')
+    search_fields = ('name', 'brand', 'description')
     readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'company', 'description', 'category')
+            'fields': ('name', 'brand', 'description', 'category', 'type')
         }),
         ('Pricing & Stock', {
             'fields': ('price', 'current_stock', 'status')
@@ -27,6 +27,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductTag)
 class ProductTagAdmin(admin.ModelAdmin):
-    list_display = ('product', 'new', 'new_if', 'hot', 'hot_if', 'rank_if', 'gift_box')
-    list_filter = ('new', 'hot', 'gift_box')
+    list_display = ('product', 'new', 'new_if', 'hot', 'hot_if', 'rank_if')
+    list_filter = ('new', 'hot')
     search_fields = ('product__name',)

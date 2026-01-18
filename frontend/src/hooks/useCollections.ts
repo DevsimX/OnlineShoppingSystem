@@ -26,7 +26,7 @@ const convertToProductFormat = (apiProduct: APIProduct): ProductCarouselProduct 
   href: `/product/${apiProduct.id}`,
   imageUrl: apiProduct.profile_pic_link,
   imageAlt: apiProduct.name,
-  vendor: apiProduct.company,
+  vendor: apiProduct.brand,
   price: formatPrice(apiProduct.price),
   badge: apiProduct.new && apiProduct.hot ? ("both" as const) : apiProduct.hot ? ("hot" as const) : apiProduct.new ? ("new" as const) : undefined,
   new: apiProduct.new,

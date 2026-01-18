@@ -153,8 +153,9 @@ def explore_products(request):
 @permission_classes([AllowAny])
 def gift_box_products(request):
     """Get 8 gift box products ranked by rank_if high to low"""
+    # Filter products where type array contains 'Gift Box'
     products = Product.objects.select_related('tag').filter(
-        tag__gift_box=True,
+        type__contains=['Gift Box'],
         tag__isnull=False
     ).order_by('-tag__rank_if')[:8]
     serializer = ProductListSerializer(products, many=True)

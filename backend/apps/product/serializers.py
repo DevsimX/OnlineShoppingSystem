@@ -9,7 +9,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'company', 'price', 'profile_pic_link', 'new', 'hot')
+        fields = ('id', 'name', 'brand', 'price', 'profile_pic_link', 'new', 'hot')
 
     def get_new(self, obj):
         """Get new status from ProductTag"""
@@ -36,8 +36,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'id', 'name', 'company', 'description', 'price', 'profile_pic_link',
-            'detail_pic_links', 'category', 'category_name', 'current_stock',
+            'id', 'name', 'brand', 'description', 'price', 'profile_pic_link',
+            'detail_pic_links', 'type', 'category', 'category_name', 'current_stock',
             'status', 'new', 'hot', 'gift_box', 'created_at', 'updated_at'
         )
 
@@ -56,8 +56,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return False
 
     def get_gift_box(self, obj):
-        """Get gift_box status from ProductTag"""
-        try:
-            return obj.tag.gift_box
-        except ProductTag.DoesNotExist:
-            return False
+        """Get gift_box status by checking if 'Gift Box' is in product type array"""
+        if obj.type and isinstance(obj.type, list):
+            return 'Gift Box' in obj.type
+        return False

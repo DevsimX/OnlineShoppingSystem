@@ -10,11 +10,12 @@ class Product(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    company = models.CharField(max_length=200, help_text="Company or producer/artist that makes the product")
+    brand = models.CharField(max_length=200, help_text="Brand or producer/artist that makes the product")
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in .xx format")
     profile_pic_link = models.URLField(max_length=500)
     detail_pic_links = models.JSONField(default=list, blank=True, null=True, help_text="Array of image URLs")
+    type = models.JSONField(default=list, help_text="Array of product types (e.g., ['Gift Box', 'Limited Edition'])")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     current_stock = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
@@ -30,14 +31,13 @@ class Product(models.Model):
 
 
 class ProductTag(models.Model):
-    """Product tag model for tracking new, hot, gift box status and impact factors"""
+    """Product tag model for tracking new, hot status and impact factors"""
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='tag')
     new = models.BooleanField(default=False)
     new_if = models.FloatField(default=0.0)
     hot = models.BooleanField(default=False)
     hot_if = models.FloatField(default=0.0)
     rank_if = models.FloatField(default=0.0)
-    gift_box = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'product_tags'
