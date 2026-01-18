@@ -6,6 +6,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     """Serializer for product list views - minimal fields"""
     new = serializers.SerializerMethodField()
     hot = serializers.SerializerMethodField()
+    brand = serializers.StringRelatedField()
 
     class Meta:
         model = Product
@@ -32,6 +33,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     hot = serializers.SerializerMethodField()
     gift_box = serializers.SerializerMethodField()
     category_name = serializers.CharField(source='category.name', read_only=True)
+    brand = serializers.StringRelatedField()
 
     class Meta:
         model = Product

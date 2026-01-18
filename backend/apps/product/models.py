@@ -1,5 +1,6 @@
 from django.db import models
 from apps.category.models import Category
+from apps.brand.models import Brand
 
 
 class Product(models.Model):
@@ -10,7 +11,7 @@ class Product(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    brand = models.CharField(max_length=200, help_text="Brand or producer/artist that makes the product")
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='products', help_text="Brand or producer/artist that makes the product")
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in .xx format")
     profile_pic_link = models.URLField(max_length=500)

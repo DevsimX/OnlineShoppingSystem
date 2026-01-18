@@ -206,6 +206,11 @@ video {
   font-family: "Price Check", monospace;
 }
 
+.font-trade-gothic {
+  font-family: "Trade Gothic", "Arial Black", sans-serif;
+  font-weight: 900;
+}
+
 .marquee-icon {
   width: 28px;
   height: 28px;

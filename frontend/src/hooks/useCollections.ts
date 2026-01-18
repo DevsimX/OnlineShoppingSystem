@@ -23,7 +23,7 @@ const formatPrice = (price: string | number): string => {
 // Helper function to convert API product to display format
 const convertToProductFormat = (apiProduct: APIProduct): ProductCarouselProduct => ({
   name: apiProduct.name,
-  href: `/product/${apiProduct.id}`,
+  href: `/products/${apiProduct.id}`,
   imageUrl: apiProduct.profile_pic_link,
   imageAlt: apiProduct.name,
   vendor: apiProduct.brand,
