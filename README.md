@@ -36,7 +36,7 @@ npm run dev
 
 - **Auth**: `/api/auth/register/`, `/api/auth/login/`, `/api/auth/logout/`, `/api/auth/me/`
 - **Categories**: `/api/categories/`
-- **Products**: `/api/products/`, `/api/products/category/<id>/`, `/api/products/<id>/`, `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/`
+- **Products**: `/api/products/`, `/api/products/category/<category_name>/`, `/api/products/<id>/`, `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/`
 - **Orders/Payments/Cart**: Placeholders (not implemented yet)
 
 ## Project Structure

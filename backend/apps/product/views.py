@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import F, Q
+from apps.category.models import Category
 from .models import Product, ProductTag
 from .serializers import ProductListSerializer, ProductDetailSerializer
 
@@ -37,12 +38,15 @@ def product_list(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def product_list_by_category(request, category_id):
-    """Get products by category ID with pagination, ranked by rank_if high to low"""
+def product_list_by_category(request, category_name):
+    """Get products by category name with pagination, ranked by rank_if high to low"""
     from django.db.models import Case, When, Value, FloatField
     
+    # Get category by name (case-insensitive lookup)
+    category = get_object_or_404(Category, name__iexact=category_name)
+    
     products = Product.objects.select_related('tag').filter(
-        category_id=category_id
+        category=category
     ).annotate(
         rank_if_value=Case(
             When(tag__isnull=False, then=F('tag__rank_if')),

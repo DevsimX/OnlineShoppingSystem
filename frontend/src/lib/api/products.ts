@@ -102,8 +102,8 @@ export async function getGiftBoxProducts(): Promise<Product[]> {
   return result as Product[];
 }
 
-export async function getAllProducts(page = 1): Promise<PaginatedResponse<Product>> {
-  const response = await fetch(`${API_BASE_URL}/api/products/?page=${page}`, {
+export async function getAllProducts(page = 1, pageSize = 20): Promise<PaginatedResponse<Product>> {
+  const response = await fetch(`${API_BASE_URL}/api/products/?page=${page}&page_size=${pageSize}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -120,11 +120,12 @@ export async function getAllProducts(page = 1): Promise<PaginatedResponse<Produc
 }
 
 export async function getProductsByCategory(
-  categoryId: number,
-  page = 1
+  categoryName: string,
+  page = 1,
+  pageSize = 20
 ): Promise<PaginatedResponse<Product>> {
   const response = await fetch(
-    `${API_BASE_URL}/api/products/category/${categoryId}/?page=${page}`,
+    `${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}/?page=${page}&page_size=${pageSize}`,
     {
       method: "GET",
       headers: {
