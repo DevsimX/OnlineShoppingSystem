@@ -13,9 +13,9 @@ type SortDropdownReturn = {
   isClosing: boolean;
   selectedValue: SortOption;
   hoveredValue: SortOption | null;
-  dropdownRef: React.RefObject<HTMLDivElement>;
-  buttonRef: React.RefObject<HTMLButtonElement>;
-  dropdownMenuRef: React.RefObject<HTMLDivElement>;
+  dropdownRef: React.RefObject<HTMLDivElement | null>;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
+  dropdownMenuRef: React.RefObject<HTMLDivElement | null>;
   handleOpen: () => void;
   handleClose: () => void;
   handleSelect: (value: SortOption, onChange?: (value: SortOption) => void) => void;
