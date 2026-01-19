@@ -375,7 +375,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 Once your order is dispatched, you will receive a tracking number via email. You can use
-                                this number to track your package on the carrier's website. If you haven't received a
+                                this number to track your package on the carrier&apos;s website. If you haven&apos;t received a
                                 tracking number, please check your spam folder or contact us at hello@poplocal.com.au.
                               </p>
                             </div>
@@ -408,7 +408,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
-                                Yes, we offer gift wrapping options at checkout. If you check this box we'll ensure your
+                                Yes, we offer gift wrapping options at checkout. If you check this box we&apos;ll ensure your
                                 order arrives beautifully wrapped and ready to delight the recipient.
                               </p>
                             </div>

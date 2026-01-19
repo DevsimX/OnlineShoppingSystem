@@ -41,7 +41,6 @@ export function useProductDetail(product: ProductDetailType) {
 
   // Get selected image data
   const selectedImageData = allImages[selectedImageIndex];
-  const selectedThumbnail = selectedImageData?.small_pic_link || product.profile_pic_link;
   const selectedImage = selectedImageData?.big_pic_link || product.profile_pic_link;
   const selectedModalImage = selectedImageData?.extra_big_pic_link || selectedImage;
   
