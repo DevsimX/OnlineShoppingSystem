@@ -9,6 +9,9 @@ import Hot from "@/assets/hot.svg";
 import New from "@/assets/new.svg";
 import MoreFromBrand from "./MoreFromBrand";
 import YouMightLike from "./YouMightLike";
+import Marquee from "@/components/home/Marquee";
+import ImageModal from "./ImageModal";
+import ImageSkeleton from "@/components/common/ImageSkeleton";
 
 type ProductDetailProps = {
   product: ProductDetailType;
@@ -35,6 +38,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     isLoadingRelated,
     youMightLikeProducts,
     isLoadingYouMightLike,
+    isImageModalOpen,
+    setIsImageModalOpen,
+    mainImageLoading,
+    thumbnailLoadingStates,
+    modalImageLoading,
+    handleMainImageLoad,
+    handleThumbnailLoad,
+    handleModalImageLoad,
+    handleThumbnailLoadingStart,
+    selectedModalImage,
   } = useProductDetail(product);
 
   return (
@@ -45,42 +58,37 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div className="relative flex items-start gap-2 max-xl:flex-col md:px-6 md:py-12 lg:mx-auto xl:gap-4">
             {/* Main Image */}
             <button
+              onClick={() => setIsImageModalOpen(true)}
               className="group relative w-full cursor-zoom-in"
               aria-haspopup="dialog"
-              aria-expanded="false"
+              aria-expanded={isImageModalOpen}
             >
               {selectedImage && (
-                <Image
-                  className="relative z-10 h-[400px] w-full object-cover sm:h-[470px] md:rounded-3xl lg:h-[780px]"
-                  src={selectedImage}
-                  alt={product.name}
-                  width={780}
-                  height={780}
-                  unoptimized
-                />
+                <>
+                  {mainImageLoading && (
+                    <div className="absolute inset-0 z-20 md:rounded-3xl">
+                      <ImageSkeleton 
+                        className="h-[400px] w-full sm:h-[470px] lg:h-[780px]" 
+                        rounded={true}
+                        fullWidth={true}
+                        fullHeight={true}
+                      />
+                    </div>
+                  )}
+                  <Image
+                    className={`relative z-10 h-[400px] w-full object-cover sm:h-[470px] md:rounded-3xl lg:h-[780px] ${mainImageLoading ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}
+                    src={selectedImage}
+                    alt={product.name}
+                    width={700}
+                    height={780}
+                    unoptimized
+                    onLoad={handleMainImageLoad}
+                    onLoadingComplete={handleMainImageLoad}
+                  />
+                </>
               )}
               <div className="absolute right-4 bottom-4 z-10 text-white/50 transition-all group-hover:scale-125 group-hover:text-white">
                 <ZoomIn className="w-6 h-6" />
-              </div>
-              {/* Loading placeholder */}
-              <div className="absolute top-0 left-0 flex h-full w-full animate-pulse flex-col items-center justify-center bg-pop-yellow-mid/50 duration-75 md:rounded-3xl">
-                <div className="w-12 h-12 text-pop-yellow-mid">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
-                </div>
               </div>
               {/* Badge */}
               {(product.new || product.hot) && (
@@ -104,24 +112,42 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Thumbnail Gallery */}
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-auto max-xl:pb-2 max-md:px-3 xl:order-first xl:flex-col">
-                {allImages.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square shrink-0 cursor-pointer rounded-2xl border-[3px] transition-all ${
-                      selectedImageIndex === index ? "border-black" : "border-transparent hover:border-black"
-                    }`}
-                  >
-                    <Image
-                      className="aspect-square w-full rounded-xl object-cover max-lg:h-20 max-lg:w-20"
-                      src={image}
-                      alt={`${product.name} - Image ${index + 1}`}
-                      width={100}
-                      height={100}
-                      unoptimized
-                    />
-                  </button>
-                ))}
+                {allImages.map((imageData, index) => {
+                  const isLoading = thumbnailLoadingStates[index] !== false;
+                  const thumbnailUrl = imageData.small_pic_link;
+                  return (
+                    <button
+                      key={imageData.id || index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        handleThumbnailLoadingStart(index);
+                      }}
+                      className={`relative aspect-square shrink-0 cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden ${selectedImageIndex === index ? "border-black" : "border-transparent hover:border-black"
+                        }`}
+                    >
+                      {isLoading && (
+                        <div className="absolute inset-0 z-10 rounded-xl">
+                          <ImageSkeleton 
+                            className="h-full w-full" 
+                            rounded={false}
+                            fullWidth={true}
+                            fullHeight={true}
+                          />
+                        </div>
+                      )}
+                      <Image
+                        className={`aspect-square w-full rounded-xl object-cover max-lg:h-20 max-lg:w-20 ${isLoading ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}
+                        src={thumbnailUrl}
+                        alt={`${product.name} - Image ${index + 1}`}
+                        width={100}
+                        height={100}
+                        unoptimized
+                        onLoad={() => handleThumbnailLoad(index)}
+                        onLoadingComplete={() => handleThumbnailLoad(index)}
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -154,10 +180,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <p>
               {isDescriptionExpanded
                 ? product.description
-                : product.description.split(" ").slice(0, 30).join(" ") + "..."}
+                : product.description.split(" ").slice(0, 30).join(" ") + (product.description.split(" ").length > 30 ? "..." : "")}
             </p>
-            {product.description.split(" ").length > 30 && (
+            {product.description && product.description.split(" ").length > 30 && (
               <button
+                type="button"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 className="mt-2 rounded font-trade-gothic text-lg font-semibold text-black uppercase underline underline-offset-6 hover:underline"
               >
@@ -182,19 +209,29 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </span>
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  className="flex cursor-pointer items-center justify-center rounded-r-full hover:text-pop-red-accent"
+                  disabled={quantity >= product.current_stock}
+                  className="flex cursor-pointer items-center justify-center rounded-r-full hover:text-pop-red-accent disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
               </div>
               <button
                 onClick={handleAddToCart}
-                className="flex h-12 w-full cursor-pointer items-center justify-center rounded-full border-2 border-black bg-pop-red-accent px-8 font-trade-gothic font-black tracking-wide text-white uppercase shadow-[2px_2px_0px_0px_#000] transition-all hover:bg-pop-teal-mid disabled:cursor-not-allowed disabled:bg-gray-400 sm:text-lg md:text-sm lg:text-xl"
+                disabled={quantity > product.current_stock}
+                className={`flex h-12 w-full cursor-pointer items-center justify-center rounded-full border-2 border-black px-8 font-trade-gothic font-black tracking-wide text-white uppercase shadow-[2px_2px_0px_0px_#000] transition-all sm:text-lg md:text-sm lg:text-xl ${
+                  quantity > product.current_stock
+                    ? "bg-gray-400 hover:bg-gray-400 disabled:cursor-not-allowed"
+                    : "bg-pop-red-accent hover:bg-pop-teal-mid disabled:cursor-not-allowed disabled:bg-gray-400"
+                }`}
               >
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5" />
-                  Add to Cart
-                </div>
+                {quantity > product.current_stock ? (
+                  "Not enough stock"
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5" />
+                    Add to Cart
+                  </div>
+                )}
               </button>
             </div>
           </div>
@@ -205,26 +242,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <div className="py-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="56"
+                    <Image decoding="async"
+                      src="https://cdn.sanity.io/images/q52u2xck/production/37100b94f61ce580475306220bfc3ba83753639d-100x100.svg?w=56&amp;h=56&amp;auto=format"
                       height="56"
-                      viewBox="0 0 56 56"
-                      fill="none"
-                    >
-                      <path
-                        d="M28 0C12.536 0 0 12.536 0 28C0 43.464 12.536 56 28 56C43.464 56 56 43.464 56 28C56 12.536 43.464 0 28 0ZM28 50.4C15.876 50.4 5.6 40.124 5.6 28C5.6 15.876 15.876 5.6 28 5.6C40.124 5.6 50.4 15.876 50.4 28C50.4 40.124 40.124 50.4 28 50.4Z"
-                        fill="black"
-                      />
-                      <path
-                        d="M28 14C26.343 14 25 15.343 25 17V27C25 28.657 26.343 30 28 30C29.657 30 31 28.657 31 27V17C31 15.343 29.657 14 28 14Z"
-                        fill="black"
-                      />
-                      <path
-                        d="M28 35C26.343 35 25 36.343 25 38C25 39.657 26.343 41 28 41C29.657 41 31 39.657 31 38C31 36.343 29.657 35 28 35Z"
-                        fill="black"
-                      />
-                    </svg>
+                      width="56"
+                      alt="POP Canberra"
+                      loading="lazy"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw" />
                   </div>
                   <div>
                     <h3 className="flex-1 text-sm font-semibold sm:text-lg">Pick up at POP Canberra</h3>
@@ -237,23 +261,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <div className="py-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="56"
+                    <Image
+                      decoding="async"
+                      src="https://cdn.sanity.io/images/q52u2xck/production/1fc3482b0420b62c625886ebae5ce7b591937bc6-100x100.svg?w=56&amp;h=56&amp;auto=format"
                       height="56"
-                      viewBox="0 0 56 56"
-                      fill="none"
-                    >
-                      <circle cx="28" cy="28" r="28" fill="#FBD576" />
-                      <path
-                        d="M19.9513 14.8443C20.8227 14.8443 21.5345 13.6048 21.5345 12.0947C21.5345 10.5845 20.8227 9.345 19.9513 9.345C19.0798 9.345 18.3681 10.571 18.3681 12.0947C18.3681 13.6183 19.0798 14.8443 19.9513 14.8443Z"
-                        fill="black"
-                      />
-                      <path
-                        d="M12.0487 14.8444C12.9202 14.8444 13.632 13.6048 13.632 12.0947C13.632 10.5845 12.9202 9.34503 12.0487 9.34503C11.1773 9.34503 10.4655 10.571 10.4655 12.0947C10.4655 13.6184 11.1773 14.8444 12.0487 14.8444Z"
-                        fill="black"
-                      />
-                    </svg>
+                      width="56"
+                      alt="POP Points"
+                      loading="lazy"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw" />
                   </div>
                   <div>
                     <h3 className="flex-1 text-sm font-semibold sm:text-lg">Earn POP Points with every purchase</h3>
@@ -285,14 +300,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <span className="w-full text-left">Shipping & Orders</span>
                   <span className="hover:bg-gray-100 inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent">
                     <ChevronDown
-                      className={`size-6 rounded-md bg-pop-neutral-black p-1 text-white transition-transform duration-200 ${
-                        openAccordion === "shipping" ? "rotate-180" : ""
-                      }`}
+                      className={`size-6 rounded-md bg-pop-neutral-black p-1 text-white transition-transform duration-200 ${openAccordion === "shipping" ? "rotate-180" : ""
+                        }`}
                     />
                   </span>
                 </button>
-                {openAccordion === "shipping" && (
-                  <div className="overflow-hidden pb-2">
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openAccordion === "shipping"
+                      ? "max-h-[2000px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div className="pb-2">
                     <div className="w-full">
                       <div className="group border-b border-gray-200 py-3 first:pt-0 last:border-b-0">
                         <button
@@ -305,14 +325,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <span className="w-full text-left">What are the shipping options and delivery times?</span>
                           <span className="hover:bg-gray-100 inline-flex size-6 items-center justify-center rounded-[7px] bg-transparent">
                             <ChevronDown
-                              className={`size-[14px] transition-transform duration-200 ${
-                                openSubAccordion === "shipping-options" ? "rotate-180" : ""
-                              }`}
+                              className={`size-[14px] transition-transform duration-200 ${openSubAccordion === "shipping-options" ? "rotate-180" : ""
+                                }`}
                             />
                           </span>
                         </button>
-                        {openSubAccordion === "shipping-options" && (
-                          <div className="overflow-hidden">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubAccordion === "shipping-options"
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 We offer standard shipping across Australia. Shipping usually takes 3-7 business,
@@ -321,7 +346,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               </p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                       <div className="group border-b border-gray-200 py-3 first:pt-0 last:border-b-0">
                         <button
@@ -334,14 +359,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <span className="w-full text-left">How can I track my order?</span>
                           <span className="hover:bg-gray-100 inline-flex size-6 items-center justify-center rounded-[7px] bg-transparent">
                             <ChevronDown
-                              className={`size-[14px] transition-transform duration-200 ${
-                                openSubAccordion === "track-order" ? "rotate-180" : ""
-                              }`}
+                              className={`size-[14px] transition-transform duration-200 ${openSubAccordion === "track-order" ? "rotate-180" : ""
+                                }`}
                             />
                           </span>
                         </button>
-                        {openSubAccordion === "track-order" && (
-                          <div className="overflow-hidden">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubAccordion === "track-order"
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 Once your order is dispatched, you will receive a tracking number via email. You can use
@@ -350,7 +380,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               </p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                       <div className="group border-b border-gray-200 py-3 first:pt-0 last:border-b-0">
                         <button
@@ -363,14 +393,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <span className="w-full text-left">Do you offer gift wrapping?</span>
                           <span className="hover:bg-gray-100 inline-flex size-6 items-center justify-center rounded-[7px] bg-transparent">
                             <ChevronDown
-                              className={`size-[14px] transition-transform duration-200 ${
-                                openSubAccordion === "gift-wrapping" ? "rotate-180" : ""
-                              }`}
+                              className={`size-[14px] transition-transform duration-200 ${openSubAccordion === "gift-wrapping" ? "rotate-180" : ""
+                                }`}
                             />
                           </span>
                         </button>
-                        {openSubAccordion === "gift-wrapping" && (
-                          <div className="overflow-hidden">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubAccordion === "gift-wrapping"
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 Yes, we offer gift wrapping options at checkout. If you check this box we'll ensure your
@@ -378,11 +413,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               </p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Returns & Refunds */}
@@ -395,14 +430,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <span className="w-full text-left">Returns & Refunds</span>
                   <span className="hover:bg-gray-100 inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent">
                     <ChevronDown
-                      className={`size-6 rounded-md bg-pop-neutral-black p-1 text-white transition-transform duration-200 ${
-                        openAccordion === "returns" ? "rotate-180" : ""
-                      }`}
+                      className={`size-6 rounded-md bg-pop-neutral-black p-1 text-white transition-transform duration-200 ${openAccordion === "returns" ? "rotate-180" : ""
+                        }`}
                     />
                   </span>
                 </button>
-                {openAccordion === "returns" && (
-                  <div className="overflow-hidden pb-2">
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openAccordion === "returns"
+                      ? "max-h-[2000px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div className="pb-2">
                     <div className="w-full">
                       <div className="group border-b border-gray-200 py-3 first:pt-0 last:border-b-0">
                         <button
@@ -415,14 +455,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <span className="w-full text-left">What is your return policy?</span>
                           <span className="hover:bg-gray-100 inline-flex size-6 items-center justify-center rounded-[7px] bg-transparent">
                             <ChevronDown
-                              className={`size-[14px] transition-transform duration-200 ${
-                                openSubAccordion === "return-policy" ? "rotate-180" : ""
-                              }`}
+                              className={`size-[14px] transition-transform duration-200 ${openSubAccordion === "return-policy" ? "rotate-180" : ""
+                                }`}
                             />
                           </span>
                         </button>
-                        {openSubAccordion === "return-policy" && (
-                          <div className="overflow-hidden">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubAccordion === "return-policy"
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 We want you to be completely satisfied with your purchase. Items can be returned within
@@ -431,7 +476,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               </p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                       <div className="group border-b border-gray-200 py-3 first:pt-0 last:border-b-0">
                         <button
@@ -444,14 +489,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                           <span className="w-full text-left">Are sale items eligible for return?</span>
                           <span className="hover:bg-gray-100 inline-flex size-6 items-center justify-center rounded-[7px] bg-transparent">
                             <ChevronDown
-                              className={`size-[14px] transition-transform duration-200 ${
-                                openSubAccordion === "sale-items" ? "rotate-180" : ""
-                              }`}
+                              className={`size-[14px] transition-transform duration-200 ${openSubAccordion === "sale-items" ? "rotate-180" : ""
+                                }`}
                             />
                           </span>
                         </button>
-                        {openSubAccordion === "sale-items" && (
-                          <div className="overflow-hidden">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubAccordion === "sale-items"
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div>
                             <div className="prose py-3 text-black prose-a:font-semibold prose-strong:font-semibold">
                               <p>
                                 Only regular-priced items are eligible for refunds. Sale or discounted items are final
@@ -464,16 +514,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               </p>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <Marquee />
 
       {/* More From Brand Section */}
       <MoreFromBrand
@@ -487,6 +539,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <YouMightLike
         products={youMightLikeProducts}
         isLoading={isLoadingYouMightLike}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageUrl={selectedModalImage}
+        alt={product.name}
+        isLoading={modalImageLoading}
+        onImageLoad={handleModalImageLoad}
       />
     </section>
   );

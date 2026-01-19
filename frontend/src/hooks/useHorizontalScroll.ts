@@ -19,6 +19,7 @@ export function useHorizontalScroll(options: UseHorizontalScrollOptions = {}) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
   const [transformSteps, setTransformSteps] = useState<number[]>([0]);
   const [translateX, setTranslateX] = useState(0);
 
@@ -81,16 +82,34 @@ export function useHorizontalScroll(options: UseHorizontalScrollOptions = {}) {
       const maxScroll = contentWidth - containerWidth + rightPadding;
       const currentTranslate = Math.abs(translateX);
 
-      setCanScrollRight(currentTranslate < maxScroll - 10);
-      setCanScrollLeft(currentTranslate > 10);
+      // Check if scrolling is needed (content is wider than container)
+      const needsScrolling = contentWidth > containerWidth;
+      setIsScrollable(needsScrolling);
+
+      if (needsScrolling) {
+        setCanScrollRight(currentTranslate < maxScroll - 10);
+        setCanScrollLeft(currentTranslate > 10);
+      } else {
+        // If content fits, disable scrolling
+        setCanScrollRight(false);
+        setCanScrollLeft(false);
+        setTranslateX(0);
+      }
     };
 
     const handleWheel = (e: WheelEvent) => {
+      // Only handle wheel if content is scrollable
+      const containerWidth = container.clientWidth;
+      const contentWidth = content.scrollWidth;
+      const needsScrolling = contentWidth > containerWidth;
+      
+      if (!needsScrolling) {
+        return; // Don't prevent default if no scrolling needed
+      }
+
       // Use deltaX for horizontal touchpad scrolling
       if (e.deltaX !== 0) {
         e.preventDefault();
-        const containerWidth = container.clientWidth;
-        const contentWidth = content.scrollWidth;
         const maxScroll = contentWidth - containerWidth + rightPadding;
 
         if (enableOverscroll) {
@@ -209,6 +228,7 @@ export function useHorizontalScroll(options: UseHorizontalScrollOptions = {}) {
     translateX,
     canScrollRight,
     canScrollLeft,
+    isScrollable,
     scroll,
   };
 }

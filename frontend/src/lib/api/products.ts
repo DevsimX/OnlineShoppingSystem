@@ -10,11 +10,19 @@ export type Product = {
   hot: boolean;
 };
 
+export type ProductDetailPic = {
+  id: number;
+  small_pic_link: string;
+  big_pic_link: string;
+  extra_big_pic_link: string;
+};
+
 export type ProductDetail = Product & {
   description: string;
-  detail_pic_links: string[] | null;
+  detail_pics: ProductDetailPic[];
   category: number;
   category_name: string;
+  brand_id: number;
   current_stock: number;
   status: string;
   gift_box: boolean;
@@ -149,6 +157,40 @@ export async function getProductsByCategory(
   
   const response = await fetch(
     `${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}/?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PaginatedResponse<Product>;
+}
+
+export async function getProductsByBrand(
+  brandId: number,
+  page = 1,
+  pageSize = 20,
+  sort?: string
+): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  if (sort && sort !== "COLLECTION_DEFAULT") {
+    params.append("sort", sort);
+  }
+  
+  const response = await fetch(
+    `${API_BASE_URL}/api/products/brand/${brandId}/?${params.toString()}`,
     {
       method: "GET",
       headers: {

@@ -4,9 +4,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
-from django.db.models import F, Q
+from django.db.models import Case, When, Value, FloatField, F
 from apps.category.models import Category
-from .models import Product, ProductTag
+from apps.brand.models import Brand
+from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer
 
 
@@ -20,8 +21,6 @@ class ProductPagination(PageNumberPagination):
 @permission_classes([AllowAny])
 def product_list(request):
     """Get all products with pagination, with optional sorting"""
-    from django.db.models import Case, When, Value, FloatField
-    
     products = Product.objects.select_related('tag').annotate(
         rank_if_value=Case(
             When(tag__isnull=False, then=F('tag__rank_if')),
@@ -62,8 +61,6 @@ def product_list(request):
 @permission_classes([AllowAny])
 def product_list_by_category(request, category_name):
     """Get products by category name with pagination, with optional sorting"""
-    from django.db.models import Case, When, Value, FloatField
-    
     # Get category by name (case-insensitive lookup)
     category = get_object_or_404(Category, name__iexact=category_name)
     
@@ -160,3 +157,48 @@ def gift_box_products(request):
     ).order_by('-tag__rank_if')[:8]
     serializer = ProductListSerializer(products, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def product_list_by_brand(request, brand_id):
+    """Get products by brand ID with pagination, with optional sorting"""
+    # Get brand by ID
+    brand = get_object_or_404(Brand, id=brand_id)
+    
+    products = Product.objects.select_related('tag').filter(
+        brand=brand
+    ).annotate(
+        rank_if_value=Case(
+            When(tag__isnull=False, then=F('tag__rank_if')),
+            default=Value(0.0),
+            output_field=FloatField()
+        )
+    )
+    
+    # Handle sorting based on query parameter
+    sort_param = request.query_params.get('sort', 'COLLECTION_DEFAULT')
+    
+    if sort_param == 'BEST_SELLING':
+        # Best selling: rank by rank_if (could be enhanced with sales data later)
+        products = products.order_by('-rank_if_value', '-created_at')
+    elif sort_param == 'CREATED':
+        # Oldest first
+        products = products.order_by('created_at', 'id')
+    elif sort_param == 'CREATED_REVERSE':
+        # Newest first
+        products = products.order_by('-created_at', '-id')
+    elif sort_param == 'PRICE':
+        # Price: Low to High
+        products = products.order_by('price', 'id')
+    elif sort_param == 'PRICE_REVERSE':
+        # Price: High to Low
+        products = products.order_by('-price', '-id')
+    else:
+        # COLLECTION_DEFAULT or unknown: Featured (rank by rank_if)
+        products = products.order_by('-rank_if_value', '-created_at')
+    
+    paginator = ProductPagination()
+    paginated_products = paginator.paginate_queryset(products, request)
+    serializer = ProductListSerializer(paginated_products, many=True)
+    return paginator.get_paginated_response(serializer.data)

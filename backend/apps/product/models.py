@@ -3,6 +3,20 @@ from apps.category.models import Category
 from apps.brand.models import Brand
 
 
+class ProductDetailPic(models.Model):
+    """Product detail picture model"""
+    small_pic_link = models.URLField(max_length=500, help_text="Small thumbnail image URL (e.g., 100x100)")
+    big_pic_link = models.URLField(max_length=500, help_text="Large image URL (e.g., 700x780)")
+    extra_big_pic_link = models.URLField(max_length=500, help_text="Extra large image URL for modal/zoom view")
+
+    class Meta:
+        db_table = 'product_detail_pics'
+        ordering = ['id']
+
+    def __str__(self):
+        return f"Detail Pic {self.id}"
+
+
 class Product(models.Model):
     """Product model"""
     STATUS_CHOICES = [
@@ -15,7 +29,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in .xx format")
     profile_pic_link = models.URLField(max_length=500)
-    detail_pic_links = models.JSONField(default=list, blank=True, null=True, help_text="Array of image URLs")
+    detail_pics = models.ManyToManyField(ProductDetailPic, blank=True, related_name='products', help_text="Array of product detail picture IDs")
     type = models.JSONField(default=list, help_text="Array of product types (e.g., ['Gift Box', 'Limited Edition'])")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     current_stock = models.PositiveIntegerField(default=0)

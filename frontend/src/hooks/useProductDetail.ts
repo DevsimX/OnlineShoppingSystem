@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { type ProductDetail as ProductDetailType, getProductsByCategory } from "@/lib/api/products";
+import { type ProductDetail as ProductDetailType, getProductsByBrand } from "@/lib/api/products";
 import { useExploreProducts } from "./useProductSections";
 
 export type ProductCarouselProduct = {
@@ -26,14 +26,63 @@ export function useProductDetail(product: ProductDetailType) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [openSubAccordion, setOpenSubAccordion] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  
+  // Image loading states
+  const [mainImageLoading, setMainImageLoading] = useState(true);
+  const [thumbnailLoadingStates, setThumbnailLoadingStates] = useState<Record<number, boolean>>({});
+  const [modalImageLoading, setModalImageLoading] = useState(false);
 
-  // Get all images (main + detail images)
+  // Get all images (only detail images, excluding profile image)
   const allImages =
-    product.detail_pic_links && product.detail_pic_links.length > 0
-      ? [product.profile_pic_link, ...product.detail_pic_links]
-      : [product.profile_pic_link];
+    product.detail_pics && product.detail_pics.length > 0
+      ? product.detail_pics
+      : []; // Empty array if no detail images exist
 
-  const selectedImage = allImages[selectedImageIndex] || product.profile_pic_link;
+  // Get selected image data
+  const selectedImageData = allImages[selectedImageIndex];
+  const selectedThumbnail = selectedImageData?.small_pic_link || product.profile_pic_link;
+  const selectedImage = selectedImageData?.big_pic_link || product.profile_pic_link;
+  const selectedModalImage = selectedImageData?.extra_big_pic_link || selectedImage;
+  
+  // Initialize thumbnail loading states
+  useEffect(() => {
+    const initialStates: Record<number, boolean> = {};
+    allImages.forEach((_, index) => {
+      initialStates[index] = true;
+    });
+    setThumbnailLoadingStates(initialStates);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allImages.length]);
+  
+  // Reset main image loading when image changes
+  useEffect(() => {
+    setMainImageLoading(true);
+  }, [selectedImageIndex]);
+  
+  // Reset modal image loading when modal opens
+  useEffect(() => {
+    if (isImageModalOpen) {
+      setModalImageLoading(true);
+    }
+  }, [isImageModalOpen, selectedImage]);
+  
+  // Handlers for image loading
+  const handleMainImageLoad = () => {
+    setMainImageLoading(false);
+  };
+  
+  const handleThumbnailLoad = (index: number) => {
+    setThumbnailLoadingStates((prev) => ({ ...prev, [index]: false }));
+  };
+  
+  const handleModalImageLoad = () => {
+    setModalImageLoading(false);
+  };
+  
+  const handleThumbnailLoadingStart = (index: number) => {
+    setThumbnailLoadingStates((prev) => ({ ...prev, [index]: true }));
+  };
 
   // Price formatting
   const priceStr = formatPrice(product.price);
@@ -41,7 +90,11 @@ export function useProductDetail(product: ProductDetailType) {
 
   // Handlers
   const handleQuantityChange = (delta: number) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
+    setQuantity((prev) => {
+      const newQuantity = prev + delta;
+      // Don't allow quantity below 1 or above current stock
+      return Math.max(1, Math.min(newQuantity, product.current_stock));
+    });
   };
 
   const handleAddToCart = () => {
@@ -49,14 +102,18 @@ export function useProductDetail(product: ProductDetailType) {
     console.log("Add to cart:", { productId: product.id, quantity });
   };
 
-  // Fetch related products from same category
+  // Fetch related products from same brand
   const [relatedProducts, setRelatedProducts] = useState<ProductCarouselProduct[]>([]);
   const [isLoadingRelated, setIsLoadingRelated] = useState(true);
 
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        const response = await getProductsByCategory(product.category_name, 1, 8);
+        if (!product.brand_id) {
+          setIsLoadingRelated(false);
+          return;
+        }
+        const response = await getProductsByBrand(product.brand_id, 1, 8);
         // Filter out current product
         const filtered = response.results
           .filter((p) => p.id !== product.id)
@@ -88,7 +145,7 @@ export function useProductDetail(product: ProductDetailType) {
     };
 
     fetchRelated();
-  }, [product.category_name, product.id]);
+  }, [product.brand_id, product.id]);
 
   // Get "You Might Like" products (using explore products)
   const { products: youMightLikeProducts, isLoading: isLoadingYouMightLike } = useExploreProducts();
@@ -120,5 +177,18 @@ export function useProductDetail(product: ProductDetailType) {
     // You might like products
     youMightLikeProducts,
     isLoadingYouMightLike,
+    // Image modal state
+    isImageModalOpen,
+    setIsImageModalOpen,
+    // Image loading states
+    mainImageLoading,
+    thumbnailLoadingStates,
+    modalImageLoading,
+    handleMainImageLoad,
+    handleThumbnailLoad,
+    handleModalImageLoad,
+    handleThumbnailLoadingStart,
+    // Modal image URL
+    selectedModalImage,
   };
 }

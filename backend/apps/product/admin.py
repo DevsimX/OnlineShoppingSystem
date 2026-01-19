@@ -1,5 +1,16 @@
 from django.contrib import admin
-from .models import Product, ProductTag
+from .models import Product, ProductTag, ProductDetailPic
+
+
+@admin.register(ProductDetailPic)
+class ProductDetailPicAdmin(admin.ModelAdmin):
+    list_display = ('id', 'small_pic_link', 'big_pic_link', 'extra_big_pic_link')
+    search_fields = ('small_pic_link', 'big_pic_link', 'extra_big_pic_link')
+    fieldsets = (
+        ('Image Links', {
+            'fields': ('small_pic_link', 'big_pic_link', 'extra_big_pic_link')
+        }),
+    )
 
 
 @admin.register(Product)
@@ -16,7 +27,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('price', 'current_stock', 'status')
         }),
         ('Images', {
-            'fields': ('profile_pic_link', 'detail_pic_links')
+            'fields': ('profile_pic_link', 'detail_pics')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

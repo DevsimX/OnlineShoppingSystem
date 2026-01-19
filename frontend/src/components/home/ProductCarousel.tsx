@@ -29,7 +29,7 @@ type ProductCarouselProps = {
 };
 
 export default function ProductCarousel({ title, titleHref, products, showSeeAll = true, isLoading = false }: ProductCarouselProps) {
-  const { scrollContainerRef, contentRef, translateX, canScrollRight, canScrollLeft, scroll } =
+  const { scrollContainerRef, contentRef, translateX, canScrollRight, canScrollLeft, isScrollable, scroll } =
     useHorizontalScroll({
       dependencies: [products],
     });
@@ -150,7 +150,7 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
             </div>
           </div>
         </div>
-        {canScrollLeft && (
+        {isScrollable && canScrollLeft && (
           <button
             onClick={() => scroll("left")}
             className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center left-1.5"
@@ -160,7 +160,7 @@ export default function ProductCarousel({ title, titleHref, products, showSeeAll
             <span className="sr-only">Previous</span>
           </button>
         )}
-        {canScrollRight && (
+        {isScrollable && canScrollRight && (
           <button
             onClick={() => scroll("right")}
             className="absolute cursor-pointer z-[2] rounded-lg border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] w-12 h-12 p-2 justify-center items-center select-none top-1/2 -translate-y-1/2 hover:bg-[#30897c] hover:[&_path]:stroke-white transition-colors duration-200 flex items-center justify-center right-1.5"
