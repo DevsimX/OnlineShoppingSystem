@@ -8,7 +8,8 @@ from django.db.models import Case, When, Value, FloatField, F, Q
 from apps.brand.models import Brand
 from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer
-from .services import get_collection_filters
+from .services import get_collection_search_query
+from django.db import connection
 
 
 class ProductPagination(PageNumberPagination):
@@ -60,55 +61,90 @@ def product_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list_by_collection(request, slug):
-    """Get products by collection slug with fuzzy matching, pagination, and optional sorting"""
-    # Use collection service to interpret slug and get filters
-    filter_config = get_collection_filters(slug)
-    query_filters = filter_config['query_filters']
-    jsonb_keywords = filter_config.get('jsonb_keywords', [])
+    """Get products by collection slug with fuzzy matching using PostgreSQL FTS + pg_trgm"""
+    # Build PostgreSQL search query
+    search_config = get_collection_search_query(slug)
     
-    # Start with base query
-    products = Product.objects.select_related('tag', 'brand')
+    # Get pagination params
+    page = int(request.query_params.get('page', 1))
+    page_size = int(request.query_params.get('page_size', 20))
+    offset = (page - 1) * page_size
     
-    # Apply the service filters
-    # The service already handles multiple case variations and name/description search
-    # This should work for most cases including "gifts-under-100"
-    if query_filters:
-        products = products.filter(query_filters)
-    
-    products = products.annotate(
-        rank_if_value=Case(
-            When(tag__isnull=False, then=F('tag__rank_if')),
-            default=Value(0.0),
-            output_field=FloatField()
-        )
-    )
-    
-    # Handle sorting based on query parameter
+    # Handle sorting
     sort_param = request.query_params.get('sort', 'COLLECTION_DEFAULT')
     
+    # Adjust ORDER BY based on sort parameter
+    base_order_by = search_config['order_by']
     if sort_param == 'BEST_SELLING':
-        # Best selling: rank by rank_if (could be enhanced with sales data later)
-        products = products.order_by('-rank_if_value', '-created_at')
+        order_by = "COALESCE(pt.rank_if, 0) DESC, p.created_at DESC"
     elif sort_param == 'CREATED':
-        # Oldest first
-        products = products.order_by('created_at', 'id')
+        order_by = "p.created_at ASC, p.id ASC"
     elif sort_param == 'CREATED_REVERSE':
-        # Newest first
-        products = products.order_by('-created_at', '-id')
+        order_by = "p.created_at DESC, p.id DESC"
     elif sort_param == 'PRICE':
-        # Price: Low to High
-        products = products.order_by('price', 'id')
+        order_by = "p.price ASC, p.id ASC"
     elif sort_param == 'PRICE_REVERSE':
-        # Price: High to Low
-        products = products.order_by('-price', '-id')
+        order_by = "p.price DESC, p.id DESC"
     else:
-        # COLLECTION_DEFAULT or unknown: Featured (rank by rank_if)
-        products = products.order_by('-rank_if_value', '-created_at')
+        order_by = base_order_by
     
-    paginator = ProductPagination()
-    paginated_products = paginator.paginate_queryset(products, request)
-    serializer = ProductListSerializer(paginated_products, many=True)
-    return paginator.get_paginated_response(serializer.data)
+    # Build SQL with pagination
+    sql_query = search_config['sql_query'].replace(
+        f"ORDER BY {search_config['order_by']}",
+        f"ORDER BY {order_by}"
+    )
+    sql_query = f"{sql_query} LIMIT %s OFFSET %s"
+    
+    # Execute query
+    with connection.cursor() as cursor:
+        # Count total results - extract WHERE clause and build simpler count query
+        sql_query_str = search_config['sql_query']
+        # Extract WHERE clause from the original query
+        where_match = sql_query_str.split('WHERE')
+        where_clause = where_match[1].split('ORDER BY')[0].strip() if len(where_match) > 1 else 'TRUE'
+        
+        count_query = f"""
+            SELECT COUNT(DISTINCT p.id)
+            FROM products p
+            LEFT JOIN brands b ON p.brand_id = b.id
+            LEFT JOIN product_tags pt ON p.id = pt.product_id
+            WHERE {where_clause}
+        """
+        cursor.execute(count_query, search_config['params'])
+        total = cursor.fetchone()[0]
+        
+        # Get paginated results
+        params = search_config['params'] + [page_size, offset]
+        cursor.execute(sql_query, params)
+        
+        # Fetch results
+        columns = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+        
+        # Convert rows to dictionaries
+        results = [dict(zip(columns, row)) for row in rows]
+        product_ids = [r['id'] for r in results]
+    
+    # Fetch Product objects from Django ORM to use serializers
+    # Preserve order by using a dict
+    products_dict = {
+        p.id: p for p in Product.objects.select_related('tag', 'brand')
+        .filter(id__in=product_ids)
+    }
+    
+    # Order products according to SQL results
+    products = [products_dict[pid] for pid in product_ids if pid in products_dict]
+    
+    # Serialize
+    serializer = ProductListSerializer(products, many=True)
+    
+    # Build paginated response
+    return Response({
+        'count': total,
+        'next': f"{request.build_absolute_uri()}?page={page + 1}" if offset + page_size < total else None,
+        'previous': f"{request.build_absolute_uri()}?page={page - 1}" if page > 1 else None,
+        'results': serializer.data
+    })
 
 
 @api_view(['GET'])

@@ -1,329 +1,147 @@
 """
-Business service layer for collection interpretation and filtering
+Business service layer for collection search using PostgreSQL FTS and pg_trgm
+Uses raw SQL queries - no ORM Q objects, no manual interpretation
 """
 from decimal import Decimal
-from django.db.models import Q, Value, CharField
-from django.db.models.functions import Lower, Cast
-from django.contrib.postgres.fields import ArrayField
+from django.db import connection
 
 
-class CollectionInterpreter:
+def get_collection_search_query(slug: str) -> dict:
     """
-    Interprets collection slugs and builds query filters.
-    
-    Handles formats like:
-    - cooking-condiments
-    - gifts-under-100
-    - gifts-for-women
-    - under-20
-    - for-man
-    - for-woman
-    """
-    
-    # Price range keywords
-    PRICE_KEYWORDS = {
-        'under': ['under', 'below', 'less-than', 'cheaper-than'],
-        'over': ['over', 'above', 'more-than', 'greater-than'],
-        'between': ['between', 'range'],
-    }
-    
-    # Gender keywords
-    GENDER_KEYWORDS = {
-        'man': ['man', 'men', 'male', 'gentleman', 'gentlemen'],
-        'woman': ['woman', 'women', 'female', 'lady', 'ladies'],
-    }
-    
-    # Common collection types that should match product types
-    TYPE_KEYWORDS = [
-        'gift', 'gifts', 'condiment', 'condiments', 'cooking', 'kitchen',
-        'drink', 'drinks', 'beverage', 'beverages', 'food', 'snack', 'snacks',
-        'art', 'print', 'prints', 'artwork', 'candle', 'candles',
-    ]
-    
-    # Related keywords for broader matching (e.g., "food" should also match "snack", "jerky", etc.)
-    KEYWORD_SYNONYMS = {
-        'food': ['food', 'snack', 'snacks', 'jerky', 'chips', 'crisps', 'candy', 'sweets', 'treat', 'treats', 'meal', 'meals'],
-        'drinks': ['drink', 'drinks', 'beverage', 'beverages', 'juice', 'soda', 'water', 'coffee', 'tea'],
-        'drink': ['drink', 'drinks', 'beverage', 'beverages', 'juice', 'soda', 'water', 'coffee', 'tea'],
-        'snack': ['snack', 'snacks', 'food', 'jerky', 'chips', 'crisps', 'candy', 'sweets', 'treat', 'treats'],
-        'snacks': ['snack', 'snacks', 'food', 'jerky', 'chips', 'crisps', 'candy', 'sweets', 'treat', 'treats'],
-    }
-    
-    def __init__(self, slug: str):
-        """
-        Initialize interpreter with a collection slug.
-        
-        Args:
-            slug: Collection slug like 'cooking-condiments' or 'gifts-under-100'
-        """
-        self.slug = slug
-        self.parts = slug.lower().split('-')
-        self.query_filters = Q()
-        self.price_filters = Q()
-        self.type_filters = Q()
-        self.name_search_filters = Q()
-        
-    def interpret(self) -> dict:
-        """
-        Interpret the slug and return filter configuration.
-        
-        Returns:
-            dict with 'query_filters' (Q object), 'order_by' (list), and metadata
-        """
-        self._parse_price_ranges()
-        self._parse_gender()
-        self._parse_types()
-        self._parse_name_search()
-        
-        # Combine all filters
-        # Use OR logic: if we have type filters OR name search, combine them with OR
-        # Then AND with price filters if they exist
-        final_filter = Q()
-        
-        # Combine type and name search with OR (products matching either)
-        # This ensures products are found even if they don't have the exact type in the type array
-        type_or_name_filter = Q()
-        if self.type_filters:
-            type_or_name_filter |= self.type_filters
-        if self.name_search_filters:
-            type_or_name_filter |= self.name_search_filters
-        
-        # If we have type/name filters, use them
-        if type_or_name_filter:
-            final_filter = type_or_name_filter
-            # AND with price filters if they exist
-            if self.price_filters:
-                final_filter &= self.price_filters
-        elif self.price_filters:
-            # If only price filters exist, use them
-            final_filter = self.price_filters
-        else:
-            # If no filters were applied, return empty Q to avoid returning all products
-            final_filter = Q(pk__isnull=True)  # This will match nothing
-        
-        return {
-            'query_filters': final_filter,
-            'price_filter_applied': bool(self.price_filters),
-            'type_filter_applied': bool(self.type_filters),
-            'gender_filter_applied': bool(getattr(self, '_gender_applied', False)),
-            'search_terms': getattr(self, '_search_terms', []),
-            'jsonb_keywords': getattr(self, '_jsonb_keywords', []),
-        }
-    
-    def _parse_price_ranges(self):
-        """Parse price-related keywords from slug"""
-        slug_lower = self.slug.lower()
-        
-        # Check for price keywords
-        for part in self.parts:
-            # Handle dollar amounts like $20, 20, under-20, etc.
-            if part.startswith('$') or part.replace('.', '').isdigit():
-                # Extract numeric value
-                price_str = part.replace('$', '').replace(',', '')
-                try:
-                    price_value = Decimal(price_str)
-                    
-                    # Check if previous part indicates "under" or "over"
-                    part_index = self.parts.index(part)
-                    if part_index > 0:
-                        prev_part = self.parts[part_index - 1]
-                        if prev_part in self.PRICE_KEYWORDS['under']:
-                            self.price_filters &= Q(price__lt=price_value)
-                            return
-                        elif prev_part in self.PRICE_KEYWORDS['over']:
-                            self.price_filters &= Q(price__gt=price_value)
-                            return
-                    
-                    # Default to "under" if no keyword but number present
-                    # Common pattern: "under-20" becomes "under-20"
-                    if 'under' in slug_lower or 'below' in slug_lower:
-                        self.price_filters &= Q(price__lt=price_value)
-                    elif 'over' in slug_lower or 'above' in slug_lower:
-                        self.price_filters &= Q(price__gt=price_value)
-                    else:
-                        # If just a number, default to "under"
-                        self.price_filters &= Q(price__lt=price_value)
-                    
-                except (ValueError, TypeError):
-                    pass
-    
-    def _parse_gender(self):
-        """Parse gender-related keywords"""
-        slug_lower = self.slug.lower()
-        
-        for keyword_type, keywords in self.GENDER_KEYWORDS.items():
-            for keyword in keywords:
-                if keyword in slug_lower:
-                    self._gender_applied = True
-                    # For now, we could search in product name or description
-                    # In the future, this could be a product attribute
-                    if keyword_type == 'man' or keyword_type == 'men':
-                        self.name_search_filters |= Q(name__icontains='men') | Q(name__icontains='man') | Q(name__icontains='male')
-                        self.name_search_filters |= Q(description__icontains='men') | Q(description__icontains='man') | Q(description__icontains='male')
-                    elif keyword_type == 'woman' or keyword_type == 'women':
-                        self.name_search_filters |= Q(name__icontains='women') | Q(name__icontains='woman') | Q(name__icontains='female') | Q(name__icontains='lady') | Q(name__icontains='ladies')
-                        self.name_search_filters |= Q(description__icontains='women') | Q(description__icontains='woman') | Q(description__icontains='female') | Q(description__icontains='lady') | Q(description__icontains='ladies')
-                    return
-    
-    def _parse_types(self):
-        """Parse product type keywords"""
-        slug_lower = self.slug.lower()
-        
-        # Check if any part matches type keywords
-        for part in self.parts:
-            if part in self.TYPE_KEYWORDS:
-                # Match against product type field (JSONField array)
-                # Normalize keyword (e.g., "gifts" -> "Gift Box")
-                normalized = self._normalize_type_keyword(part)
-                if normalized:
-                    # Build variations to match different forms in the database
-                    variations = set()
-                    
-                    # Add base variations
-                    variations.add(normalized)  # "Gift Box"
-                    variations.add(normalized.lower())  # "gift box"
-                    variations.add(normalized.upper())  # "GIFT BOX"
-                    variations.add(normalized.title())  # "Gift Box"
-                    
-                    # Add plural variations based on the normalized form
-                    if normalized.endswith('Box'):
-                        variations.add(normalized + 'es')  # "Gift Boxes"
-                        variations.add(normalized.lower() + 'es')  # "gift boxes"
-                        variations.add(normalized.upper() + 'ES')  # "GIFT BOXES"
-                    elif normalized.endswith('y'):
-                        variations.add(normalized[:-1] + 'ies')  # "Candy" -> "Candies"
-                        variations.add(normalized.lower()[:-1] + 'ies')
-                    elif not normalized.endswith('s'):  # Don't add 's' if already ends in 's'
-                        variations.add(normalized + 's')  # "Gift" -> "Gifts"
-                        variations.add(normalized.lower() + 's')
-                    
-                    # Also add the original part and its variations for broader matching
-                    # This helps match products that have "gifts" or "Gifts" directly in their type array
-                    variations.add(part)
-                    variations.add(part.title())
-                    variations.add(part.upper())
-                    if not part.endswith('s'):  # Don't add 's' if already ends in 's'
-                        variations.add(part + 's')  # "gift" -> "gifts"
-                        variations.add(part.title() + 's')  # "Gift" -> "Gifts"
-                    
-                    # Build OR query for all variations
-                    # Note: type__contains for JSONField checks if array contains exact value (case-sensitive)
-                    # So we check all case variations explicitly
-                    type_query = Q()
-                    for variation in variations:
-                        # Check exact match for each variation
-                        type_query |= Q(type__contains=[variation])
-                    
-                    self.type_filters |= type_query
-                
-                # Enhanced fuzzy name/description matching with synonyms
-                # Get synonyms for broader matching (e.g., "food" should match "snack", "jerky", etc.)
-                search_terms = [part]
-                if part in self.KEYWORD_SYNONYMS:
-                    search_terms.extend(self.KEYWORD_SYNONYMS[part])
-                
-                # Search in name, description, and brand name for all related terms
-                for term in search_terms:
-                    if len(term) > 2:  # Only search terms longer than 2 characters
-                        self.name_search_filters |= (
-                            Q(name__icontains=term) | 
-                            Q(description__icontains=term) |
-                            Q(brand__name__icontains=term)
-                        )
-                
-                # Store the keyword for case-insensitive JSONB matching in the view
-                if not hasattr(self, '_jsonb_keywords'):
-                    self._jsonb_keywords = []
-                self._jsonb_keywords.append(part)
-    
-    def _normalize_type_keyword(self, keyword: str) -> str | None:
-        """
-        Normalize a keyword to match product type values.
-        
-        For example: "gifts" -> "Gift Box", "condiment" -> might match a type
-        """
-        type_mappings = {
-            'gift': 'Gift Box',
-            'gifts': 'Gift Box',
-            'condiment': 'Condiment',
-            'condiments': 'Condiment',
-            'cooking': 'Cooking',
-            'kitchen': 'Kitchen',
-            'drink': 'Beverage',
-            'drinks': 'Beverage',
-            'beverage': 'Beverage',
-            'beverages': 'Beverage',
-            'food': 'Food',
-            'snack': 'Snack',
-            'snacks': 'Snack',
-            'art': 'Art',
-            'print': 'Print',
-            'prints': 'Print',
-            'artwork': 'Art',
-            'candle': 'Candle',
-            'candles': 'Candle',
-        }
-        
-        return type_mappings.get(keyword.lower())
-    
-    def _parse_name_search(self):
-        """Parse general search terms that should match product names/descriptions"""
-        # Always add search terms for parts that aren't already handled by type/gender filters
-        # This ensures we catch products even if they don't have the exact type in the type array
-        
-        # Add all non-keyword parts as search terms
-        excluded_parts = set()
-        
-        # Exclude price-related parts
-        for keyword_list in self.PRICE_KEYWORDS.values():
-            excluded_parts.update(keyword_list)
-        
-        # Exclude gender-related parts (already handled in _parse_gender)
-        for keyword_list in self.GENDER_KEYWORDS.values():
-            excluded_parts.update(keyword_list)
-        
-        # Exclude common connectors
-        excluded_parts.update(['for', 'the', 'a', 'an', 'and', 'or', 'under', 'over', 'below', 'above'])
-        
-        # Build search terms from remaining parts that aren't in TYPE_KEYWORDS
-        # (TYPE_KEYWORDS are already handled in _parse_types with synonyms)
-        search_terms = [
-            part for part in self.parts 
-            if part not in excluded_parts 
-            and part not in self.TYPE_KEYWORDS  # Skip TYPE_KEYWORDS as they're handled in _parse_types
-            and not part.replace('.', '').replace('$', '').isdigit()
-        ]
-        
-        if search_terms:
-            self._search_terms = search_terms
-            # Create fuzzy search on name and description
-            for term in search_terms:
-                if len(term) > 2:  # Only search terms longer than 2 characters
-                    self.name_search_filters |= Q(name__icontains=term) | Q(description__icontains=term)
-                    # Also search in brand name
-                    self.name_search_filters |= Q(brand__name__icontains=term)
-
-
-def get_collection_filters(slug: str) -> dict:
-    """
-    Public function to get collection filters from a slug.
+    Build PostgreSQL FTS + pg_trgm search query from a slug.
+    Relies purely on PostgreSQL's FTS and pg_trgm for fuzzy matching.
     
     Args:
         slug: Collection slug (e.g., 'cooking-condiments', 'gifts-under-100')
     
     Returns:
-        dict with 'query_filters' (Q object) and 'jsonb_keywords' (list) for case-insensitive matching
+        dict with 'sql_query' (SQL string), 'params' (query parameters), 
+        'order_by' (ORDER BY clause), and metadata
     """
-    interpreter = CollectionInterpreter(slug)
-    result = interpreter.interpret()
-    query_filters = result['query_filters']
+    parts = slug.lower().split('-')
+    where_conditions = []
+    params = []
     
-    # If no filters were applied, return a filter that matches nothing
-    # This prevents returning all products for ambiguous slugs
-    if not query_filters:
-        query_filters = Q(pk__isnull=True)
+    # Extract search terms (exclude common words and numbers)
+    excluded_words = {'for', 'the', 'a', 'an', 'and', 'or', 'under', 'over', 'below', 'above', 'to', 'of', 'in', 'on', 'at'}
+    search_terms = []
+    price_value = None
+    price_operator = None
+    
+    for part in parts:
+        # Check if it's a price number
+        if part.startswith('$') or part.replace('.', '').isdigit():
+            try:
+                price_value = float(part.replace('$', '').replace(',', ''))
+                # Check if previous part indicates "under" or "over"
+                part_index = parts.index(part)
+                if part_index > 0:
+                    prev_part = parts[part_index - 1]
+                    if prev_part in ['under', 'below', 'less']:
+                        price_operator = 'lt'
+                    elif prev_part in ['over', 'above', 'more', 'greater']:
+                        price_operator = 'gt'
+                if not price_operator:
+                    # Default to "under" if no keyword
+                    price_operator = 'lt'
+            except (ValueError, TypeError):
+                pass
+        elif part not in excluded_words and len(part) > 2:
+            search_terms.append(part)
+    
+    # Build search conditions using PostgreSQL FTS and pg_trgm
+    # Best practice: Prioritize FTS (more semantic, fewer false positives)
+    # Use similarity with higher threshold (0.2) to reduce false positives
+    # Use ILIKE for exact substring matches (most reliable)
+    search_conditions = []
+    
+    if search_terms:
+        # Combine search terms
+        search_text = ' '.join(search_terms)
+        
+        # Primary: FTS and ILIKE (most reliable, semantic matching)
+        # Secondary: Similarity with higher threshold (0.2) to reduce false positives
+        search_conditions.append(
+            "(to_tsvector('english', p.name || ' ' || p.description || ' ' || COALESCE(b.name, '')) @@ plainto_tsquery('english', %s) OR "
+            "p.name ILIKE %s OR "
+            "p.description ILIKE %s OR "
+            "b.name ILIKE %s OR "
+            "p.type::text ILIKE %s OR "
+            "similarity(p.name, %s) > 0.2 OR "
+            "similarity(p.description, %s) > 0.2 OR "
+            "similarity(b.name, %s) > 0.2)"
+        )
+        params.extend([
+            search_text,  # FTS query (prioritized)
+            f'%{search_text}%', f'%{search_text}%', f'%{search_text}%',  # ILIKE params (exact matches)
+            f'%{search_text}%',  # type search
+            search_text, search_text, search_text,  # similarity params (with higher threshold)
+        ])
+        
+        # Also search individual terms for better matching
+        # Use higher threshold (0.2) for individual terms to reduce false positives
+        for term in search_terms:
+            if len(term) > 3:
+                search_conditions.append(
+                    "(p.name ILIKE %s OR "
+                    "p.description ILIKE %s OR "
+                    "similarity(p.name, %s) > 0.2 OR "
+                    "similarity(p.description, %s) > 0.2)"
+                )
+                params.extend([f'%{term}%', f'%{term}%', term, term])
+    
+    if search_conditions:
+        where_conditions.append(f"({' OR '.join(search_conditions)})")
+    
+    # Price filter
+    if price_value is not None and price_operator:
+        if price_operator == 'lt':
+            where_conditions.append("p.price < %s")
+            params.append(price_value)
+        elif price_operator == 'gt':
+            where_conditions.append("p.price > %s")
+            params.append(price_value)
+    
+    # Build ORDER BY clause based on relevance
+    # Use pg_trgm similarity score for ranking
+    order_by = "COALESCE(pt.rank_if, 0) DESC, p.created_at DESC"
+    similarity_expr = None
+    if search_terms:
+        search_text = ' '.join(search_terms)
+        # Add similarity-based ordering
+        search_text_escaped = search_text.replace("'", "''")
+        similarity_expr = (
+            f"GREATEST("
+            f"similarity(p.name, '{search_text_escaped}'), "
+            f"similarity(p.description, '{search_text_escaped}'), "
+            f"similarity(b.name, '{search_text_escaped}')"
+            f")"
+        )
+        order_by = "similarity_score DESC, COALESCE(pt.rank_if, 0) DESC, p.created_at DESC"
+    
+    # Build SQL query
+    where_clause = ' AND '.join(where_conditions) if where_conditions else 'TRUE'
+    
+    # Use explicit column list
+    select_fields = (
+        "p.id, p.name, p.brand_id, p.description, p.price, p.profile_pic_link, "
+        "p.type, p.current_stock, p.status, p.created_at, p.updated_at, "
+        "pt.rank_if"
+    )
+    if similarity_expr:
+        select_fields = f"{select_fields}, {similarity_expr} AS similarity_score"
+    
+    sql_query = f"""
+        SELECT {select_fields}
+        FROM products p
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN product_tags pt ON p.id = pt.product_id
+        WHERE {where_clause}
+        ORDER BY {order_by}
+    """
     
     return {
-        'query_filters': query_filters,
-        'jsonb_keywords': result.get('jsonb_keywords', []),
+        'sql_query': sql_query,
+        'params': params,
+        'order_by': order_by,
     }
