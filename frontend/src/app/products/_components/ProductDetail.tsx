@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ZoomIn, Plus, Minus, ShoppingBag, ChevronDown } from "lucide-react";
+import { ZoomIn, Plus, Minus, ShoppingBag, ChevronDown, Loader2 } from "lucide-react";
 import { type ProductDetail as ProductDetailType } from "@/lib/api/products";
 import { useProductDetail } from "@/hooks/useProductDetail";
 import Hot from "@/assets/hot.svg";
@@ -48,6 +48,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     handleModalImageLoad,
     handleThumbnailLoadingStart,
     selectedModalImage,
+    isAddingToCart,
   } = useProductDetail(product);
 
   return (
@@ -216,7 +217,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </div>
               <button
                 onClick={handleAddToCart}
-                disabled={quantity > product.current_stock}
+                disabled={quantity > product.current_stock || isAddingToCart}
                 className={`flex h-12 w-full cursor-pointer items-center justify-center rounded-full border-2 border-black px-8 font-trade-gothic font-black tracking-wide text-white uppercase shadow-[2px_2px_0px_0px_#000] transition-all sm:text-lg md:text-sm lg:text-xl ${
                   quantity > product.current_stock
                     ? "bg-gray-400 hover:bg-gray-400 disabled:cursor-not-allowed"
@@ -225,6 +226,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               >
                 {quantity > product.current_stock ? (
                   "Not enough stock"
+                ) : isAddingToCart ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Adding...
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <ShoppingBag className="w-5 h-5" />

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { type ProductDetail as ProductDetailType, getProductsByBrand, getYouMightLikeProducts } from "@/lib/api/products";
+import { addToCart } from "@/lib/api/cart";
+import { useCart } from "@/contexts/CartContext";
 
 export type ProductCarouselProduct = {
   name: string;
@@ -101,9 +103,23 @@ export function useProductDetail(product: ProductDetailType) {
     });
   };
 
-  const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
-    console.log("Add to cart:", { productId: product.id, quantity });
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const { openCart, refreshCart } = useCart();
+
+  const handleAddToCart = async () => {
+    if (isAddingToCart) return;
+    
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product.id, quantity);
+      await refreshCart();
+      openCart();
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      // TODO: Show error toast/notification
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   // Fetch related products from same brand
@@ -229,5 +245,7 @@ export function useProductDetail(product: ProductDetailType) {
     handleThumbnailLoadingStart,
     // Modal image URL
     selectedModalImage,
+    // Add to cart loading state
+    isAddingToCart,
   };
 }

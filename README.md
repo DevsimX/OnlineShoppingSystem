@@ -37,18 +37,20 @@ npm run dev
 - **Auth**: `/api/auth/register/`, `/api/auth/login/`, `/api/auth/logout/`, `/api/auth/me/`
 - **Products**: 
   - `/api/products/` - All products (supports `?sort=PRICE`, `?page=1`, `?page_size=20`)
-  - `/api/products/collections/<slug>/` - Products by collection with fuzzy matching (e.g., `/api/products/collections/food-drinks/`, `/api/products/collections/gifts-under-100/`)
-    - Supports flexible slug-based routing with PostgreSQL Full-Text Search (FTS) and pg_trgm fuzzy matching
-    - Automatically interprets slugs like `food-drinks`, `cooking-condiments`, `gifts-under-100`, `art-prints`
+  - `/api/products/collections/<slug>/` - Products by collection with fuzzy matching
+    - Supports flexible slug-based routing with PostgreSQL FTS + pg_trgm
+    - Automatically interprets slugs like `food-drinks`, `gifts-under-100`, `art-prints`
     - Supports `?sort=PRICE`, `?page=1`, `?page_size=20`
   - `/api/products/<id>/` - Single product details
-  - `/api/products/<id>/you-might-like/` - 8 recommended products (same type, ordered by rank)
-  - `/api/products/hot/` - 8 most hot products
-  - `/api/products/new/` - 8 most new products
-  - `/api/products/explore/` - 8 most explore products
-  - `/api/products/gift-box/` - 8 gift box products
-  - **Sort Options**: `COLLECTION_DEFAULT` (Featured), `BEST_SELLING`, `CREATED` (Oldest), `CREATED_REVERSE` (Newest), `PRICE` (Low to High), `PRICE_REVERSE` (High to Low)
-- **Orders/Payments/Cart**: Placeholders (not implemented yet)
+  - `/api/products/<id>/you-might-like/` - 8 recommended products (same type)
+  - `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/` - Featured product sections
+  - **Sort Options**: `COLLECTION_DEFAULT`, `BEST_SELLING`, `CREATED`, `CREATED_REVERSE`, `PRICE`, `PRICE_REVERSE`
+- **Cart**: 
+  - `GET /api/cart/` - Get cart (requires authentication)
+  - `POST /api/cart/add/` - Add item to cart
+  - `POST /api/cart/update/` - Update item quantity
+  - `POST /api/cart/remove/` - Remove item from cart
+  - **Note**: Cart works for both authenticated (database) and unauthenticated (localStorage) users
 
 ## Project Structure
 
@@ -74,14 +76,13 @@ OnlineShoppingSystem/
 
 - ✅ JWT authentication (login/register)
 - ✅ Protected dashboard
-- ✅ Product carousels with real-time backend data
-- ✅ Lazy loading for product sections
-- ✅ Flexible collection routing with fuzzy search (PostgreSQL FTS + pg_trgm)
-- ✅ Collections page with pagination and sorting
-- ✅ Sort dropdown with URL-trackable sort parameters
-- ✅ Product detail pages with image galleries
-- ✅ "You Might Like" recommendations
-- ✅ Shopping cart UI
+- ✅ Product carousels with lazy loading
+- ✅ Flexible collection routing with PostgreSQL FTS + pg_trgm fuzzy search
+- ✅ Product detail pages with image galleries and modal views
+- ✅ Shopping cart with dual storage (database for authenticated, localStorage for guests)
+- ✅ Automatic cart sync on login (merges localStorage cart with database)
+- ✅ Cart persists across page refreshes for all users
+- ✅ Free shipping progress indicator
 - ✅ Responsive design
 - ✅ Custom hooks for maintainability
 
@@ -110,42 +111,36 @@ npm run lint
 - ✅ Protected dashboard page
 - ✅ Product & Brand models and API endpoints
 - ✅ Product carousels with loading states and lazy loading
-- ✅ Backend integration for all product sections (Hot, New, Gift Box, Explore)
-- ✅ Badge animations (new/hot badges with opposite rotation)
-- ✅ **Flexible collection routing with PostgreSQL Full-Text Search (FTS) and pg_trgm**
-  - Removed Category table and hardcoded category endpoints
-  - Implemented fuzzy matching using PostgreSQL native search capabilities
-  - Collection slugs like `food-drinks`, `gifts-under-100`, `art-prints` are automatically interpreted
-  - Supports price filtering (e.g., `gifts-under-100`)
-  - Prioritizes FTS matches over similarity for better accuracy
-- ✅ Collections page with pagination and URL-trackable parameters
-- ✅ Product sorting functionality (Featured, Best Selling, Oldest, Newest, Price: Low to High, Price: High to Low)
-- ✅ Sort dropdown component with fade-in/fade-out animations
-- ✅ **Product detail pages** with image galleries and modal views
-- ✅ **"You Might Like" recommendations** based on product type
-- ✅ Shopping cart UI with drawer
-- ✅ **Product descriptions and types** - All products have accurate 50+ word descriptions and simple type classifications
-- ✅ Custom hooks extracted for better maintainability
-  - `useProductSections` - Product fetching and lazy loading
-  - `useCollections` - Collections page data fetching
-  - `useCollectionsPagination` - Pagination and URL management
-  - `useSortDropdown` - Sort dropdown state management
-  - `useProductDetail` - Product detail page data fetching
-  - `useAuth` - Authentication checking
-  - `useLogin` / `useRegister` - Form handling
-  - `usePasswordValidation` - Password strength
+- ✅ Flexible collection routing with PostgreSQL FTS + pg_trgm
+  - Removed Category table, uses dynamic slug-based routing
+  - Automatic interpretation of slugs like `food-drinks`, `gifts-under-100`
+  - Supports price filtering and prioritizes FTS matches
+- ✅ Collections page with pagination and sorting
+- ✅ Product detail pages with image galleries and modal views
+- ✅ "You Might Like" recommendations based on product type
+- ✅ **Shopping cart with dual storage system**
+  - Database storage for authenticated users
+  - localStorage for unauthenticated users (persists across refreshes)
+  - Automatic sync on login (merges localStorage cart with database)
+- ✅ Product descriptions and types (50+ words, simple classifications)
+- ✅ Custom hooks for maintainability (`useProductSections`, `useCollections`, `useProductDetail`, `useCart`, etc.)
 - ✅ Responsive design across all pages
 
 ### In Progress
-- 🔄 Order, Payment, and Cart API endpoints (models created, endpoints pending)
+- 🔄 Order and Payment API endpoints (models created, endpoints pending)
 
 ## Recent Updates
 
 ### Search & Collections
-- **Migrated from Meilisearch to PostgreSQL FTS + pg_trgm**: Removed external search dependency and now use PostgreSQL's native full-text search with fuzzy matching capabilities
-- **Removed Category table**: Replaced with flexible collection routing that interprets slugs dynamically
-- **Improved search accuracy**: Higher similarity thresholds (0.2) and prioritized FTS matches reduce false positives
+- Migrated from Meilisearch to PostgreSQL FTS + pg_trgm for native search
+- Removed Category table, implemented flexible slug-based collection routing
+- Improved search accuracy with higher similarity thresholds (0.2) and prioritized FTS matches
 
 ### Product Data
-- **Enhanced product descriptions**: All products now have detailed 50+ word descriptions matching their actual content
-- **Standardized product types**: Products use simple, consistent type classifications (food, drink, art, jewelry, etc.)
+- Enhanced product descriptions (50+ words) and standardized product types
+
+### Shopping Cart
+- Dual storage system: database for authenticated users, localStorage for guests
+- Automatic cart sync on login (merges localStorage with database cart)
+- Cart persists across page refreshes for all users
+- Free shipping progress indicator with success state

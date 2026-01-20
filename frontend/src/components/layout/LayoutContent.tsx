@@ -2,12 +2,9 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import CartDrawer from "@/components/cart/CartDrawer";
-import { useCart } from "@/contexts/CartContext";
+import Cart from "@/components/cart/Cart";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isCartOpen, closeCart } = useCart();
-
   return (
     <>
       <Header />
@@ -16,7 +13,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         {children}
       </div>
       <Footer />
-      <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
+      <Cart />
     </>
   );
 }

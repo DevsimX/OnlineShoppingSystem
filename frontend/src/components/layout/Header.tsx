@@ -30,7 +30,7 @@ type NavLinkItem = {
 
 export default function Header() {
   const router = useRouter();
-  const { openCart } = useCart();
+  const { openCart, cartItemCount } = useCart();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -326,12 +326,17 @@ export default function Header() {
 
             {/* Cart Icon */}
             <button
-              className="IconMenu cursor-pointer"
+              className="IconMenu relative cursor-pointer"
               aria-label="Open Cart"
               onClick={openCart}
             >
               <span className="sr-only">Open Cart</span>
               <Cart />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-pop-red-accent text-xs font-semibold text-white">
+                  {cartItemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
