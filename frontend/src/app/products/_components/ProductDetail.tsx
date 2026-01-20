@@ -160,7 +160,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </h1>
             <div className="pt-4">
               <Link
-                href={`/collections/${product.category_name.toLowerCase().replace(/\s+/g, "-")}`}
+                href={`/collections/all-products`}
                 className="text-lg tracking-wide underline-offset-4 hover:underline"
               >
                 {product.brand}
@@ -531,7 +531,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         products={relatedProducts}
         isLoading={isLoadingRelated}
         brand={product.brand}
-        categorySlug={product.category_name.toLowerCase().replace(/\s+/g, "-")}
+        categorySlug="all-products"
       />
 
       {/* You Might Like Section */}

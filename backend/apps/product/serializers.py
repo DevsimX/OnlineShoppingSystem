@@ -39,7 +39,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     new = serializers.SerializerMethodField()
     hot = serializers.SerializerMethodField()
     gift_box = serializers.SerializerMethodField()
-    category_name = serializers.CharField(source='category.name', read_only=True)
     brand = serializers.StringRelatedField()
     brand_id = serializers.IntegerField(source='brand.id', read_only=True)
     detail_pics = ProductDetailPicSerializer(many=True, read_only=True)
@@ -48,7 +47,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             'id', 'name', 'brand', 'brand_id', 'description', 'price', 'profile_pic_link',
-            'detail_pics', 'type', 'category', 'category_name', 'current_stock',
+            'detail_pics', 'type', 'current_stock',
             'status', 'new', 'hot', 'gift_box', 'created_at', 'updated_at'
         )
 

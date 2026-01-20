@@ -20,8 +20,6 @@ export type ProductDetailPic = {
 export type ProductDetail = Product & {
   description: string;
   detail_pics: ProductDetailPic[];
-  category: number;
-  category_name: string;
   brand_id: number;
   current_stock: number;
   status: string;
@@ -140,40 +138,6 @@ export async function getAllProducts(
   return result as PaginatedResponse<Product>;
 }
 
-export async function getProductsByCategory(
-  categoryName: string,
-  page = 1,
-  pageSize = 20,
-  sort?: string
-): Promise<PaginatedResponse<Product>> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    page_size: pageSize.toString(),
-  });
-  
-  if (sort && sort !== "COLLECTION_DEFAULT") {
-    params.append("sort", sort);
-  }
-  
-  const response = await fetch(
-    `${API_BASE_URL}/api/products/category/${encodeURIComponent(categoryName)}/?${params.toString()}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw result as ApiError;
-  }
-
-  return result as PaginatedResponse<Product>;
-}
-
 export async function getProductsByBrand(
   brandId: number,
   page = 1,
@@ -240,4 +204,38 @@ export async function getYouMightLikeProducts(productId: number): Promise<Produc
   }
 
   return result as Product[];
+}
+
+export async function getProductsByCollection(
+  slug: string,
+  page = 1,
+  pageSize = 20,
+  sort?: string
+): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  if (sort && sort !== "COLLECTION_DEFAULT") {
+    params.append("sort", sort);
+  }
+  
+  const response = await fetch(
+    `${API_BASE_URL}/api/products/collections/${encodeURIComponent(slug)}/?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PaginatedResponse<Product>;
 }

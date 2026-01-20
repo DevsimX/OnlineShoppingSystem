@@ -1,5 +1,4 @@
 from django.db import models
-from apps.category.models import Category
 from apps.brand.models import Brand
 
 
@@ -31,7 +30,6 @@ class Product(models.Model):
     profile_pic_link = models.URLField(max_length=500)
     detail_pics = models.ManyToManyField(ProductDetailPic, blank=True, related_name='products', help_text="Array of product detail picture IDs")
     type = models.JSONField(default=list, help_text="Array of product types (e.g., ['Gift Box', 'Limited Edition'])")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     current_stock = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
     created_at = models.DateTimeField(auto_now_add=True)

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllProducts, getProductsByCategory, type Product as APIProduct, type PaginatedResponse } from "@/lib/api/products";
-import { getCategories } from "@/lib/api/categories";
+import { getAllProducts, getProductsByCollection, type Product as APIProduct, type PaginatedResponse } from "@/lib/api/products";
 
 export type ProductCarouselProduct = {
   name: string;
@@ -33,36 +32,24 @@ const convertToProductFormat = (apiProduct: APIProduct): ProductCarouselProduct 
   hot: apiProduct.hot,
 });
 
-// Helper to convert URL slug to category name
-const slugToCategoryName = (slug: string, categories: { name: string }[]): string | null => {
-  const normalize = (str: string): string => {
-    return str
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-  };
-
-  const normalizedSlug = normalize(slug);
-
-  // Try to find matching category
-  for (const cat of categories) {
-    const normalizedCatName = normalize(cat.name);
-    if (normalizedCatName === normalizedSlug) {
-      return cat.name;
-    }
+// Helper to format page title from slug
+const formatPageTitle = (slug: string): string => {
+  if (slug === "all-products") {
+    return "All Products";
   }
-
-  // Fallback: try to match by removing common words and special chars
-  const simplifiedSlug = normalizedSlug.replace(/-/g, "");
-  for (const cat of categories) {
-    const simplifiedCatName = normalize(cat.name).replace(/-/g, "");
-    if (simplifiedCatName === simplifiedSlug) {
-      return cat.name;
-    }
-  }
-
-  return null;
+  // Convert slug to readable title
+  // e.g., "cooking-condiments" -> "Cooking Condiments"
+  // e.g., "gifts-under-100" -> "Gifts Under $100"
+  return slug
+    .split("-")
+    .map((word) => {
+      // Handle special cases
+      if (word === "under" || word === "below") return word;
+      if (word.match(/^\d+$/)) return `$${word}`;
+      // Capitalize first letter
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 };
 
 export function useCollections(slug: string, page: number, pageSize: number = 20, sort?: string) {
@@ -77,9 +64,6 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch categories first to get category names
-        const cats = await getCategories();
-
         let response: PaginatedResponse<APIProduct>;
         
         if (slug === "all-products") {
@@ -87,18 +71,9 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
           response = await getAllProducts(page, pageSize, sort);
           setPageTitle("All Products");
         } else {
-          // Map slug to category name
-          const mappedName = slugToCategoryName(slug, cats);
-          if (!mappedName) {
-            // Category not found, show empty or error
-            setProducts([]);
-            setTotalCount(0);
-            setPageTitle(slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()));
-            setIsLoading(false);
-            return;
-          }
-          setPageTitle(mappedName);
-          response = await getProductsByCategory(mappedName, page, pageSize, sort);
+          // Use new collection endpoint
+          response = await getProductsByCollection(slug, page, pageSize, sort);
+          setPageTitle(formatPageTitle(slug));
         }
 
         const convertedProducts = response.results.map(convertToProductFormat);
@@ -110,6 +85,7 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
         console.error("Failed to fetch products:", error);
         setProducts([]);
         setTotalCount(0);
+        setPageTitle(formatPageTitle(slug));
       } finally {
         setIsLoading(false);
       }

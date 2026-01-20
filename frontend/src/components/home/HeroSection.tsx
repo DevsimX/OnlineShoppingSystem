@@ -32,7 +32,7 @@ const heroSlides: HeroSlide[] = [
     imageUrl: "/images/image02.png",
     imageAlt: "Tasty Local-Made Chocolates & Candy!",
     ctaText: "Shop Confectionary",
-    ctaHref: "/collections/sweet-treats",
+    ctaHref: "/collections/confectionary",
   },
 ];
 

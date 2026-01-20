@@ -15,13 +15,13 @@ class ProductDetailPicAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'brand', 'category', 'price', 'current_stock', 'status', 'created_at')
-    list_filter = ('category', 'status', 'created_at')
-    search_fields = ('name', 'brand', 'description')
+    list_display = ('name', 'brand', 'price', 'current_stock', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'brand__name', 'description')
     readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'brand', 'description', 'category', 'type')
+            'fields': ('name', 'brand', 'description', 'type')
         }),
         ('Pricing & Stock', {
             'fields': ('price', 'current_stock', 'status')

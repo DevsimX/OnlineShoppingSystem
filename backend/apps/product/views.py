@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Case, When, Value, FloatField, F, Q
-from apps.category.models import Category
 from apps.brand.models import Brand
 from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer
+from .services import get_collection_filters
 
 
 class ProductPagination(PageNumberPagination):
@@ -59,14 +59,23 @@ def product_list(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def product_list_by_category(request, category_name):
-    """Get products by category name with pagination, with optional sorting"""
-    # Get category by name (case-insensitive lookup)
-    category = get_object_or_404(Category, name__iexact=category_name)
+def product_list_by_collection(request, slug):
+    """Get products by collection slug with fuzzy matching, pagination, and optional sorting"""
+    # Use collection service to interpret slug and get filters
+    filter_config = get_collection_filters(slug)
+    query_filters = filter_config['query_filters']
+    jsonb_keywords = filter_config.get('jsonb_keywords', [])
     
-    products = Product.objects.select_related('tag').filter(
-        category=category
-    ).annotate(
+    # Start with base query
+    products = Product.objects.select_related('tag', 'brand')
+    
+    # Apply the service filters
+    # The service already handles multiple case variations and name/description search
+    # This should work for most cases including "gifts-under-100"
+    if query_filters:
+        products = products.filter(query_filters)
+    
+    products = products.annotate(
         rank_if_value=Case(
             When(tag__isnull=False, then=F('tag__rank_if')),
             default=Value(0.0),
