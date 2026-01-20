@@ -49,6 +49,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     handleThumbnailLoadingStart,
     selectedModalImage,
     isAddingToCart,
+    handleMainImageError,
+    handleThumbnailError,
+    handleModalImageError,
   } = useProductDetail(product);
 
   return (
@@ -85,6 +88,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     unoptimized
                     onLoad={handleMainImageLoad}
                     onLoadingComplete={handleMainImageLoad}
+                    onError={handleMainImageError}
                   />
                 </>
               )}
@@ -144,6 +148,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         unoptimized
                         onLoad={() => handleThumbnailLoad(index)}
                         onLoadingComplete={() => handleThumbnailLoad(index)}
+                        onError={() => handleThumbnailError(index)}
                       />
                     </button>
                   );
@@ -554,6 +559,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         alt={product.name}
         isLoading={modalImageLoading}
         onImageLoad={handleModalImageLoad}
+        onImageError={handleModalImageError}
       />
     </section>
   );

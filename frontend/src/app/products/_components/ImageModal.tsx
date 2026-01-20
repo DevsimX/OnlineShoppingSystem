@@ -11,6 +11,7 @@ type ImageModalProps = {
   alt: string;
   isLoading: boolean;
   onImageLoad: () => void;
+  onImageError?: () => void;
 };
 
 export default function ImageModal({
@@ -20,6 +21,7 @@ export default function ImageModal({
   alt,
   isLoading,
   onImageLoad,
+  onImageError,
 }: ImageModalProps) {
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function ImageModal({
               src={imageUrl}
               alt={alt}
               onLoad={onImageLoad}
+              onError={onImageError}
               style={{ display: "block" }}
             />
             {isLoading && (

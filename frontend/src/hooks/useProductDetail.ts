@@ -64,12 +64,45 @@ export function useProductDetail(product: ProductDetailType) {
   // Reset main image loading when image changes
   useEffect(() => {
     setMainImageLoading(true);
-  }, [selectedImageIndex]);
+    
+    // Check if image is already loaded (cached images)
+    if (selectedImage) {
+      const img = new Image();
+      img.onload = () => {
+        // Image is already loaded/cached, set loading to false immediately
+        setMainImageLoading(false);
+      };
+      img.onerror = () => {
+        // Image failed to load, set loading to false
+        setMainImageLoading(false);
+      };
+      img.src = selectedImage;
+      
+      // If image is already complete (cached), the onload won't fire, so check complete property
+      if (img.complete) {
+        setMainImageLoading(false);
+      }
+    }
+    
+    // Fallback: Set loading to false after 10 seconds in case image fails to load
+    const timeoutId = setTimeout(() => {
+      setMainImageLoading(false);
+    }, 10000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [selectedImageIndex, selectedImage]);
   
   // Reset modal image loading when modal opens
   useEffect(() => {
     if (isImageModalOpen) {
       setModalImageLoading(true);
+      
+      // Fallback: Set loading to false after 10 seconds in case image fails to load
+      const timeoutId = setTimeout(() => {
+        setModalImageLoading(false);
+      }, 10000);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isImageModalOpen, selectedImage]);
   
@@ -78,11 +111,26 @@ export function useProductDetail(product: ProductDetailType) {
     setMainImageLoading(false);
   };
   
+  const handleMainImageError = () => {
+    // If image fails to load, hide loading skeleton
+    setMainImageLoading(false);
+  };
+  
   const handleThumbnailLoad = (index: number) => {
     setThumbnailLoadingStates((prev) => ({ ...prev, [index]: false }));
   };
   
+  const handleThumbnailError = (index: number) => {
+    // If thumbnail fails to load, hide loading skeleton
+    setThumbnailLoadingStates((prev) => ({ ...prev, [index]: false }));
+  };
+  
   const handleModalImageLoad = () => {
+    setModalImageLoading(false);
+  };
+  
+  const handleModalImageError = () => {
+    // If modal image fails to load, hide loading skeleton
     setModalImageLoading(false);
   };
   
@@ -247,5 +295,9 @@ export function useProductDetail(product: ProductDetailType) {
     selectedModalImage,
     // Add to cart loading state
     isAddingToCart,
+    // Error handlers
+    handleMainImageError,
+    handleThumbnailError,
+    handleModalImageError,
   };
 }
