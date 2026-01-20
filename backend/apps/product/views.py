@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
-from django.db.models import Case, When, Value, FloatField, F
+from django.db.models import Case, When, Value, FloatField, F, Q
 from apps.category.models import Category
 from apps.brand.models import Brand
 from .models import Product
@@ -202,3 +202,40 @@ def product_list_by_brand(request, brand_id):
     paginated_products = paginator.paginate_queryset(products, request)
     serializer = ProductListSerializer(paginated_products, many=True)
     return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def you_might_like_products(request, product_id):
+    """Get 8 products with same type as provided product, ordered by rank_if, excluding the provided product"""
+    # Get the product to find its type
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Get product's type array
+    product_types = product.type if isinstance(product.type, list) else []
+    
+    if not product_types:
+        # If product has no type, return empty list
+        return Response([], status=status.HTTP_200_OK)
+    
+    # Find products that share at least one type with the provided product
+    # Using __contains for each type in the array
+    type_filters = Q()
+    for product_type in product_types:
+        type_filters |= Q(type__contains=[product_type])
+    
+    # Get products with same type, exclude current product, ordered by rank_if
+    products = Product.objects.select_related('tag').filter(
+        type_filters
+    ).exclude(
+        id=product_id
+    ).annotate(
+        rank_if_value=Case(
+            When(tag__isnull=False, then=F('tag__rank_if')),
+            default=Value(0.0),
+            output_field=FloatField()
+        )
+    ).order_by('-rank_if_value', '-created_at')[:8]
+    
+    serializer = ProductListSerializer(products, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

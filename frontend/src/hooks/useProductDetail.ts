@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { type ProductDetail as ProductDetailType, getProductsByBrand } from "@/lib/api/products";
-import { useExploreProducts } from "./useProductSections";
+import { type ProductDetail as ProductDetailType, getProductsByBrand, getYouMightLikeProducts } from "@/lib/api/products";
 
 export type ProductCarouselProduct = {
   name: string;
@@ -44,13 +43,19 @@ export function useProductDetail(product: ProductDetailType) {
   const selectedImage = selectedImageData?.big_pic_link || product.profile_pic_link;
   const selectedModalImage = selectedImageData?.extra_big_pic_link || selectedImage;
   
-  // Initialize thumbnail loading states
+  // Initialize thumbnail loading states when images change
   useEffect(() => {
     const initialStates: Record<number, boolean> = {};
     allImages.forEach((_, index) => {
-      initialStates[index] = true;
+      // Only set loading to true for new thumbnails that haven't been loaded yet
+      if (thumbnailLoadingStates[index] === undefined) {
+        initialStates[index] = true;
+      }
     });
-    setThumbnailLoadingStates(initialStates);
+    // Only update states for new thumbnails, preserve existing ones
+    if (Object.keys(initialStates).length > 0) {
+      setThumbnailLoadingStates((prev) => ({ ...prev, ...initialStates }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allImages.length]);
   
@@ -146,8 +151,43 @@ export function useProductDetail(product: ProductDetailType) {
     fetchRelated();
   }, [product.brand_id, product.id]);
 
-  // Get "You Might Like" products (using explore products)
-  const { products: youMightLikeProducts, isLoading: isLoadingYouMightLike } = useExploreProducts();
+  // Get "You Might Like" products (products with same type)
+  const [youMightLikeProducts, setYouMightLikeProducts] = useState<ProductCarouselProduct[]>([]);
+  const [isLoadingYouMightLike, setIsLoadingYouMightLike] = useState(true);
+
+  useEffect(() => {
+    const fetchYouMightLike = async () => {
+      try {
+        const response = await getYouMightLikeProducts(product.id);
+        const formatted = response.map((p) => ({
+          name: p.name,
+          href: `/products/${p.id}`,
+          imageUrl: p.profile_pic_link,
+          imageAlt: p.name,
+          vendor: p.brand,
+          price: formatPrice(p.price),
+          new: p.new,
+          hot: p.hot,
+          badge:
+            p.new && p.hot
+              ? ("both" as const)
+              : p.hot
+                ? ("hot" as const)
+                : p.new
+                  ? ("new" as const)
+                  : undefined,
+        }));
+        setYouMightLikeProducts(formatted);
+      } catch (error) {
+        console.error("Failed to fetch you might like products:", error);
+        setYouMightLikeProducts([]);
+      } finally {
+        setIsLoadingYouMightLike(false);
+      }
+    };
+
+    fetchYouMightLike();
+  }, [product.id]);
 
   return {
     // Image state

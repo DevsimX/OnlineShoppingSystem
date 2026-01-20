@@ -113,14 +113,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-auto max-xl:pb-2 max-md:px-3 xl:order-first xl:flex-col">
                 {allImages.map((imageData, index) => {
-                  const isLoading = thumbnailLoadingStates[index] !== false;
+                  const isLoading = thumbnailLoadingStates[index] === true;
                   const thumbnailUrl = imageData.small_pic_link;
                   return (
                     <button
                       key={imageData.id || index}
                       onClick={() => {
                         setSelectedImageIndex(index);
-                        handleThumbnailLoadingStart(index);
                       }}
                       className={`relative aspect-square shrink-0 cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden ${selectedImageIndex === index ? "border-black" : "border-transparent hover:border-black"
                         }`}

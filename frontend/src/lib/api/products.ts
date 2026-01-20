@@ -224,3 +224,20 @@ export async function getProductDetail(productId: number): Promise<ProductDetail
 
   return result as ProductDetail;
 }
+
+export async function getYouMightLikeProducts(productId: number): Promise<Product[]> {
+  const response = await fetch(`${API_BASE_URL}/api/products/${productId}/you-might-like/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as Product[];
+}
