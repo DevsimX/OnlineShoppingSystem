@@ -9,7 +9,6 @@ import {
   getPostalAddresses,
   createPostalAddress,
   updatePostalAddress,
-  type PostalAddress,
 } from "@/lib/api/auth";
 
 type AccountDetailsProps = {
@@ -46,8 +45,33 @@ export default function AccountDetails({ user }: AccountDetailsProps) {
 
   // Load user's postal address on mount
   useEffect(() => {
+    const loadPostalAddress = async () => {
+      try {
+        setIsLoadingAddress(true);
+        const addresses = await getPostalAddresses();
+        if (addresses.length > 0) {
+          const defaultAddress = addresses.find((addr) => addr.is_default) || addresses[0];
+          setAddressDetails({
+            id: defaultAddress.id || null,
+            address_first_name: defaultAddress.first_name || "",
+            address_last_name: defaultAddress.last_name || "",
+            company: defaultAddress.company || "",
+            address1: defaultAddress.address_line_1 || "",
+            address2: defaultAddress.address_line_2 || "",
+            city: defaultAddress.city || "",
+            province: defaultAddress.province || "",
+            country: defaultAddress.country || "Australia",
+            zip: defaultAddress.postal_code || "",
+            address_phone: defaultAddress.phone || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load postal address:", error);
+      } finally {
+        setIsLoadingAddress(false);
+      }
+    };
     loadPostalAddress();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update phone when user changes
@@ -58,33 +82,6 @@ export default function AccountDetails({ user }: AccountDetailsProps) {
       phone: user.phone || "",
     });
   }, [user]);
-
-  const loadPostalAddress = async () => {
-    try {
-      setIsLoadingAddress(true);
-      const addresses = await getPostalAddresses();
-      if (addresses.length > 0) {
-        const defaultAddress = addresses.find((addr) => addr.is_default) || addresses[0];
-        setAddressDetails({
-          id: defaultAddress.id || null,
-          address_first_name: defaultAddress.first_name || "",
-          address_last_name: defaultAddress.last_name || "",
-          company: defaultAddress.company || "",
-          address1: defaultAddress.address_line_1 || "",
-          address2: defaultAddress.address_line_2 || "",
-          city: defaultAddress.city || "",
-          province: defaultAddress.province || "",
-          country: defaultAddress.country || "Australia",
-          zip: defaultAddress.postal_code || "",
-          address_phone: defaultAddress.phone || "",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load postal address:", error);
-    } finally {
-      setIsLoadingAddress(false);
-    }
-  };
 
   const handlePhoneChange = (value: string) => {
     setPersonalDetails({ ...personalDetails, phone: value });
@@ -114,11 +111,12 @@ export default function AccountDetails({ user }: AccountDetailsProps) {
         phone: personalDetails.phone,
       });
       toast.success("Profile updated successfully!");
-    } catch (error: any) {
-      const errorMessage = error?.phone?.[0] || error?.error || "Failed to update profile";
+    } catch (error: unknown) {
+      const apiError = error as { phone?: string[]; error?: string };
+      const errorMessage = apiError?.phone?.[0] || apiError?.error || "Failed to update profile";
       toast.error(errorMessage);
-      if (error?.phone) {
-        setPhoneError(error.phone[0]);
+      if (apiError?.phone) {
+        setPhoneError(apiError.phone[0]);
       }
     } finally {
       setIsUpdatingProfile(false);
@@ -152,8 +150,9 @@ export default function AccountDetails({ user }: AccountDetailsProps) {
         setAddressDetails({ ...addressDetails, id: newAddress.id || null });
         toast.success("Address saved successfully!");
       }
-    } catch (error: any) {
-      const errorMessage = error?.error || "Failed to save address";
+    } catch (error: unknown) {
+      const apiError = error as { error?: string };
+      const errorMessage = apiError?.error || "Failed to save address";
       toast.error(errorMessage);
     } finally {
       setIsUpdatingAddress(false);

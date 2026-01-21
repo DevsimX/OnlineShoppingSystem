@@ -11,7 +11,7 @@ type DashboardProps = {
   onTabChange: (tab: AccountTab) => void;
 };
 
-export default function Dashboard({ user, onTabChange }: DashboardProps) {
+export default function Dashboard({ onTabChange }: DashboardProps) {
   return (
     <>
       {/* Points Section */}

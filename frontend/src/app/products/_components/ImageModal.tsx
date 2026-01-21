@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import Image from "next/image";
 import ImageSkeleton from "@/components/common/ImageSkeleton";
 
 type ImageModalProps = {
@@ -67,22 +68,33 @@ export default function ImageModal({
       >
         {imageUrl && (
           <>
-            <img
-              className={`max-h-[90vh] !max-w-[90vw] rounded-xl object-contain ${isLoading ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}
-              src={imageUrl}
-              alt={alt}
-              onLoad={onImageLoad}
-              onError={onImageError}
-              style={{ display: "block" }}
-            />
-            {isLoading && (
-              <div className="absolute inset-0 z-[60] flex items-center justify-center">
-                <ImageSkeleton 
-                  className="max-h-[90vh] max-w-[90vw]" 
-                  rounded={true}
-                />
-              </div>
-            )}
+            <div className="relative max-h-[90vh] max-w-[90vw]">
+              <Image
+                className={`rounded-xl object-contain ${isLoading ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}
+                src={imageUrl}
+                alt={alt}
+                width={1200}
+                height={1200}
+                style={{ 
+                  maxHeight: "90vh",
+                  maxWidth: "90vw",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain"
+                }}
+                onLoad={onImageLoad}
+                onError={onImageError}
+                unoptimized
+              />
+              {isLoading && (
+                <div className="absolute inset-0 z-[60] flex items-center justify-center">
+                  <ImageSkeleton 
+                    className="max-h-[90vh] max-w-[90vw]" 
+                    rounded={true}
+                  />
+                </div>
+              )}
+            </div>
             <button
               onClick={onClose}
               className="absolute top-4 right-4 z-50 rounded-full border-2 border-white p-2 text-white hover:bg-white hover:text-black transition-colors"

@@ -46,7 +46,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     handleMainImageLoad,
     handleThumbnailLoad,
     handleModalImageLoad,
-    handleThumbnailLoadingStart,
     selectedModalImage,
     isAddingToCart,
     handleMainImageError,
