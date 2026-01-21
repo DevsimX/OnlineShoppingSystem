@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { register, type RegisterData } from "@/lib/api/auth";
+import { register, type RegisterData, validateAustralianPhone } from "@/lib/api/auth";
 import { usePasswordValidation } from "./usePasswordValidation";
 
 /**
@@ -13,6 +13,7 @@ export function useRegister(onSuccess?: (username: string) => void) {
     email: "",
     first_name: "",
     last_name: "",
+    phone: "",
     password: "",
     password_confirm: "",
   });
@@ -31,6 +32,7 @@ export function useRegister(onSuccess?: (username: string) => void) {
   // Validation helpers
   const emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
   const isValidEmail = registerData.email ? emailPattern.test(registerData.email) : true;
+  const isValidPhone = registerData.phone ? validateAustralianPhone(registerData.phone) : false;
   const passwordsMatch = registerData.password === registerData.password_confirm || !registerData.password_confirm;
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -48,6 +50,19 @@ export function useRegister(onSuccess?: (username: string) => void) {
     if (registerData.password !== registerData.password_confirm) {
       setRegisterErrors({ password_confirm: "Passwords do not match" });
       toast.error("Passwords do not match");
+      return;
+    }
+
+    // Client-side validation - Phone
+    if (!registerData.phone) {
+      setRegisterErrors({ phone: "Phone number is required" });
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    if (!isValidPhone) {
+      setRegisterErrors({ phone: "Phone number must be in Australian format (+61XXXXXXXXX or 0XXXXXXXXX)" });
+      toast.error("Invalid phone number format");
       return;
     }
 
@@ -85,6 +100,7 @@ export function useRegister(onSuccess?: (username: string) => void) {
     setHasInteracted,
     isLoading,
     isValidEmail,
+    isValidPhone,
     passwordsMatch,
     isStrongPassword,
     passwordRequirements,

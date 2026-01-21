@@ -15,6 +15,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     setHasInteracted,
     isLoading,
     isValidEmail,
+    isValidPhone,
     passwordsMatch,
     isStrongPassword,
     passwordRequirements,
@@ -112,6 +113,37 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
               className="w-full bg-white rounded-full border-2 border-[var(--pop-neutral-black)] px-4 py-2 shadow-3d focus:ring-0 focus:outline-none"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="register-phone" className="block text-sm font-semibold mb-1 px-4">
+            Phone Number <span className="text-red-600">*</span>
+          </label>
+          <input
+            id="register-phone"
+            type="tel"
+            placeholder="+61412345678 or 0412345678"
+            required
+            value={registerData.phone}
+            onChange={(e) => {
+              setRegisterData({ ...registerData, phone: e.target.value });
+              setHasInteracted({ ...hasInteracted, phone: true });
+            }}
+            onBlur={() => setHasInteracted({ ...hasInteracted, phone: true })}
+            className={`w-full bg-white rounded-full border-2 px-4 py-2 shadow-3d focus:ring-0 focus:outline-none ${
+              registerErrors.phone || (hasInteracted.phone && registerData.phone && !isValidPhone)
+                ? "border-red-500"
+                : "border-[var(--pop-neutral-black)]"
+            }`}
+          />
+          {registerErrors.phone && (
+            <p className="text-sm text-red-600 px-4 mt-1">{registerErrors.phone}</p>
+          )}
+          {hasInteracted.phone && registerData.phone && !isValidPhone && !registerErrors.phone && (
+            <p className="text-sm text-red-600 px-4 mt-1">
+              Phone number must be in Australian format (+61XXXXXXXXX or 0XXXXXXXXX)
+            </p>
+          )}
         </div>
 
         <div>

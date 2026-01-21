@@ -34,7 +34,14 @@ npm run dev
 
 ## API Endpoints
 
-- **Auth**: `/api/auth/register/`, `/api/auth/login/`, `/api/auth/logout/`, `/api/auth/me/`
+- **Auth**: 
+  - `/api/auth/register/` - Register new user (requires phone)
+  - `/api/auth/login/` - Login
+  - `/api/auth/logout/` - Logout
+  - `/api/auth/me/` - Get current user info
+  - `/api/auth/me/update/` - Update user profile (PATCH)
+  - `/api/auth/postal-addresses/` - Get or create postal addresses (GET/POST)
+  - `/api/auth/postal-addresses/<id>/` - Manage specific address (GET/PUT/PATCH/DELETE)
 - **Products**: 
   - `/api/products/` - All products (supports `?sort=PRICE`, `?page=1`, `?page_size=20`)
   - `/api/products/collections/<slug>/` - Products by collection with fuzzy matching
@@ -58,6 +65,7 @@ npm run dev
 OnlineShoppingSystem/
 ├─ backend/          # Django + DRF
 │  ├─ apps/          # authentication, brand, product, order, payment, cart
+│  │  ├─ authentication/  # User model with phone, UserPostalAddress model
 │  │  └─ product/    # Product models, views, and search services
 │  │     └─ services.py  # PostgreSQL FTS + pg_trgm search logic
 │  └─ config/        # Django settings
@@ -74,8 +82,10 @@ OnlineShoppingSystem/
 
 ## Features
 
-- ✅ JWT authentication (login/register)
-- ✅ Protected dashboard
+- ✅ JWT authentication (login/register with phone validation)
+- ✅ User profile management with Australian phone format validation
+- ✅ Postal address management (independent from user profile)
+- ✅ Protected account area (dashboard, order history, points activity, account details)
 - ✅ Product carousels with lazy loading
 - ✅ Flexible collection routing with PostgreSQL FTS + pg_trgm fuzzy search
 - ✅ Product detail pages with image galleries and modal views
@@ -144,3 +154,10 @@ npm run lint
 - Automatic cart sync on login (merges localStorage with database cart)
 - Cart persists across page refreshes for all users
 - Free shipping progress indicator with success state
+
+### User Profile & Address Management
+- Added phone field to User model with Australian format validation (+61XXXXXXXXX or 0XXXXXXXXX)
+- Phone is required during registration and validated on both frontend and backend
+- Created UserPostalAddress model with independent first_name, last_name, and all address fields
+- API endpoints for updating user profile and managing postal addresses
+- Frontend validation and form handling for profile and address updates

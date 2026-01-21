@@ -35,7 +35,7 @@ export function useLogin(prefilledUsername: string = "", onSuccess?: () => void)
         onSuccess();
       } else {
         // Redirect to protected page or home
-        window.location.href = "/dashboard";
+        window.location.href = "/account";
       }
     } catch (error) {
       const apiError = error as { error?: string; username?: string[]; password?: string[] };

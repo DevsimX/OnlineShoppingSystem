@@ -5,6 +5,7 @@ export type RegisterData = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string;
   password: string;
   password_confirm: string;
 };
@@ -28,6 +29,7 @@ export type LoginResponse = {
     username: string;
     first_name: string;
     last_name: string;
+    phone: string;
     date_joined: string;
   };
 };
@@ -158,4 +160,133 @@ export function clearRefreshToken(): void {
 
 export function isAuthenticated(): boolean {
   return getToken() !== null;
+}
+
+// Phone validation for Australian format
+export function validateAustralianPhone(phone: string): boolean {
+  // Australian phone number pattern: +61XXXXXXXXX or 0XXXXXXXXX
+  const pattern = /^(\+61|0)[2-478](?:[ -]?[0-9]){8}$/;
+  return pattern.test(phone);
+}
+
+// Update user profile
+export async function updateProfile(data: {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  email?: string;
+}): Promise<LoginResponse["user"]> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No token available");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/me/update/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as LoginResponse["user"];
+}
+
+// Postal address types
+export type PostalAddress = {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  company?: string;
+  address_line_1: string;
+  address_line_2?: string;
+  city: string;
+  province: string;
+  country: string;
+  postal_code: string;
+  phone?: string;
+  is_default?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+// Get postal addresses
+export async function getPostalAddresses(): Promise<PostalAddress[]> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No token available");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/postal-addresses/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PostalAddress[];
+}
+
+// Create postal address
+export async function createPostalAddress(data: Omit<PostalAddress, "id" | "created_at" | "updated_at">): Promise<PostalAddress> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No token available");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/postal-addresses/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PostalAddress;
+}
+
+// Update postal address
+export async function updatePostalAddress(addressId: number, data: Partial<PostalAddress>): Promise<PostalAddress> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No token available");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/postal-addresses/${addressId}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PostalAddress;
 }

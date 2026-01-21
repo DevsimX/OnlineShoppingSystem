@@ -33,13 +33,29 @@ export default function Header() {
   const { openCart, cartItemCount } = useCart();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
+  // Check authentication status after hydration to avoid SSR mismatch
+  useEffect(() => {
+    setIsAuthenticatedState(isAuthenticated());
+    
+    // Listen for storage changes (login/logout in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "auth_token") {
+        setIsAuthenticatedState(isAuthenticated());
+      }
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const handleAccountClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (isAuthenticated()) {
-      router.push("/dashboard");
+    if (isAuthenticatedState) {
+      router.push("/account");
     } else {
       router.push("/auth");
     }
@@ -315,7 +331,7 @@ export default function Header() {
           <div className="flex gap-2 md:gap-3">
             {/* User Account Icon */}
             <a 
-              href={isAuthenticated() ? "/dashboard" : "/auth"} 
+              href={isAuthenticatedState ? "/account" : "/auth"} 
               onClick={handleAccountClick}
               className="IconMenu" 
               aria-label="Go to your account"
