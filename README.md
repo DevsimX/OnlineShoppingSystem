@@ -138,6 +138,8 @@ npm run lint
 
 ### In Progress
 - 🔄 Order and Payment API endpoints (models created, endpoints pending)
+- Search input
+- Filter function
 
 ## Recent Updates
 
