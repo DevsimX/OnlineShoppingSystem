@@ -8,7 +8,7 @@ from django.db.models import Case, When, Value, FloatField, F, Q
 from apps.brand.models import Brand
 from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer
-from .services import get_collection_search_query
+from .services import get_collection_search_query, get_search_query, get_search_suggestions
 from django.db import connection
 
 
@@ -133,6 +133,150 @@ def product_list_by_collection(request, slug):
     }
     
     # Order products according to SQL results
+    products = [products_dict[pid] for pid in product_ids if pid in products_dict]
+    
+    # Serialize
+    serializer = ProductListSerializer(products, many=True)
+    
+    # Build paginated response
+    return Response({
+        'count': total,
+        'next': f"{request.build_absolute_uri()}?page={page + 1}" if offset + page_size < total else None,
+        'previous': f"{request.build_absolute_uri()}?page={page - 1}" if page > 1 else None,
+        'results': serializer.data
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_products(request):
+    """Search products with FTS + pg_trgm, returns products and suggestions"""
+    query = request.query_params.get('q', '').strip()
+    limit = int(request.query_params.get('limit', 8))
+    
+    if not query:
+        return Response({
+            'suggestions': [],
+            'products': [],
+            'total': 0
+        })
+    
+    # Get suggestions (brands)
+    suggestions = get_search_suggestions(query, limit=limit)
+    
+    # Get products
+    search_config = get_search_query(query, limit=limit)
+    
+    with connection.cursor() as cursor:
+        cursor.execute(search_config['sql_query'], search_config['params'])
+        columns = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+        results = [dict(zip(columns, row)) for row in rows]
+        product_ids = [r['id'] for r in results]
+    
+    # Fetch Product objects from Django ORM
+    products_dict = {
+        p.id: p for p in Product.objects.select_related('tag', 'brand')
+        .filter(id__in=product_ids)
+    }
+    products = [products_dict[pid] for pid in product_ids if pid in products_dict]
+    
+    # Serialize
+    serializer = ProductListSerializer(products, many=True)
+    
+    return Response({
+        'suggestions': suggestions,
+        'products': serializer.data,
+        'total': len(products)
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_products_full(request, query):
+    """Full search results page with pagination"""
+    # Get pagination params
+    page = int(request.query_params.get('page', 1))
+    page_size = int(request.query_params.get('page_size', 20))
+    offset = (page - 1) * page_size
+    
+    # Build search query
+    search_config = get_search_query(query, limit=10000)  # Large limit for counting
+    
+    # Extract WHERE clause for count
+    sql_query_str = search_config['sql_query']
+    where_match = sql_query_str.split('WHERE')
+    where_clause = where_match[1].split('ORDER BY')[0].strip() if len(where_match) > 1 else 'TRUE'
+    # Remove LIMIT from where_clause if present
+    where_clause = where_clause.split('LIMIT')[0].strip()
+    
+    # Check if it's a short query (no similarity_score in SELECT)
+    is_short_query = 'similarity_score' not in sql_query_str
+    
+    # Build count query
+    count_query = f"""
+        SELECT COUNT(DISTINCT p.id)
+        FROM products p
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN product_tags pt ON p.id = pt.product_id
+        WHERE {where_clause}
+    """
+    
+    # Build paginated query - use the ORDER BY from search_config
+    if is_short_query:
+        # Short query: no similarity_score
+        select_fields = (
+            f"p.id, p.name, p.brand_id, p.description, p.price, p.profile_pic_link, "
+            f"p.type, p.current_stock, p.status, p.created_at, p.updated_at, "
+            f"pt.rank_if"
+        )
+        order_by = search_config['order_by']
+    else:
+        # Longer query: include similarity_score
+        search_text_escaped = query.replace("'", "''")
+        similarity_expr = (
+            f"GREATEST("
+            f"similarity(p.name, '{search_text_escaped}'), "
+            f"similarity(p.description, '{search_text_escaped}'), "
+            f"similarity(b.name, '{search_text_escaped}')"
+            f")"
+        )
+        select_fields = (
+            f"p.id, p.name, p.brand_id, p.description, p.price, p.profile_pic_link, "
+            f"p.type, p.current_stock, p.status, p.created_at, p.updated_at, "
+            f"pt.rank_if, {similarity_expr} AS similarity_score"
+        )
+        order_by = search_config['order_by']
+    
+    paginated_query = f"""
+        SELECT {select_fields}
+        FROM products p
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN product_tags pt ON p.id = pt.product_id
+        WHERE {where_clause}
+        ORDER BY {order_by}
+        LIMIT %s OFFSET %s
+    """
+    
+    with connection.cursor() as cursor:
+        # Get total count
+        cursor.execute(count_query, search_config['params'][:-1])  # Remove limit param
+        total = cursor.fetchone()[0]
+        
+        # Get paginated results
+        params = search_config['params'][:-1] + [page_size, offset]  # Remove limit, add pagination
+        cursor.execute(paginated_query, params)
+        
+        columns = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+        results = [dict(zip(columns, row)) for row in rows]
+        product_ids = [r['id'] for r in results]
+    
+    # Fetch Product objects from Django ORM
+    products_dict = {
+        p.id: p for p in Product.objects.select_related('tag', 'brand')
+        .filter(id__in=product_ids)
+    }
     products = [products_dict[pid] for pid in product_ids if pid in products_dict]
     
     # Serialize

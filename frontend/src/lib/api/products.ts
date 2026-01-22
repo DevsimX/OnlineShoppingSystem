@@ -239,3 +239,60 @@ export async function getProductsByCollection(
 
   return result as PaginatedResponse<Product>;
 }
+
+export type SearchResponse = {
+  suggestions: string[];
+  products: Product[];
+  total: number;
+};
+
+export async function searchProducts(query: string, limit = 8): Promise<SearchResponse> {
+  const params = new URLSearchParams({
+    q: query,
+    limit: limit.toString(),
+  });
+  
+  const response = await fetch(`${API_BASE_URL}/api/products/search/?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as SearchResponse;
+}
+
+export async function searchProductsFull(
+  query: string,
+  page = 1,
+  pageSize = 20
+): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+  
+  const response = await fetch(
+    `${API_BASE_URL}/api/products/search/${encodeURIComponent(query)}/?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw result as ApiError;
+  }
+
+  return result as PaginatedResponse<Product>;
+}

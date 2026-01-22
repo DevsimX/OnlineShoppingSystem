@@ -6,6 +6,7 @@ import {
   getExploreProducts,
   type Product as APIProduct,
 } from "@/lib/api/products";
+import { formatPriceString } from "@/lib/utils";
 
 export type ProductCarouselProduct = {
   name: string;
@@ -19,12 +20,6 @@ export type ProductCarouselProduct = {
   hot?: boolean;
 };
 
-// Helper function to format price from API
-const formatPrice = (price: string | number): string => {
-  const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return numPrice.toFixed(2);
-};
-
 // Helper function to convert API product to ProductCarousel format
 const convertToProductCarouselFormat = (apiProduct: APIProduct): ProductCarouselProduct => ({
   name: apiProduct.name,
@@ -32,7 +27,7 @@ const convertToProductCarouselFormat = (apiProduct: APIProduct): ProductCarousel
   imageUrl: apiProduct.profile_pic_link,
   imageAlt: apiProduct.name,
   vendor: apiProduct.brand,
-  price: formatPrice(apiProduct.price),
+  price: formatPriceString(apiProduct.price),
   badge: apiProduct.new && apiProduct.hot ? ("both" as const) : apiProduct.hot ? ("hot" as const) : apiProduct.new ? ("new" as const) : undefined,
   new: apiProduct.new,
   hot: apiProduct.hot,

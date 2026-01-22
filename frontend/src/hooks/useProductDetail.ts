@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { type ProductDetail as ProductDetailType, getProductsByBrand, getYouMightLikeProducts } from "@/lib/api/products";
 import { addToCart } from "@/lib/api/cart";
 import { useCart } from "@/contexts/CartContext";
+import { formatPriceString } from "@/lib/utils";
 
 export type ProductCarouselProduct = {
   name: string;
@@ -13,11 +14,6 @@ export type ProductCarouselProduct = {
   badge?: "new" | "hot" | "both";
   new?: boolean;
   hot?: boolean;
-};
-
-const formatPrice = (price: string | number): string => {
-  const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return numPrice.toFixed(2);
 };
 
 export function useProductDetail(product: ProductDetailType) {
@@ -139,7 +135,7 @@ export function useProductDetail(product: ProductDetailType) {
   };
 
   // Price formatting
-  const priceStr = formatPrice(product.price);
+  const priceStr = formatPriceString(product.price);
   const [whole, decimal] = priceStr.split(".");
 
   // Handlers
@@ -192,7 +188,7 @@ export function useProductDetail(product: ProductDetailType) {
             imageUrl: p.profile_pic_link,
             imageAlt: p.name,
             vendor: p.brand,
-            price: formatPrice(p.price),
+            price: formatPriceString(p.price),
             new: p.new,
             hot: p.hot,
             badge:
@@ -229,7 +225,7 @@ export function useProductDetail(product: ProductDetailType) {
           imageUrl: p.profile_pic_link,
           imageAlt: p.name,
           vendor: p.brand,
-          price: formatPrice(p.price),
+          price: formatPriceString(p.price),
           new: p.new,
           hot: p.hot,
           badge:

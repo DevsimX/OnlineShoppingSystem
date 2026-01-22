@@ -11,6 +11,7 @@ import Cart from "@/assets/cart.svg"
 import { ChevronDown } from "lucide-react"
 import { isAuthenticated } from "@/lib/api/auth";
 import { useCart } from "@/contexts/CartContext";
+import SearchDropdown from "@/components/search/SearchDropdown";
 
 type DropdownSection = {
   type: "category" | "standalone";
@@ -34,8 +35,11 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [displayedDropdown, setDisplayedDropdown] = useState<string | null>(null);
   const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Check authentication status after hydration to avoid SSR mismatch
   useEffect(() => {
@@ -308,13 +312,35 @@ export default function Header() {
         {/* Search Bar */}
         <div className="relative w-full flex-1 shrink-0 max-md:order-last max-md:mt-3 max-md:block max-md:basis-1/1 md:max-w-[720px]">
           <input
+            ref={searchInputRef}
             id="search"
             type="text"
             placeholder="What are you looking for?"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setIsSearchOpen(true);
+            }}
+            onFocus={() => {
+              if (searchQuery.trim()) {
+                setIsSearchOpen(true);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && searchQuery.trim()) {
+                router.push(`/search/${encodeURIComponent(searchQuery.trim())}`);
+                setIsSearchOpen(false);
+              }
+            }}
             className="h-12 w-full bg-white items-center rounded-full border-2 border-black pl-16 shadow-[2px_2px_0px_0px_#000] focus:ring-0 focus:outline-none sm:text-lg"
             style={{ touchAction: "manipulation" }}
           />
           <Search />
+          <SearchDropdown
+            query={searchQuery}
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+          />
         </div>
 
         {/* Navigation Links & Icons */}

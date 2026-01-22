@@ -7,15 +7,9 @@ import { useCart } from "@/contexts/CartContext";
 import DialogOverlay from "@/components/common/DialogOverlay";
 import BigCart from "@/assets/bigcart.svg";
 import { updateCartItem, removeCartItem, type CartItem } from "@/lib/api/cart";
+import { formatPrice } from "@/lib/utils";
 
 const FREE_SHIPPING_THRESHOLD = 100;
-
-function formatPrice(price: string | number): { whole: string; decimal: string } {
-  const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  const formatted = numPrice.toFixed(2);
-  const [whole, decimal] = formatted.split(".");
-  return { whole, decimal };
-}
 
 function CartItemRow({ item }: { item: CartItem }) {
   const { refreshCart } = useCart();

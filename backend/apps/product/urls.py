@@ -9,6 +9,8 @@ urlpatterns = [
     path('gift-box/', views.gift_box_products, name='gift-box-products'),
     path('collections/<str:slug>/', views.product_list_by_collection, name='product-list-by-collection'),
     path('brand/<int:brand_id>/', views.product_list_by_brand, name='product-list-by-brand'),
+    path('search/', views.search_products, name='search-products'),
+    path('search/<str:query>/', views.search_products_full, name='search-products-full'),
     path('<int:product_id>/you-might-like/', views.you_might_like_products, name='you-might-like-products'),
     path('<int:product_id>/', views.product_detail, name='product-detail'),
 ]
