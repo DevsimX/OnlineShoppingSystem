@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.db import connection
 
 
-def get_collection_search_query(slug: str) -> dict:
+def get_collection_search_query(slug: str, filters: dict = None) -> dict:
     """
     Build PostgreSQL FTS + pg_trgm search query from a slug.
     Relies purely on PostgreSQL's FTS and pg_trgm for fuzzy matching.
@@ -93,7 +93,7 @@ def get_collection_search_query(slug: str) -> dict:
     if search_conditions:
         where_conditions.append(f"({' OR '.join(search_conditions)})")
     
-    # Price filter
+    # Price filter from slug
     if price_value is not None and price_operator:
         if price_operator == 'lt':
             where_conditions.append("p.price < %s")
@@ -101,6 +101,49 @@ def get_collection_search_query(slug: str) -> dict:
         elif price_operator == 'gt':
             where_conditions.append("p.price > %s")
             params.append(price_value)
+    
+    # Apply additional filters from query parameters
+    if filters:
+        # Availability filter
+        if 'available' in filters and filters['available'] is not None:
+            if filters['available']:
+                where_conditions.append("p.current_stock > 0 AND p.status = 'available'")
+            else:
+                where_conditions.append("(p.current_stock = 0 OR p.status = 'unavailable')")
+        
+        # Price range filters
+        if 'min_price' in filters and filters['min_price'] is not None:
+            where_conditions.append("p.price >= %s")
+            params.append(float(filters['min_price']))
+        if 'max_price' in filters and filters['max_price'] is not None:
+            where_conditions.append("p.price <= %s")
+            params.append(float(filters['max_price']))
+        
+        # Product type filter (type is a JSON array)
+        if 'product_type' in filters and filters['product_type']:
+            type_conditions = []
+            for product_type in filters['product_type']:
+                # Use JSON containment operator for exact match in array
+                # Also use ILIKE as fallback for partial matching
+                type_conditions.append("(p.type @> %s::jsonb OR p.type::text ILIKE %s)")
+                # JSON array format: ["Air Freshener"]
+                import json
+                params.append(json.dumps([product_type]))
+                params.append(f'%{product_type}%')
+            if type_conditions:
+                where_conditions.append(f"({' OR '.join(type_conditions)})")
+        
+        # Brand filter
+        if 'brand' in filters and filters['brand']:
+            brand_conditions = []
+            for brand_name in filters['brand']:
+                # brand_name is already decoded from views.py, but ensure it's a string
+                brand_name_clean = str(brand_name).strip()
+                if brand_name_clean:
+                    brand_conditions.append("b.name ILIKE %s")
+                    params.append(f'%{brand_name_clean}%')
+            if brand_conditions:
+                where_conditions.append(f"({' OR '.join(brand_conditions)})")
     
     # Build ORDER BY clause based on relevance
     # Use pg_trgm similarity score for ranking

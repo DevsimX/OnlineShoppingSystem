@@ -1,15 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { ListFilter } from "lucide-react";
-import { useCollections } from "@/hooks/useCollections";
+import { useCollections, type FilterState } from "@/hooks/useCollections";
 import { useCollectionsPagination } from "@/hooks/useCollectionsPagination";
+import { useCollectionFilters } from "@/hooks/useCollectionFilters";
 import SortDropdown from "@/components/collections/SortDropdown";
 import CollectionProductGrid from "@/components/common/CollectionProductGrid";
 import Pagination from "@/components/common/Pagination";
+import FilterDialog from "@/components/collections/FilterDialog";
 
 export default function CollectionsPage() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { slug, currentPage, pageSize, sort, handleNextPage: handleNext, handlePreviousPage: handlePrevious, handleSortChange } =
     useCollectionsPagination();
+  const { filters, applyFilters, clearFilters } = useCollectionFilters();
 
   const {
     products,
@@ -18,7 +23,8 @@ export default function CollectionsPage() {
     hasNext,
     hasPrevious,
     pageTitle,
-  } = useCollections(slug, currentPage, pageSize, sort);
+    filterMetadata,
+  } = useCollections(slug, currentPage, pageSize, sort, filters);
 
   return (
     <section className="px-6 py-12 md:py-20">
@@ -30,9 +36,10 @@ export default function CollectionsPage() {
         <div className="flex items-center gap-3 max-sm:gap-y-6 sm:gap-6">
           {/* Filter Button */}
           <button
+            onClick={() => setIsFilterOpen(true)}
             className="flex h-12 cursor-pointer items-center justify-center rounded-full border-2 border-black bg-white px-4 font-black tracking-wide text-black uppercase shadow-[2px_2px_0px_0px_#000] hover:bg-pop-teal-mid hover:text-white disabled:cursor-not-allowed disabled:bg-gray-400 sm:px-6 sm:text-lg"
             aria-haspopup="dialog"
-            aria-expanded="false"
+            aria-expanded={isFilterOpen}
           >
             <ListFilter className="mr-2 h-5 w-5" />
             Filters
@@ -74,6 +81,19 @@ export default function CollectionsPage() {
           />
         )}
       </div>
+
+      {/* Filter Dialog */}
+      <FilterDialog
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={(newFilters: FilterState) => applyFilters(newFilters, slug)}
+        onClear={() => clearFilters(slug)}
+        initialFilters={filters}
+        availableCounts={filterMetadata.availableCounts}
+        productTypes={filterMetadata.productTypes}
+        brands={filterMetadata.brands}
+        priceRange={filterMetadata.priceRange}
+      />
     </section>
   );
 }

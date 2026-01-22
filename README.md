@@ -43,11 +43,12 @@ npm run dev
   - `/api/auth/postal-addresses/` - Get or create postal addresses (GET/POST)
   - `/api/auth/postal-addresses/<id>/` - Manage specific address (GET/PUT/PATCH/DELETE)
 - **Products**: 
-  - `/api/products/` - All products (supports `?sort=PRICE`, `?page=1`, `?page_size=20`)
+  - `/api/products/` - All products (supports `?sort=`, `?page=`, `?page_size=`, filters: `?available=`, `?minPrice=`, `?maxPrice=`, `?productType=`, `?brand=`)
   - `/api/products/collections/<slug>/` - Products by collection with fuzzy matching
     - Supports flexible slug-based routing with PostgreSQL FTS + pg_trgm
-    - Automatically interprets slugs like `food-drinks`, `gifts-under-100`, `art-prints`
-    - Supports `?sort=PRICE`, `?page=1`, `?page_size=20`
+    - Same query params as above plus filters; list serializer includes `type`, `current_stock`, `status` for filter metadata
+  - `/api/products/search/` - Search suggestions (collections, products) with `?q=`, `?limit=`
+  - `/api/products/search/<query>/` - Paginated full search results
   - `/api/products/<id>/` - Single product details
   - `/api/products/<id>/you-might-like/` - 8 recommended products (same type)
   - `/api/products/hot/`, `/api/products/new/`, `/api/products/explore/`, `/api/products/gift-box/` - Featured product sections
@@ -72,11 +73,12 @@ OnlineShoppingSystem/
 └─ frontend/         # Next.js
    └─ src/
       ├─ app/        # Pages and routes
-      │  ├─ collections/[slug]/  # Dynamic collection pages
+      │  ├─ collections/[slug]/  # Collection pages with filters
+      │  ├─ search/[query]/      # Search results page
       │  └─ products/[product_id]/  # Product detail pages
-      ├─ components/ # Shared components
+      ├─ components/ # Shared components (incl. FilterDialog, SearchDropdown)
       ├─ contexts/   # React contexts
-      ├─ hooks/      # Custom React hooks
+      ├─ hooks/      # Custom React hooks (useCollections, useCollectionFilters, etc.)
       └─ lib/api/    # API service functions
 ```
 
@@ -89,6 +91,9 @@ OnlineShoppingSystem/
 - ✅ Product carousels with lazy loading
 - ✅ Flexible collection routing with PostgreSQL FTS + pg_trgm fuzzy search
 - ✅ Product detail pages with image galleries and modal views
+- ✅ Header search: dropdown (collection suggestions, products), "See all results" → `/search/[query]`, paginated results
+- ✅ Collection filters: slide-in dialog (left) with Availability, Price, Product type, Brand; URL-synced; Clear clears params and navigates
+- ✅ Filter metadata from products: in/out-of-stock counts, price range, product types, brands (list API includes `type`, `current_stock`, `status`)
 - ✅ Shopping cart with dual storage (database for authenticated, localStorage for guests)
 - ✅ Automatic cart sync on login (merges localStorage cart with database)
 - ✅ Cart persists across page refreshes for all users
@@ -124,8 +129,9 @@ npm run lint
 - ✅ Flexible collection routing with PostgreSQL FTS + pg_trgm
   - Removed Category table, uses dynamic slug-based routing
   - Automatic interpretation of slugs like `food-drinks`, `gifts-under-100`
-  - Supports price filtering and prioritizes FTS matches
-- ✅ Collections page with pagination and sorting
+  - Supports filters (availability, price, product type, brand) and prioritizes FTS matches
+- ✅ Collections page with pagination, sorting, and filter dialog
+- ✅ Header search (suggestions + products) and `/search/[query]` results page
 - ✅ Product detail pages with image galleries and modal views
 - ✅ "You Might Like" recommendations based on product type
 - ✅ **Shopping cart with dual storage system**
@@ -138,28 +144,25 @@ npm run lint
 
 ### In Progress
 - 🔄 Order and Payment API endpoints (models created, endpoints pending)
-- Search input
-- Filter function
 
 ## Recent Updates
 
-### Search & Collections
-- Migrated from Meilisearch to PostgreSQL FTS + pg_trgm for native search
-- Removed Category table, implemented flexible slug-based collection routing
-- Improved search accuracy with higher similarity thresholds (0.2) and prioritized FTS matches
+### Search
+- Header search dropdown: collection suggestions (static, contain-check), product results (FTS + pg_trgm), "See all results" → `/search/[query]`
+- Search results page: product grid, pagination, "Results for X" (no "0" when zero results)
 
-### Product Data
-- Enhanced product descriptions (50+ words) and standardized product types
+### Collection Filters
+- Filter dialog (slide-in from left, opposite of cart): Availability (in stock / out of stock), Price (min/max), Product type, Brand
+- Filters stored in URL; **Clear** clears all filter params and navigates
+- Metadata from products: in-stock = `status === 'available'` and `current_stock > 0`; out-of-stock = `status === 'available'` and `current_stock === 0`
+- Backend: `ProductListSerializer` includes `type`, `current_stock`, `status`; brand filter uses decoded names (no double-encoding)
+
+### Search & Collections (earlier)
+- Migrated from Meilisearch to PostgreSQL FTS + pg_trgm; flexible slug-based collection routing
+- Product types and enhanced descriptions
 
 ### Shopping Cart
-- Dual storage system: database for authenticated users, localStorage for guests
-- Automatic cart sync on login (merges localStorage with database cart)
-- Cart persists across page refreshes for all users
-- Free shipping progress indicator with success state
+- Dual storage (DB / localStorage), sync on login, free shipping progress indicator
 
-### User Profile & Address Management
-- Added phone field to User model with Australian format validation (+61XXXXXXXXX or 0XXXXXXXXX)
-- Phone is required during registration and validated on both frontend and backend
-- Created UserPostalAddress model with independent first_name, last_name, and all address fields
-- API endpoints for updating user profile and managing postal addresses
-- Frontend validation and form handling for profile and address updates
+### User Profile & Addresses
+- User `phone` (AU format, required); `UserPostalAddress` model; profile and postal-address API endpoints

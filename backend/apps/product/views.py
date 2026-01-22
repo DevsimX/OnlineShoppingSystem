@@ -10,6 +10,7 @@ from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer
 from .services import get_collection_search_query, get_search_query, get_search_suggestions
 from django.db import connection
+from urllib.parse import unquote
 
 
 class ProductPagination(PageNumberPagination):
@@ -21,14 +22,47 @@ class ProductPagination(PageNumberPagination):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
-    """Get all products with pagination, with optional sorting"""
-    products = Product.objects.select_related('tag').annotate(
+    """Get all products with pagination, with optional sorting and filtering"""
+    products = Product.objects.select_related('tag', 'brand').annotate(
         rank_if_value=Case(
             When(tag__isnull=False, then=F('tag__rank_if')),
             default=Value(0.0),
             output_field=FloatField()
         )
     )
+    
+    # Apply filters
+    available_param = request.query_params.get('available')
+    if available_param is not None:
+        is_available = available_param.lower() == 'true'
+        if is_available:
+            products = products.filter(current_stock__gt=0, status='available')
+        else:
+            products = products.filter(Q(current_stock=0) | Q(status='unavailable'))
+    
+    min_price = request.query_params.get('minPrice')
+    if min_price:
+        products = products.filter(price__gte=float(min_price))
+    
+    max_price = request.query_params.get('maxPrice')
+    if max_price:
+        products = products.filter(price__lte=float(max_price))
+    
+    product_type = request.query_params.get('productType')
+    if product_type:
+        type_list = [t.strip() for t in product_type.split(',')]
+        type_q = Q()
+        for pt in type_list:
+            type_q |= Q(type__icontains=pt)
+        products = products.filter(type_q)
+    
+    brand = request.query_params.get('brand')
+    if brand:
+        brand_list = [unquote(b.strip()) for b in brand.split(',')]
+        brand_q = Q()
+        for b_name in brand_list:
+            brand_q |= Q(brand__name__icontains=b_name)
+        products = products.filter(brand_q)
     
     # Handle sorting based on query parameter
     sort_param = request.query_params.get('sort', 'COLLECTION_DEFAULT')
@@ -62,8 +96,30 @@ def product_list(request):
 @permission_classes([AllowAny])
 def product_list_by_collection(request, slug):
     """Get products by collection slug with fuzzy matching using PostgreSQL FTS + pg_trgm"""
-    # Build PostgreSQL search query
-    search_config = get_collection_search_query(slug)
+    # Extract filter parameters
+    filters = {}
+    available_param = request.query_params.get('available')
+    if available_param is not None:
+        filters['available'] = available_param.lower() == 'true'
+    
+    min_price = request.query_params.get('minPrice')
+    if min_price:
+        filters['min_price'] = float(min_price)
+    
+    max_price = request.query_params.get('maxPrice')
+    if max_price:
+        filters['max_price'] = float(max_price)
+    
+    product_type = request.query_params.get('productType')
+    if product_type:
+        filters['product_type'] = [t.strip() for t in product_type.split(',')]
+    
+    brand = request.query_params.get('brand')
+    if brand:
+        filters['brand'] = [unquote(b.strip()) for b in brand.split(',')]
+    
+    # Build PostgreSQL search query with filters
+    search_config = get_collection_search_query(slug, filters)
     
     # Get pagination params
     page = int(request.query_params.get('page', 1))

@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getAllProducts, getProductsByCollection, type Product as APIProduct, type PaginatedResponse } from "@/lib/api/products";
 import { formatPriceString } from "@/lib/utils";
+
+export type FilterState = {
+  available?: boolean | null;
+  minPrice?: number;
+  maxPrice?: number;
+  productType?: string[];
+  brand?: string[];
+};
 
 export type ProductCarouselProduct = {
   name: string;
@@ -12,6 +20,19 @@ export type ProductCarouselProduct = {
   badge?: "new" | "hot" | "both";
   new?: boolean;
   hot?: boolean;
+};
+
+export type FilterMetadata = {
+  availableCounts: {
+    inStock: number;
+    outOfStock: number;
+  };
+  priceRange: {
+    min: number;
+    max: number;
+  };
+  productTypes: Array<{ name: string; count: number }>;
+  brands: Array<{ name: string; count: number }>;
 };
 
 // Helper function to convert API product to display format
@@ -47,14 +68,17 @@ const formatPageTitle = (slug: string): string => {
     .join(" ");
 };
 
-export function useCollections(slug: string, page: number, pageSize: number = 20, sort?: string) {
+export function useCollections(slug: string, page: number, pageSize: number = 20, sort?: string, filters?: FilterState) {
   const [products, setProducts] = useState<ProductCarouselProduct[]>([]);
+  const [allProductsForMetadata, setAllProductsForMetadata] = useState<APIProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
   const [pageTitle, setPageTitle] = useState("All Products");
 
+  // Fetch paginated products
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -62,12 +86,10 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
         let response: PaginatedResponse<APIProduct>;
         
         if (slug === "all-products") {
-          // Fetch all products
-          response = await getAllProducts(page, pageSize, sort);
+          response = await getAllProducts(page, pageSize, sort, filters);
           setPageTitle("All Products");
         } else {
-          // Use new collection endpoint
-          response = await getProductsByCollection(slug, page, pageSize, sort);
+          response = await getProductsByCollection(slug, page, pageSize, sort, filters);
           setPageTitle(formatPageTitle(slug));
         }
 
@@ -87,7 +109,110 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
     };
 
     fetchData();
-  }, [slug, page, pageSize, sort]);
+  }, [slug, page, pageSize, sort, filters]);
+
+  // Fetch all products for metadata calculation (without filters, without pagination)
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      setIsLoadingMetadata(true);
+      try {
+        // Fetch all products for the collection without filters to get accurate metadata
+        // Use a large page size to get all products
+        let response: PaginatedResponse<APIProduct>;
+        
+        if (slug === "all-products") {
+          response = await getAllProducts(1, 10000); // Large page size to get all
+        } else {
+          response = await getProductsByCollection(slug, 1, 10000); // Large page size to get all
+        }
+
+        setAllProductsForMetadata(response.results);
+      } catch (error) {
+        console.error("Failed to fetch products for metadata:", error);
+        setAllProductsForMetadata([]);
+      } finally {
+        setIsLoadingMetadata(false);
+      }
+    };
+
+    fetchMetadata();
+  }, [slug]); // Only depend on slug, not filters
+
+  // Calculate filter metadata from all products in collection
+  const filterMetadata = useMemo<FilterMetadata>(() => {
+    if (allProductsForMetadata.length === 0) {
+      return {
+        availableCounts: { inStock: 0, outOfStock: 0 },
+        priceRange: { min: 0, max: 0 },
+        productTypes: [],
+        brands: [],
+      };
+    }
+
+    // Calculate price range
+    const prices = allProductsForMetadata.map(p => parseFloat(p.price)).filter(p => !isNaN(p));
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+    // Calculate availability counts
+    let inStock = 0;
+    let outOfStock = 0;
+    allProductsForMetadata.forEach((product) => {
+      // In stock: status = 'available' AND current_stock > 0
+      // Out of stock: status = 'available' AND current_stock = 0
+      if (product.status === 'available') {
+        const stock = product.current_stock ?? 0;
+        if (stock > 0) {
+          inStock++;
+        } else {
+          outOfStock++;
+        }
+      }
+    });
+
+    // Calculate product types with counts (type is array of strings per product)
+    const typeCounts = new Map<string, number>();
+    allProductsForMetadata.forEach((product) => {
+      const types = product.type;
+      if (Array.isArray(types)) {
+        types.forEach((t: string) => {
+          const name = typeof t === "string" ? t.trim() : String(t).trim();
+          if (name) {
+            typeCounts.set(name, (typeCounts.get(name) || 0) + 1);
+          }
+        });
+      }
+    });
+
+    const productTypes = Array.from(typeCounts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Calculate brands with counts
+    const brandCounts = new Map<string, number>();
+    allProductsForMetadata.forEach((product) => {
+      if (product.brand) {
+        brandCounts.set(product.brand, (brandCounts.get(product.brand) || 0) + 1);
+      }
+    });
+
+    const brands = Array.from(brandCounts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+      availableCounts: {
+        inStock,
+        outOfStock,
+      },
+      priceRange: {
+        min: minPrice,
+        max: maxPrice,
+      },
+      productTypes,
+      brands,
+    };
+  }, [allProductsForMetadata]);
 
   return {
     products,
@@ -96,5 +221,7 @@ export function useCollections(slug: string, page: number, pageSize: number = 20
     hasNext,
     hasPrevious,
     pageTitle,
+    filterMetadata,
+    isLoadingMetadata,
   };
 }

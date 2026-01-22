@@ -17,7 +17,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'brand', 'price', 'profile_pic_link', 'new', 'hot')
+        fields = ('id', 'name', 'brand', 'price', 'profile_pic_link', 'new', 'hot', 'type', 'current_stock', 'status')
 
     def get_new(self, obj):
         """Get new status from ProductTag"""

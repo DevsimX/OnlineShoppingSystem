@@ -8,6 +8,9 @@ export type Product = {
   profile_pic_link: string;
   new: boolean;
   hot: boolean;
+  type?: string[];
+  current_stock?: number;
+  status?: string;
 };
 
 export type ProductDetailPic = {
@@ -111,7 +114,8 @@ export async function getGiftBoxProducts(): Promise<Product[]> {
 export async function getAllProducts(
   page = 1,
   pageSize = 20,
-  sort?: string
+  sort?: string,
+  filters?: { available?: boolean | null; minPrice?: number; maxPrice?: number; productType?: string[]; brand?: string[] }
 ): Promise<PaginatedResponse<Product>> {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -120,6 +124,25 @@ export async function getAllProducts(
   
   if (sort && sort !== "COLLECTION_DEFAULT") {
     params.append("sort", sort);
+  }
+
+  // Add filter parameters
+  if (filters) {
+    if (filters.available !== null && filters.available !== undefined) {
+      params.append("available", filters.available.toString());
+    }
+    if (filters.minPrice !== undefined) {
+      params.append("minPrice", filters.minPrice.toString());
+    }
+    if (filters.maxPrice !== undefined) {
+      params.append("maxPrice", filters.maxPrice.toString());
+    }
+    if (filters.productType && filters.productType.length > 0) {
+      params.append("productType", filters.productType.join(","));
+    }
+    if (filters.brand && filters.brand.length > 0) {
+      params.append("brand", filters.brand.join(","));
+    }
   }
   
   const response = await fetch(`${API_BASE_URL}/api/products/?${params.toString()}`, {
@@ -210,7 +233,8 @@ export async function getProductsByCollection(
   slug: string,
   page = 1,
   pageSize = 20,
-  sort?: string
+  sort?: string,
+  filters?: { available?: boolean | null; minPrice?: number; maxPrice?: number; productType?: string[]; brand?: string[] }
 ): Promise<PaginatedResponse<Product>> {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -219,6 +243,25 @@ export async function getProductsByCollection(
   
   if (sort && sort !== "COLLECTION_DEFAULT") {
     params.append("sort", sort);
+  }
+
+  // Add filter parameters
+  if (filters) {
+    if (filters.available !== null && filters.available !== undefined) {
+      params.append("available", filters.available.toString());
+    }
+    if (filters.minPrice !== undefined) {
+      params.append("minPrice", filters.minPrice.toString());
+    }
+    if (filters.maxPrice !== undefined) {
+      params.append("maxPrice", filters.maxPrice.toString());
+    }
+    if (filters.productType && filters.productType.length > 0) {
+      params.append("productType", filters.productType.join(","));
+    }
+    if (filters.brand && filters.brand.length > 0) {
+      params.append("brand", filters.brand.join(","));
+    }
   }
   
   const response = await fetch(

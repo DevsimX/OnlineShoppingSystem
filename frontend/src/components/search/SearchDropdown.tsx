@@ -98,7 +98,7 @@ export default function SearchDropdown({ query, isOpen, onClose }: SearchDropdow
         </div>
       ) : hasNoResults ? (
         <div className="py-4 text-center">
-          <p className="text-xl font-extrabold text-black">No results found for "{query}"</p>
+          <p className="text-xl font-extrabold text-black">No results found for &quot;{query}&quot;</p>
         </div>
       ) : (
         <>
