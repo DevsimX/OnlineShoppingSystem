@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,7 +9,7 @@ import LoginForm from "./_components/LoginForm";
 import RegisterForm from "./_components/RegisterForm";
 import { useAuthTabs } from "@/hooks/useAuthTabs";
 
-export default function AuthPage() {
+function AuthContent() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const { activeTab, setActiveTab, prefilledUsername, handleRegisterSuccess } = useAuthTabs();
@@ -93,5 +94,21 @@ export default function AuthPage() {
       </main>
       <Marquee />
     </>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <main style={{ viewTransitionName: "main-content" }}>
+        <div className="mx-auto max-w-5xl px-3 py-12 md:py-24">
+          <div className="flex items-center justify-center">
+            <p className="text-lg">Loading...</p>
+          </div>
+        </div>
+      </main>
+    }>
+      <AuthContent />
+    </Suspense>
   );
 }

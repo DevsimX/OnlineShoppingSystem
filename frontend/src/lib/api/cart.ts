@@ -338,7 +338,6 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
   // Merge localStorage items with database cart
   // For each localStorage item, add it to database (backend will merge quantities)
   const syncErrors: string[] = [];
-  let syncedCount = 0;
   
   for (const item of localCart.items) {
     try {
@@ -361,9 +360,7 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
           }),
         });
         
-        if (response.ok) {
-          syncedCount++;
-        } else {
+        if (!response.ok) {
           const error = await response.json();
           syncErrors.push(`Failed to sync item ${item.product_id}: ${error.error || "Unknown error"}`);
         }
@@ -381,9 +378,7 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
           }),
         });
         
-        if (response.ok) {
-          syncedCount++;
-        } else {
+        if (!response.ok) {
           const error = await response.json();
           syncErrors.push(`Failed to sync item ${item.product_id}: ${error.error || "Unknown error"}`);
         }
