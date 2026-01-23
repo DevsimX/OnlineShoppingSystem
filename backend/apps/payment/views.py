@@ -4,8 +4,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from decimal import Decimal
 from django.conf import settings
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse, JsonResponse
 import stripe
 from apps.cart.views import get_or_create_cart, calculate_cart_total
+from apps.cart.models import ShoppingCart
+from apps.order.models import Order
 
 
 @api_view(['GET'])
@@ -167,3 +173,89 @@ def create_checkout_session(request):
         })
     except stripe.error.StripeError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@csrf_exempt
+@require_POST
+def stripe_webhook(request):
+    """Handle Stripe webhook events"""
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    webhook_secret = getattr(settings, 'STRIPE_WEBHOOK_SECRET', None)
+    
+    if not webhook_secret:
+        return JsonResponse({'error': 'Webhook secret not configured'}, status=500)
+    
+    # Initialize Stripe
+    stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', None)
+    if not stripe.api_key:
+        return JsonResponse({'error': 'Stripe not configured'}, status=500)
+    
+    try:
+        # Verify webhook signature
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return JsonResponse({'error': 'Invalid payload'}, status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return JsonResponse({'error': 'Invalid signature'}, status=400)
+    
+    # Handle the event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        
+        # Only process if payment is successful
+        if session.get('payment_status') == 'paid':
+            try:
+                with transaction.atomic():
+                    # Get metadata from checkout session
+                    metadata = session.get('metadata', {})
+                    user_id = metadata.get('user_id')
+                    cart_id = metadata.get('cart_id')
+                    
+                    if not user_id or not cart_id:
+                        return JsonResponse({'error': 'Missing metadata'}, status=400)
+                    
+                    # Get the cart
+                    try:
+                        cart = ShoppingCart.objects.select_for_update().get(id=cart_id, owner_id=user_id)
+                    except ShoppingCart.DoesNotExist:
+                        return JsonResponse({'error': 'Cart not found'}, status=404)
+                    
+                    # Get cart items and calculate total
+                    items, subtotal, total_items = calculate_cart_total(cart)
+                    
+                    if total_items == 0:
+                        return JsonResponse({'error': 'Cart is empty'}, status=400)
+                    
+                    # Calculate total amount from session (includes shipping, gift wrap, etc.)
+                    amount_total = Decimal(session.get('amount_total', 0)) / 100  # Convert from cents
+                    
+                    # Create order from cart
+                    order = Order.objects.create(
+                        owner_id=user_id,
+                        amount=amount_total,
+                        products=cart.products.copy(),  # Copy the products dict
+                        status='completed',  # Payment is successful, so order is completed
+                    )
+                    
+                    # Clear the cart
+                    cart.products = {}
+                    cart.amount = Decimal('0.00')
+                    cart.save()
+                    
+                    return JsonResponse({'status': 'success', 'order_id': order.id})
+                    
+            except Exception as e:
+                # Log the error but return 200 to prevent Stripe from retrying
+                # In production, you should log this properly
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f'Error processing webhook: {str(e)}')
+                return JsonResponse({'error': str(e)}, status=500)
+    
+    # Return 200 for other event types or non-paid sessions
+    return JsonResponse({'status': 'received'})
