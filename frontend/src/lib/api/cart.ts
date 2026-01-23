@@ -412,7 +412,7 @@ export async function createCheckoutSession(giftWrap: boolean, note: string): Pr
     throw new Error("User not authenticated");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/cart/checkout/`, {
+  const response = await fetch(`${API_BASE_URL}/api/payments/checkout/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
