@@ -395,12 +395,31 @@ def explore_products(request):
 @permission_classes([AllowAny])
 def gift_box_products(request):
     """Get 8 gift box products ranked by rank_if high to low"""
-    # Filter products where type array contains 'Gift Box'
+    # Filter products where type array contains anything with 'gift' (case-insensitive)
+    # Get all products with tags, annotate rank_if, then filter in Python for case-insensitive matching
     products = Product.objects.select_related('tag').filter(
-        type__contains=['Gift Box'],
         tag__isnull=False
-    ).order_by('-tag__rank_if')[:8]
-    serializer = ProductListSerializer(products, many=True)
+    ).annotate(
+        rank_if_value=Case(
+            When(tag__isnull=False, then=F('tag__rank_if')),
+            default=Value(0.0),
+            output_field=FloatField()
+        )
+    ).order_by('-rank_if_value')
+    
+    # Filter for products where any type contains 'gift' (case-insensitive)
+    gift_products = []
+    for product in products:
+        if product.type and isinstance(product.type, list):
+            for type_item in product.type:
+                if isinstance(type_item, str) and 'gift' in type_item.lower():
+                    gift_products.append(product)
+                    break
+        # Stop once we have 8 products (already sorted by rank_if)
+        if len(gift_products) >= 8:
+            break
+    
+    serializer = ProductListSerializer(gift_products, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

@@ -97,20 +97,26 @@ export function useLazyProducts(
 ) {
   const [products, setProducts] = useState<ProductCarouselProduct[]>(createPlaceholderProducts());
   const [isLoading, setIsLoading] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const hasLoadedRef = useRef(false);
+  const fetchFunctionRef = useRef(fetchFunction);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  // Keep fetch function ref up to date
   useEffect(() => {
-    if (hasLoaded) return;
+    fetchFunctionRef.current = fetchFunction;
+  }, [fetchFunction]);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasLoaded) {
+          if (entry.isIntersecting && !hasLoadedRef.current) {
+            hasLoadedRef.current = true;
             setIsLoading(true);
-            setHasLoaded(true);
 
-            fetchFunction()
+            fetchFunctionRef.current()
               .then((apiProducts) => {
                 const convertedProducts = apiProducts.map(convertToProductCarouselFormat);
                 setProducts(padProducts(convertedProducts));
@@ -140,7 +146,7 @@ export function useLazyProducts(
         observer.unobserve(currentSection);
       }
     };
-  }, [hasLoaded, fetchFunction, sectionName]);
+  }, [sectionName]);
 
   return { products, isLoading, sectionRef };
 }
