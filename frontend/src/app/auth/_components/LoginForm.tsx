@@ -5,12 +5,14 @@ import { useLogin } from "@/hooks/useLogin";
 type LoginFormProps = {
   onSuccess?: () => void;
   prefilledUsername?: string;
+  redirect?: string | null;
 };
 
-export default function LoginForm({ onSuccess, prefilledUsername = "" }: LoginFormProps) {
+export default function LoginForm({ onSuccess, prefilledUsername = "", redirect }: LoginFormProps) {
   const { loginData, setLoginData, loginError, isLoading, handleLogin } = useLogin(
     prefilledUsername,
-    onSuccess
+    onSuccess,
+    redirect
   );
 
   return (

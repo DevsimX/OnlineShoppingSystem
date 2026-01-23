@@ -5,7 +5,7 @@ import { login, setToken, setRefreshToken, type LoginData } from "@/lib/api/auth
 /**
  * Hook for handling login form logic
  */
-export function useLogin(prefilledUsername: string = "", onSuccess?: () => void) {
+export function useLogin(prefilledUsername: string = "", onSuccess?: () => void, redirect?: string | null) {
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState<LoginData>({
     username: prefilledUsername,
@@ -34,8 +34,19 @@ export function useLogin(prefilledUsername: string = "", onSuccess?: () => void)
       if (onSuccess) {
         onSuccess();
       } else {
-        // Redirect to protected page or home
-        window.location.href = "/account";
+        // Check if there's a checkout intent stored
+        const checkoutIntent = typeof window !== "undefined" ? sessionStorage.getItem("checkout_intent") : null;
+        if (checkoutIntent === "true") {
+          // Clear the intent and redirect to home (user can open cart and checkout)
+          sessionStorage.removeItem("checkout_intent");
+          window.location.href = redirect || "/";
+        } else if (redirect) {
+          // Redirect to the specified path
+          window.location.href = redirect;
+        } else {
+          // Redirect to protected page or home
+          window.location.href = "/account";
+        }
       }
     } catch (error) {
       const apiError = error as { error?: string; username?: string[]; password?: string[] };

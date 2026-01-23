@@ -337,6 +337,9 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
 
   // Merge localStorage items with database cart
   // For each localStorage item, add it to database (backend will merge quantities)
+  const syncErrors: string[] = [];
+  let syncedCount = 0;
+  
   for (const item of localCart.items) {
     try {
       const existingItem = dbCart.items.find(
@@ -346,7 +349,7 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
       if (existingItem) {
         // Item exists in both - add the localStorage quantity to database
         const totalQuantity = existingItem.quantity + item.quantity;
-        await fetch(`${API_BASE_URL}/api/cart/update/`, {
+        const response = await fetch(`${API_BASE_URL}/api/cart/update/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -357,9 +360,16 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
             quantity: totalQuantity,
           }),
         });
+        
+        if (response.ok) {
+          syncedCount++;
+        } else {
+          const error = await response.json();
+          syncErrors.push(`Failed to sync item ${item.product_id}: ${error.error || "Unknown error"}`);
+        }
       } else {
         // Item only in localStorage - add it
-        await fetch(`${API_BASE_URL}/api/cart/add/`, {
+        const response = await fetch(`${API_BASE_URL}/api/cart/add/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -370,15 +380,67 @@ export async function syncLocalStorageCartToDatabase(): Promise<Cart> {
             quantity: item.quantity,
           }),
         });
+        
+        if (response.ok) {
+          syncedCount++;
+        } else {
+          const error = await response.json();
+          syncErrors.push(`Failed to sync item ${item.product_id}: ${error.error || "Unknown error"}`);
+        }
       }
     } catch (error) {
       console.error(`Failed to sync item ${item.product_id}:`, error);
+      syncErrors.push(`Failed to sync item ${item.product_id}: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 
-  // Clear localStorage cart after successful sync
+  // Clear localStorage after merge attempt - items are now in database cart
+  // Even if some items failed, we clear localStorage since the merge attempt was made
   clearLocalStorageCart();
+  
+  if (syncErrors.length > 0) {
+    console.warn("Some cart items failed to sync:", syncErrors);
+  }
 
   // Return updated database cart
   return getCart();
+}
+
+export type CheckoutResponse = {
+  session_id: string;
+  url: string;
+};
+
+export async function createCheckoutSession(giftWrap: boolean, note: string): Promise<CheckoutResponse> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("User not authenticated");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/cart/checkout/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      gift_wrap: giftWrap,
+      note: note,
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Token expired or invalid - clear it and throw auth error
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
+      }
+      throw new Error("Your session has expired. Please sign in again.");
+    }
+    const error = await response.json();
+    throw new Error(error.error || error.detail || "Failed to create checkout session");
+  }
+
+  return response.json();
 }

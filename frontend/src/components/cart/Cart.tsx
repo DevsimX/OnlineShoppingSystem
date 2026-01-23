@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { X, Plus, Minus, Trash2, ChevronDown, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import DialogOverlay from "@/components/common/DialogOverlay";
 import BigCart from "@/assets/bigcart.svg";
-import { updateCartItem, removeCartItem, type CartItem } from "@/lib/api/cart";
+import { updateCartItem, removeCartItem, createCheckoutSession, type CartItem } from "@/lib/api/cart";
 import { formatPrice } from "@/lib/utils";
+import { isAuthenticated } from "@/lib/api/auth";
 
 const FREE_SHIPPING_THRESHOLD = 100;
 
@@ -106,9 +109,11 @@ function CartItemRow({ item }: { item: CartItem }) {
 
 export default function Cart() {
   const { isCartOpen, closeCart, cart, isLoading } = useCart();
+  const router = useRouter();
   const [giftWrap, setGiftWrap] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
   const [note, setNote] = useState("");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // Calculate free shipping progress
   const subtotal = cart ? parseFloat(cart.subtotal) : 0;
@@ -124,6 +129,49 @@ export default function Cart() {
       setNoteExpanded(false);
     }
   }, [isCartOpen]);
+
+  const handleCheckout = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      // Show notification explaining why checkout is denied
+      toast.error("Please sign in to proceed with checkout", {
+        duration: 4000,
+      });
+      
+      // Force user to sign in - store checkout intent and redirect to auth page
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("checkout_intent", "true");
+      }
+      closeCart();
+      router.push("/auth?redirect=/");
+      return;
+    }
+
+    // User is authenticated - proceed with Stripe checkout
+    setIsCheckingOut(true);
+    try {
+      const checkoutData = await createCheckoutSession(giftWrap, note);
+      // Redirect to Stripe checkout page
+      window.location.href = checkoutData.url;
+    } catch (error) {
+      console.error("Failed to create checkout session:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to start checkout. Please try again.";
+      toast.error(errorMessage, {
+        duration: 4000,
+      });
+      
+      // If it's an auth error, redirect to login
+      if (errorMessage.includes("session has expired") || errorMessage.includes("not authenticated")) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("checkout_intent", "true");
+        }
+        closeCart();
+        router.push("/auth?redirect=/");
+      }
+      
+      setIsCheckingOut(false);
+    }
+  };
 
   return (
     <>
@@ -304,9 +352,18 @@ export default function Cart() {
 
                 {/* Checkout Button */}
                 <button
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
                   className="flex items-center justify-center uppercase tracking-wide font-family-trade-gothic font-black disabled:cursor-not-allowed disabled:bg-gray-400 cursor-pointer leading-none bg-pop-red-accent text-white hover:bg-pop-teal-mid border-2 border-black shadow-[2px_2px_0px_0px_#000] min-h-12 px-6 py-2 text-lg md:text-xl rounded-full w-full"
                 >
-                  Checkout
+                  {isCheckingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Checkout"
+                  )}
                 </button>
                 <p className="text-center text-[11px] md:text-sm">Tax included. Shipping calculated at checkout.</p>
               </div>

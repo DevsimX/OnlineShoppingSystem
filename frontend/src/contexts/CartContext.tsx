@@ -40,9 +40,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load cart on mount
+  // Load cart on mount and check for sync needed
   useEffect(() => {
-    refreshCart();
+    const loadCartAndSync = async () => {
+      const currentlyAuthenticated = isAuthenticated();
+      setWasAuthenticated(currentlyAuthenticated);
+      
+      // If user is authenticated on mount, check if localStorage cart needs syncing
+      if (currentlyAuthenticated) {
+        const localCart = getLocalStorageCart();
+        if (localCart.items.length > 0) {
+          try {
+            // Sync localStorage cart to database
+            await syncLocalStorageCartToDatabase();
+            // Refresh to get merged cart
+            await refreshCart();
+            return;
+          } catch (error) {
+            console.error("Failed to sync cart on mount:", error);
+            // Continue to refresh cart even if sync fails
+          }
+        }
+      }
+      
+      // Normal cart load
+      await refreshCart();
+    };
+    
+    loadCartAndSync();
   }, []);
 
   // Monitor authentication state changes and sync cart when user logs in
@@ -53,9 +78,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // If user just logged in (wasn't authenticated before, now is)
       if (wasAuthenticated === false && currentlyAuthenticated) {
         try {
-          // Sync localStorage cart to database
-          await syncLocalStorageCartToDatabase();
-          // Refresh cart to get merged data
+          // Check if there are items in localStorage to sync
+          const localCart = getLocalStorageCart();
+          if (localCart.items.length > 0) {
+            // Sync localStorage cart to database
+            await syncLocalStorageCartToDatabase();
+          }
+          // Refresh cart to get merged data (or database cart if localStorage was empty)
           await refreshCart();
         } catch (error) {
           console.error("Failed to sync cart on login:", error);
@@ -73,10 +102,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setWasAuthenticated(currentlyAuthenticated);
     };
 
-    // Initial check
-    if (wasAuthenticated === null) {
-      setWasAuthenticated(isAuthenticated());
-    } else {
+    // Only run sync check if wasAuthenticated has been initialized
+    if (wasAuthenticated !== null) {
       checkAuthAndSync();
     }
   }, [wasAuthenticated]);

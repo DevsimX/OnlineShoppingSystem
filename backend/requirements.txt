@@ -6,3 +6,4 @@ psycopg2-binary==2.9.9
 python-decouple==3.8
 gunicorn==21.2.0
 whitenoise==6.8.2
+stripe>=14.2.0

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Marquee from "@/components/home/Marquee";
@@ -8,6 +9,8 @@ import RegisterForm from "./_components/RegisterForm";
 import { useAuthTabs } from "@/hooks/useAuthTabs";
 
 export default function AuthPage() {
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const { activeTab, setActiveTab, prefilledUsername, handleRegisterSuccess } = useAuthTabs();
 
   return (
@@ -51,7 +54,7 @@ export default function AuthPage() {
               </div>
 
               {/* Login Form */}
-              {activeTab === "login" && <LoginForm prefilledUsername={prefilledUsername} />}
+              {activeTab === "login" && <LoginForm prefilledUsername={prefilledUsername} redirect={redirect} />}
 
               {/* Register Form */}
               {activeTab === "register" && (
