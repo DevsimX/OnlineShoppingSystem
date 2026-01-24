@@ -21,12 +21,25 @@ def payment_list(request):
     return Response({'message': 'Endpoint not implemented yet'}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
+def _checkout_redirect_base(request):
+    """Resolve frontend base URL for success/cancel redirects. From request or settings."""
+    base = request.data.get('frontend_base_url') or getattr(
+        settings, 'FRONTEND_BASE_URL', None
+    )
+    if base:
+        base = base.rstrip('/')
+        if base.startswith(('http://', 'https://')):
+            return base
+    return None
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
     """Create Stripe checkout session"""
     gift_wrap = request.data.get('gift_wrap', False)
     note = request.data.get('note', '')
+    frontend_base = _checkout_redirect_base(request)
     
     # Get user's cart
     cart = get_or_create_cart(request.user)
@@ -95,6 +108,13 @@ def create_checkout_session(request):
     customer_email = request.user.email
     
     # Create Stripe checkout session
+    if frontend_base:
+        success_url = f'{frontend_base}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}'
+        cancel_url = f'{frontend_base}/checkout/cancel'
+    else:
+        success_url = request.build_absolute_uri('/checkout/success?session_id={CHECKOUT_SESSION_ID}')
+        cancel_url = request.build_absolute_uri('/checkout/cancel')
+
     try:
         session_params = {
             'payment_method_types': ['card'],
@@ -104,8 +124,8 @@ def create_checkout_session(request):
             'shipping_address_collection': {
                 'allowed_countries': ['AU'],
             },
-            'success_url': request.build_absolute_uri('/checkout/success?session_id={CHECKOUT_SESSION_ID}'),
-            'cancel_url': request.build_absolute_uri('/checkout/cancel'),
+            'success_url': success_url,
+            'cancel_url': cancel_url,
             'metadata': {
                 'user_id': str(request.user.id),
                 'cart_id': str(cart.id),

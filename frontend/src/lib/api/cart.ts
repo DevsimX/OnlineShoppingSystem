@@ -18,6 +18,12 @@ export type Cart = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost";
+
+/** Frontend origin for checkout success/cancel redirects. Passed to backend. */
+function getFrontendBaseUrl(): string {
+  if (typeof window !== "undefined") return window.location.origin;
+  return process.env.NEXT_PUBLIC_APP_URL || "";
+}
 const CART_STORAGE_KEY = "shopping_cart";
 
 // LocalStorage cart management
@@ -412,6 +418,8 @@ export async function createCheckoutSession(giftWrap: boolean, note: string): Pr
     throw new Error("User not authenticated");
   }
 
+  const frontendBaseUrl = getFrontendBaseUrl();
+
   const response = await fetch(`${API_BASE_URL}/api/payments/checkout/`, {
     method: "POST",
     headers: {
@@ -421,6 +429,7 @@ export async function createCheckoutSession(giftWrap: boolean, note: string): Pr
     body: JSON.stringify({
       gift_wrap: giftWrap,
       note: note,
+      frontend_base_url: frontendBaseUrl || undefined,
     }),
   });
 
