@@ -17,7 +17,7 @@ services:
 
   backend:
     build: .
-    command: sh entrypoint.sh gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -31,8 +31,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-popshop}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=${POSTGRES_HOST:-db}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - ENVIRONMENT=${ENVIRONMENT:-local}
 
   nginx:

@@ -69,14 +69,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
+# Support both DB_HOST/DB_PORT and POSTGRES_HOST/POSTGRES_PORT naming conventions
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('POSTGRES_DB', default='popshop'),
         'USER': config('POSTGRES_USER', default='postgres'),
         'PASSWORD': config('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': config('POSTGRES_HOST', default='db'),
-        'PORT': config('POSTGRES_PORT', default='5432'),
+        'HOST': config('POSTGRES_HOST', default=config('DB_HOST', default='db')),
+        'PORT': config('POSTGRES_PORT', default=config('DB_PORT', default='5432')),
     }
 }
 

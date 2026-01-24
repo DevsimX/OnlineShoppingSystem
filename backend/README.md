@@ -132,7 +132,6 @@ backend/
 │   └── nginx.conf          # Nginx reverse proxy config
 ├── docker compose.yml      # Docker services
 ├── Dockerfile              # Web container image
-├── entrypoint.sh          # Container startup script
 ├── requirements.txt        # Python dependencies
 └── .env.example           # Environment variables template
 ```
