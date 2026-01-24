@@ -1,10 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -36,5 +37,22 @@ export default function CheckoutSuccessPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main>
+          <PageHero firstLine="Thank" secondLine="You!" />
+          <section className="max-w-2xl mx-auto px-6 py-16 text-center">
+            <p className="text-lg text-stone-700 animate-pulse">Loading…</p>
+          </section>
+        </main>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
