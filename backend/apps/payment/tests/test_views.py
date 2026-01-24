@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -72,11 +72,22 @@ class PaymentTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
 
+    @override_settings(
+        STRIPE_WEBHOOK_SECRET='whsec_test',
+        STRIPE_SECRET_KEY='sk_test_dummy',
+    )
     @patch('apps.payment.views.stripe.Webhook.construct_event')
     def test_stripe_webhook_invalid_signature(self, mock_construct):
         """Test Stripe webhook with invalid signature"""
-        from stripe.error import SignatureVerificationError
-        mock_construct.side_effect = SignatureVerificationError('Invalid signature', 'sig_header')
-        
-        response = self.client.post('/api/payments/webhook/', {}, format='json')
+        import stripe
+        mock_construct.side_effect = stripe.SignatureVerificationError(
+            'Invalid signature', 'sig_header'
+        )
+
+        response = self.client.post(
+            '/api/payments/webhook/',
+            {},
+            format='json',
+            HTTP_STRIPE_SIGNATURE='test_sig',
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

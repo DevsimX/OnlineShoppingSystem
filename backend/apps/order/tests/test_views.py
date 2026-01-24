@@ -41,7 +41,7 @@ class OrderTests(TestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/api/orders/{self.order.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(float(response.data['amount']), 99.99)
+        self.assertEqual(float(response.data['total']), 99.99)
 
     def test_get_order_detail_not_found(self):
         """Test getting non-existent order"""

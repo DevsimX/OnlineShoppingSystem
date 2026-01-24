@@ -103,5 +103,7 @@ class CartTests(TestCase):
         }, format='json')
         response = self.client.get('/api/cart/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Total should be 29.99 * 3 = 89.97
-        self.assertGreater(float(response.data.get('total', 0)), 0)
+        # Cart returns subtotal (29.99 * 3 = 89.97)
+        subtotal = float(response.data.get('subtotal', 0))
+        self.assertGreater(subtotal, 0)
+        self.assertAlmostEqual(subtotal, 89.97, places=2)

@@ -171,7 +171,7 @@ def create_checkout_session(request):
             'session_id': checkout_session.id,
             'url': checkout_session.url,
         })
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -199,7 +199,7 @@ def stripe_webhook(request):
     except ValueError as e:
         # Invalid payload
         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.SignatureVerificationError as e:
         # Invalid signature
         return JsonResponse({'error': 'Invalid signature'}, status=400)
     

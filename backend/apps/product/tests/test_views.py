@@ -83,4 +83,5 @@ class ProductTests(TestCase):
         """Test product search"""
         response = self.client.get('/api/products/search/?q=test')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('results', response.data)
+        self.assertIn('products', response.data)
+        self.assertIn('total', response.data)
