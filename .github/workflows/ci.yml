@@ -44,48 +44,39 @@ jobs:
   backend:
     name: Backend Checks
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: ./backend
-    
+
+    env:
+      SECRET_KEY: ci-secret-key-for-testing
+      DEBUG: "False"
+      ENVIRONMENT: local
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
           cache-dependency-path: backend/requirements.txt
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            pip install django djangorestframework
-          fi
-      
+          pip install -r requirements.txt
+
       - name: Run Django checks
         run: |
           python manage.py check
           python manage.py check --deploy
-        # Add any required Django environment variables here:
-        # env:
-        #   SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-        #   DEBUG: 'False'
-      
-      - name: Run Django tests (if available)
-        run: |
-          if [ -f shop/tests.py ] && [ -s shop/tests.py ]; then
-            python manage.py test
-          else
-            echo "No tests found, skipping test execution"
-          fi
-        continue-on-error: true
+
+      - name: Run Django tests
+        run: python manage.py test --verbosity=2 --settings=config.settings.test
 
   # Optional: Combined job that runs both frontend and backend
   # Uncomment if you want a single job that runs everything
