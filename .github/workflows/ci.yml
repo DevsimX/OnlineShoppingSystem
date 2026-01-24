@@ -90,7 +90,7 @@ jobs:
         run: docker compose run --rm backend python manage.py migrate --noinput
 
       - name: Run Django tests
-        run: docker compose run --rm backend python manage.py test --verbosity=2
+        run: docker compose run --rm backend python run_tests.py
 
       - name: Stop services
         if: always()
