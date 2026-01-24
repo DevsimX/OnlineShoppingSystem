@@ -8,10 +8,10 @@ export default function CheckoutCancelPage() {
     <main>
       <PageHero firstLine="Checkout" secondLine="Cancelled" />
       <section className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <p className="text-lg text-stone-700 mb-8">
+        <p className="text-2xl font-price-check mb-8">
           Your checkout was cancelled. Your cart items are still saved.
         </p>
-        <p className="text-sm text-stone-500 mb-8">
+        <p className="text-xl font-price-check mb-8">
           You can open your cart from the header to complete checkout later.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
