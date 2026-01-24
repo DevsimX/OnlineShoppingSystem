@@ -7,6 +7,8 @@ Full-stack e-commerce app with Next.js frontend and Django + DRF backend.
 - **Frontend**: [https://online-shopping-system-hv2v.vercel.app](https://online-shopping-system-hv2v.vercel.app) (Vercel)
 - **Backend API**: [https://onlineshoppingsystem.onrender.com](https://onlineshoppingsystem.onrender.com) (Render)
 
+> **Note:** The backend runs on a **free tier** (Render). It may be slow to respond or appear unavailable when cold-starting (the service wakes up after inactivity). If requests fail or time out, **please try again** — a retry or two usually succeeds once the service is awake.
+
 ## Prerequisites
 
 - Node.js 18+
