@@ -63,6 +63,22 @@ Follow the prompts to create an admin user.
 docker compose exec backend python manage.py migrate
 ```
 
+### Run tests
+```bash
+# Run all tests
+docker compose exec backend python manage.py test
+
+# Run tests for specific app
+docker compose exec backend python manage.py test apps.authentication
+docker compose exec backend python manage.py test apps.product
+docker compose exec backend python manage.py test apps.cart
+docker compose exec backend python manage.py test apps.order
+docker compose exec backend python manage.py test apps.payment
+
+# Run with verbose output
+docker compose exec backend python manage.py test --verbosity=2
+```
+
 ### Create new Django app
 ```bash
 docker compose exec backend python manage.py startapp app_name apps/
@@ -75,7 +91,7 @@ docker compose exec backend python manage.py shell
 
 ### View logs
 ```bash
-docker compose logs -f web
+docker compose logs -f backend
 ```
 
 ### Stop services

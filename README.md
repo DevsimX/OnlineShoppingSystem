@@ -84,6 +84,16 @@ https://online-shopping-system-hv2v.vercel.app,https://online-shopping-system-hv
 OnlineShoppingSystem/
 ├─ backend/          # Django REST Framework API
 │  ├─ apps/          # Domain modules (auth, products, cart, orders, payments)
+│  │  ├─ authentication/
+│  │  │  └─ tests/   # Unit tests
+│  │  ├─ product/
+│  │  │  └─ tests/
+│  │  ├─ cart/
+│  │  │  └─ tests/
+│  │  ├─ order/
+│  │  │  └─ tests/
+│  │  └─ payment/
+│  │     └─ tests/
 │  ├─ config/        # Django settings (base, local, staging, production)
 │  ├─ Dockerfile     # Production Docker image
 │  ├─ docker-compose.yml  # Local development setup
@@ -106,11 +116,23 @@ OnlineShoppingSystem/
 - **Order Management**: Order history, order details, and order status tracking
 - **Responsive UI**: Mobile-first design with reusable components and custom hooks
 
+## Testing
+
+Backend unit tests live under `backend/apps/<app>/tests/` for each app. Run all tests:
+
+```bash
+cd backend
+docker compose exec backend python manage.py test
+```
+
+Tests cover auth (register, login, profile, postal addresses), products (list, detail, filters, search), cart (add, update, remove), orders (list, detail, pagination), and payments (checkout, webhook).
+
 ## Recent Updates
 
 ### Backend
+- ✅ Unit tests organized in `tests/` folders per app (auth, product, cart, order, payment)
 - ✅ Removed entrypoint script - simplified deployment
-- ✅ Added support for both `DB_HOST`/`DB_PORT` and `POSTGRES_HOST`/`POSTGRES_PORT` environment variables
+- ✅ Support for both `DB_HOST`/`DB_PORT` and `POSTGRES_HOST`/`POSTGRES_PORT` environment variables
 - ✅ Auto-detection of production environment on Render
 - ✅ Enhanced CORS configuration with environment variable support
 - ✅ Updated ALLOWED_HOSTS to support both local development and production
@@ -128,6 +150,15 @@ OnlineShoppingSystem/
 # Run migrations
 docker compose exec backend python manage.py makemigrations
 docker compose exec backend python manage.py migrate
+
+# Run tests
+docker compose exec backend python manage.py test
+# Or run tests for a specific app:
+docker compose exec backend python manage.py test apps.authentication
+docker compose exec backend python manage.py test apps.product
+docker compose exec backend python manage.py test apps.cart
+docker compose exec backend python manage.py test apps.order
+docker compose exec backend python manage.py test apps.payment
 
 # View logs
 docker compose logs -f backend
