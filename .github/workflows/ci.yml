@@ -76,7 +76,7 @@ jobs:
           python manage.py check --deploy
 
       - name: Run Django tests
-        run: python manage.py test --verbosity=2 --settings=config.settings.test
+        run: python manage.py test apps.authentication.tests apps.product.tests apps.cart.tests apps.order.tests apps.payment.tests --verbosity=2 --settings=config.settings.test
 
   # Optional: Combined job that runs both frontend and backend
   # Uncomment if you want a single job that runs everything

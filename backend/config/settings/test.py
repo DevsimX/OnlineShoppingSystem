@@ -1,4 +1,5 @@
 from .base import *
+import os
 
 # Use SQLite for tests (faster, no external database needed)
 DATABASES = {
@@ -7,6 +8,9 @@ DATABASES = {
         'NAME': ':memory:',
     }
 }
+
+# Ensure test discovery finds tests in tests/ subdirectories
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Disable migrations for faster tests (optional)
 # class DisableMigrations:
