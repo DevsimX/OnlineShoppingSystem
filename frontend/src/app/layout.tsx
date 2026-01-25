@@ -11,15 +11,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Toaster 
-          position="top-right" 
-          toastOptions={{
-            duration: 3000,
-          }}
-        />
-        <CartProvider>
-          <LayoutContent>{children}</LayoutContent>
-        </CartProvider>
+        <div className="relative mx-auto max-w-8xl overflow-hidden border-black 2xl:border-r-2 2xl:border-l-2">
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+            }}
+          />
+          <CartProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </CartProvider>
+        </div>
       </body>
     </html>
   );
