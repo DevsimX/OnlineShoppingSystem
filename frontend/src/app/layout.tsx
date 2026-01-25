@@ -11,7 +11,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="relative mx-auto max-w-8xl overflow-hidden border-black 2xl:border-r-2 2xl:border-l-2">
+        <div className="relative mx-auto max-w-[88rem] overflow-hidden border-black 2xl:border-r-2 2xl:border-l-2">
           <Toaster
             position="top-right"
             toastOptions={{
