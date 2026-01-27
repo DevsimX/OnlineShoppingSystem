@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { MobileSheetMenuItem } from "./types";
 import { useMobileSheet } from "@/hooks/useMobileSheet";
@@ -18,12 +18,14 @@ export function HeaderMobileSheet(props: HeaderMobileSheetProps) {
   const { isOpen, items, onNavigate } = props;
   const { mounted, shouldRender, sheetState } = useMobileSheet(isOpen);
   const { openTop, toggleItem, closeAll } = useMobileSheetAccordion();
+  const prevIsOpenRef = useRef(isOpen);
 
   // Close all accordions when sheet closes
   useEffect(() => {
-    if (!isOpen) {
+    if (prevIsOpenRef.current && !isOpen) {
       closeAll();
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen, closeAll]);
 
   const handleBlankClick = (e: React.MouseEvent<HTMLDivElement>) => {
