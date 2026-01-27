@@ -524,6 +524,50 @@ video {
   }
 }
 
+/* Mobile sheet: grow top -> bottom (no opacity). */
+@keyframes mobileSheetDown {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes mobileSheetUp {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0);
+  }
+}
+
+.mobile-sheet {
+  transform-origin: top;
+  will-change: transform;
+}
+
+.mobile-sheet[data-state="open"] {
+  animation: mobileSheetDown 220ms ease-out forwards;
+}
+
+.mobile-sheet[data-state="closed"] {
+  animation: mobileSheetUp 220ms ease-in forwards;
+}
+
+/* Mobile accordion (sheet menus): animate height top -> bottom (no opacity). */
+.mobile-accordion {
+  overflow: hidden;
+  height: 0;
+  transition: height 200ms ease-in-out;
+  will-change: height;
+}
+
+.mobile-accordion[data-state="open"] {
+  height: var(--mobile-accordion-content-height);
+}
+
 .dropdown-enter {
   animation: fadeIn 0.2s ease-out forwards;
 }
