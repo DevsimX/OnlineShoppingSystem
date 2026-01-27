@@ -2,6 +2,7 @@
 Business service layer for collection search using PostgreSQL FTS and pg_trgm
 Uses raw SQL queries - no ORM Q objects, no manual interpretation
 """
+import json
 from decimal import Decimal
 from django.db import connection
 
@@ -12,13 +13,139 @@ def get_collection_search_query(slug: str, filters: dict = None) -> dict:
     Relies purely on PostgreSQL's FTS and pg_trgm for fuzzy matching.
     
     Args:
-        slug: Collection slug (e.g., 'cooking-condiments', 'gifts-under-100')
+        slug: Collection slug (e.g., 'cooking-condiments', 'gifts-under-100', 'whats-hot', 'new-stuff')
     
     Returns:
         dict with 'sql_query' (SQL string), 'params' (query parameters), 
         'order_by' (ORDER BY clause), and metadata
     """
-    parts = slug.lower().split('-')
+    slug_lower = slug.lower()
+    
+    # Handle special collection slugs: whats-hot and new-stuff
+    if slug_lower == 'whats-hot':
+        where_conditions = ["pt.hot = TRUE AND pt.hot_if IS NOT NULL"]
+        params = []
+        order_by = "COALESCE(pt.hot_if, 0) DESC, p.created_at DESC"
+        
+        # Apply additional filters from query parameters
+        if filters:
+            if 'available' in filters and filters['available'] is not None:
+                if filters['available']:
+                    where_conditions.append("p.current_stock > 0 AND p.status = 'available'")
+                else:
+                    where_conditions.append("(p.current_stock = 0 OR p.status = 'unavailable')")
+            
+            if 'min_price' in filters and filters['min_price'] is not None:
+                where_conditions.append("p.price >= %s")
+                params.append(float(filters['min_price']))
+            if 'max_price' in filters and filters['max_price'] is not None:
+                where_conditions.append("p.price <= %s")
+                params.append(float(filters['max_price']))
+            
+            if 'product_type' in filters and filters['product_type']:
+                type_conditions = []
+                for product_type in filters['product_type']:
+                    type_conditions.append("(p.type @> %s::jsonb OR p.type::text ILIKE %s)")
+                    params.append(json.dumps([product_type]))
+                    params.append(f'%{product_type}%')
+                if type_conditions:
+                    where_conditions.append(f"({' OR '.join(type_conditions)})")
+            
+            if 'brand' in filters and filters['brand']:
+                brand_conditions = []
+                for brand_name in filters['brand']:
+                    brand_name_clean = str(brand_name).strip()
+                    if brand_name_clean:
+                        brand_conditions.append("b.name ILIKE %s")
+                        params.append(f'%{brand_name_clean}%')
+                if brand_conditions:
+                    where_conditions.append(f"({' OR '.join(brand_conditions)})")
+        
+        where_clause = ' AND '.join(where_conditions)
+        select_fields = (
+            "p.id, p.name, p.brand_id, p.description, p.price, p.profile_pic_link, "
+            "p.type, p.current_stock, p.status, p.created_at, p.updated_at, "
+            "pt.rank_if"
+        )
+        
+        sql_query = f"""
+            SELECT {select_fields}
+            FROM products p
+            LEFT JOIN brands b ON p.brand_id = b.id
+            LEFT JOIN product_tags pt ON p.id = pt.product_id
+            WHERE {where_clause}
+            ORDER BY {order_by}
+        """
+        
+        return {
+            'sql_query': sql_query,
+            'params': params,
+            'order_by': order_by,
+        }
+    
+    if slug_lower == 'new-stuff':
+        where_conditions = ["pt.new = TRUE AND pt.new_if IS NOT NULL"]
+        params = []
+        order_by = "COALESCE(pt.new_if, 0) DESC, p.created_at DESC"
+        
+        # Apply additional filters from query parameters
+        if filters:
+            if 'available' in filters and filters['available'] is not None:
+                if filters['available']:
+                    where_conditions.append("p.current_stock > 0 AND p.status = 'available'")
+                else:
+                    where_conditions.append("(p.current_stock = 0 OR p.status = 'unavailable')")
+            
+            if 'min_price' in filters and filters['min_price'] is not None:
+                where_conditions.append("p.price >= %s")
+                params.append(float(filters['min_price']))
+            if 'max_price' in filters and filters['max_price'] is not None:
+                where_conditions.append("p.price <= %s")
+                params.append(float(filters['max_price']))
+            
+            if 'product_type' in filters and filters['product_type']:
+                type_conditions = []
+                for product_type in filters['product_type']:
+                    type_conditions.append("(p.type @> %s::jsonb OR p.type::text ILIKE %s)")
+                    params.append(json.dumps([product_type]))
+                    params.append(f'%{product_type}%')
+                if type_conditions:
+                    where_conditions.append(f"({' OR '.join(type_conditions)})")
+            
+            if 'brand' in filters and filters['brand']:
+                brand_conditions = []
+                for brand_name in filters['brand']:
+                    brand_name_clean = str(brand_name).strip()
+                    if brand_name_clean:
+                        brand_conditions.append("b.name ILIKE %s")
+                        params.append(f'%{brand_name_clean}%')
+                if brand_conditions:
+                    where_conditions.append(f"({' OR '.join(brand_conditions)})")
+        
+        where_clause = ' AND '.join(where_conditions)
+        select_fields = (
+            "p.id, p.name, p.brand_id, p.description, p.price, p.profile_pic_link, "
+            "p.type, p.current_stock, p.status, p.created_at, p.updated_at, "
+            "pt.rank_if"
+        )
+        
+        sql_query = f"""
+            SELECT {select_fields}
+            FROM products p
+            LEFT JOIN brands b ON p.brand_id = b.id
+            LEFT JOIN product_tags pt ON p.id = pt.product_id
+            WHERE {where_clause}
+            ORDER BY {order_by}
+        """
+        
+        return {
+            'sql_query': sql_query,
+            'params': params,
+            'order_by': order_by,
+        }
+    
+    # Regular collection slug handling (existing logic)
+    parts = slug_lower.split('-')
     where_conditions = []
     params = []
     
