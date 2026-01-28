@@ -129,21 +129,6 @@ docker compose exec backend python manage.py test
 
 Tests cover auth (register, login, profile, postal addresses), products (list, detail, filters, search), cart (add, update, remove), orders (list, detail, pagination), and payments (checkout, webhook).
 
-## Recent Updates
-
-### Backend
-- ✅ Unit tests organized in `tests/` folders per app (auth, product, cart, order, payment)
-- ✅ Removed entrypoint script - simplified deployment
-- ✅ Support for both `DB_HOST`/`DB_PORT` and `POSTGRES_HOST`/`POSTGRES_PORT` environment variables
-- ✅ Auto-detection of production environment on Render
-- ✅ Enhanced CORS configuration with environment variable support
-- ✅ Updated ALLOWED_HOSTS to support both local development and production
-- ✅ Comprehensive `.env.example` with all required variables
-
-### Frontend
-- ✅ Updated to Next.js 15.5.9 (security patch)
-- ✅ Configured to connect to Render backend via `NEXT_PUBLIC_API_BASE_URL`
-
 ## Development
 
 ### Backend Commands
